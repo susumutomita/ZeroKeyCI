@@ -18,7 +18,7 @@
     "start": "next start",
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
@@ -54,6 +54,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@textlint-ja/textlint-rule-preset-ai-writing": "^1.6.1",
     "@types/dompurify": "^3.0.5",
     "@types/node": "^24",
