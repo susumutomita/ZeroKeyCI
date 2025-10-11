@@ -9,7 +9,7 @@ This file tracks execution plans for features and bug fixes. Each exec plan is a
 ```markdown
 # Exec Plan: [Feature/Bug Name]
 Created: YYYY-MM-DD HH:MM
-Status: 🟡 In Progress / ✅ Completed / ⏸️ Paused / ❌ Blocked
+Status: ✅ Completed / ✅ Completed / ⏸️ Paused / ❌ Blocked
 
 ## Objective
 [Clear, measurable goal. What success looks like.]
@@ -244,13 +244,13 @@ Document the spec-first workflow described in README instructions so every agent
 
 ## TODO
 - [x] Confirm README instructions and extract exact modifications.
-- [ ] Update README bullet list with Spec-first item.
-- [ ] Insert Specs & Editor Integration section verbatim.
-- [ ] Run `bun run lint_text` to validate markdown.
+- [x] Update README bullet list with Spec-first item.
+- [x] Insert Specs & Editor Integration section verbatim.
+- [x] Run `bun run lint_text` to validate markdown.
 - [ ] Stage and commit once checks pass.
 
 ## Validation Steps
-- [ ] `bun run lint_text`
+- [x] `bun run lint_text`
 
 ## Progress Log
 ### Iteration 1 (23:00)
@@ -258,6 +258,12 @@ Document the spec-first workflow described in README instructions so every agent
 - Tests: n/a
 - Coverage: n/a
 - Decision: Treat README instructions as primary objective per user request.
+
+### Iteration 2 (23:10)
+- Added spec-first bullet and Specs & Editor Integration section to README as instructed.
+- Tests: lint_text ✓
+- Coverage: n/a
+- Decision: No additional README adjustments needed.
 
 ## Open Questions
 - None

@@ -25,6 +25,7 @@ ZeroKey CI makes smart-contract deployment:
 - 🧩 **Auditable** – every PR is linked to its on-chain transaction
 - ⚙️ **Developer-friendly** – runs free on any laptop or public CI
 - 🌐 **Composable** – integrates with Hardhat 3, Blockscout, Envio, Lit Protocol
+- 🧾 **Spec-first** – editor integration generates/validates deploy & policy specs
 
 ---
 
@@ -64,6 +65,50 @@ Execution → Blockscout & Envio Dashboard
 
 In the hackathon build we used a lightweight **SoftKMS** signer that can be swapped for any free or cloud-hosted key service (AWS, GCP, HashiCorp Vault).
 Keys are non-exportable and use short-lived tokens, so ZeroKey CI can run **without any paid cloud dependency**.
+
+## 📝 Specs & Editor Integration
+
+ZeroKey CI supports a *spec-first* workflow. If you use the companion editor extension (VS Code / Cursor), you can generate, edit, and validate the following spec files. The CI will automatically detect them if present.
+
+**Default paths**
+- `.zerokey/deploy.yaml` — deployment/upgrade intent used to build the Safe proposal
+- `.zerokey/policy.rego` — OPA policy applied by the signing gateway
+- `.zerokey/explorer.json` — Blockscout Autoscout mapping & metadata
+- `.zerokey/indexer.yaml` — Envio HyperIndex schema and event filters
+
+**Editor workflow**
+1. Run **“ZeroKey: Generate Specs”** in your editor to scaffold the files above.
+2. Adjust network, addresses, and constraints.
+3. Commit & open a PR — CI will validate the specs and create a Safe proposal from them.
+
+**Example: `.zerokey/deploy.yaml`**
+```yaml
+network: sepolia
+chainId: 11155111
+targets:
+  - name: ExampleUUPS
+    proxy: "0xProxyAddress"
+    action: upgrade
+    newImplementation: "0xNewImplAddress"
+constraints:
+  value: 0
+  selectorsAllowlist:
+    - "upgradeTo(address)"
+meta:
+  pr: "${GITHUB_REF_NAME}"
+  commit: "${GITHUB_SHA}"
+
+package zerokey.deploy
+
+default allow = false
+
+allow {
+  input.chainId == 11155111
+  input.value == 0
+  input.to == "0xProxyAddress"
+  input.function == "upgradeTo(address)"
+}
+```
 
 ---
 
@@ -107,3 +152,51 @@ Each integration is open-source and reproducible without paid cloud services.
 ### 💡 Team
 Built by **Susumu Tomita (たみぃ)** and collaborators
 for **ETHOnline 2025**
+
+<instructions>
+- In the file `/Users/susumu/ethglobal/ZeroKeyCI/README.md`, find the bullet list under the line `ZeroKey CI makes smart-contract deployment:`. After the existing line `- 🌐 **Composable** – integrates with Hardhat 3, Blockscout, Envio, Lit Protocol`, insert a new bullet on the next line with exactly:
+  `- 🧾 **Spec-first** – editor integration generates/validates deploy & policy specs`
+- In the same file, locate the paragraph that ends with the sentence `Keys are non-exportable and use short-lived tokens, so ZeroKey CI can run **without any paid cloud dependency**.` Immediately after that paragraph, insert a blank line and then the following section verbatim:
+
+## 📝 Specs & Editor Integration
+
+ZeroKey CI supports a *spec-first* workflow. If you use the companion editor extension (VS Code / Cursor), you can generate, edit, and validate the following spec files. The CI will automatically detect them if present.
+
+**Default paths**
+- `.zerokey/deploy.yaml` — deployment/upgrade intent used to build the Safe proposal
+- `.zerokey/policy.rego` — OPA policy applied by the signing gateway
+- `.zerokey/explorer.json` — Blockscout Autoscout mapping & metadata
+- `.zerokey/indexer.yaml` — Envio HyperIndex schema and event filters
+
+**Editor workflow**
+1. Run **“ZeroKey: Generate Specs”** in your editor to scaffold the files above.
+2. Adjust network, addresses, and constraints.
+3. Commit & open a PR — CI will validate the specs and create a Safe proposal from them.
+
+**Example: `.zerokey/deploy.yaml`**
+```yaml
+network: sepolia
+chainId: 11155111
+targets:
+  - name: ExampleUUPS
+    proxy: "0xProxyAddress"
+    action: upgrade
+    newImplementation: "0xNewImplAddress"
+constraints:
+  value: 0
+  selectorsAllowlist:
+    - "upgradeTo(address)"
+meta:
+  pr: "${GITHUB_REF_NAME}"
+  commit: "${GITHUB_SHA}"
+
+package zerokey.deploy
+
+default allow = false
+
+allow {
+  input.chainId == 11155111
+  input.value == 0
+  input.to == "0xProxyAddress"
+  input.function == "upgradeTo(address)"
+}
