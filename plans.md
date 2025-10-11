@@ -272,8 +272,8 @@ Document the spec-first workflow described in README instructions so every agent
 - README instructions section
 
 ## Handoff Notes
-**Final Summary:** _TBD_
+**Final Summary:** Added spec-first bullet and detailed Specs & Editor Integration section per README instructions; lint_text check passes.
 
-**Outstanding Risks:** _TBD_
+**Outstanding Risks:** None noted.
 
-**Follow-up Tasks:** _TBD_
+**Follow-up Tasks:** Ensure companion editor extension implementation aligns with documented workflow.
