@@ -84,6 +84,114 @@ Status: ✅ Completed / ✅ Completed / ⏸️ Paused / ❌ Blocked
 
 ## Active Exec Plans
 
+### Exec Plan: Install Codex CLI in Devcontainer
+Created: 2025-10-12 09:05
+Status: 🟡 In Progress
+
+#### Objective
+Ensure the VS Code devcontainer image installs the OpenAI Codex CLI so agents have parity with local tooling.
+
+#### Guardrails
+- Do not break existing Claude installation.
+- Devcontainer build must succeed without manual intervention.
+- Keep firewall script and other configurations intact.
+
+#### TODO
+- [x] Review current devcontainer configuration.
+- [ ] Add Codex CLI installation to Dockerfile.
+- [ ] (Optional) Document availability in README/agents if needed.
+- [ ] Validate devcontainer image builds (`docker build -f .devcontainer/Dockerfile .`).
+- [ ] Update exec plan with progress and outcomes.
+
+#### Validation Steps
+- [ ] `docker build -f .devcontainer/Dockerfile .`
+
+#### Progress Log
+
+##### Iteration 1 (09:05)
+- Reviewed `.devcontainer/devcontainer.json` and `Dockerfile`; confirmed Claude CLI already installed but Codex missing.
+- Tests: n/a
+- Decision: Install Codex via npm globally to align with Node-based image.
+
+### Exec Plan: Hardhat 3 Setup and Smart Contract Infrastructure
+Created: 2025-10-12 08:15
+Status: 🟡 In Progress
+
+#### Objective
+Implement core smart contract infrastructure for ZeroKey CI:
+- Hardhat 3 development environment
+- UUPS upgradeable sample contract
+- Comprehensive tests with 100% coverage
+- Deployment scripts
+- .zerokey/ spec examples (deploy.yaml, policy.rego)
+
+#### Guardrails
+- Must maintain 100% test coverage
+- No private keys in code or configuration
+- All contracts must be upgradeable (UUPS pattern)
+- Deployment scripts must be deterministic
+- All specs must be validated before use
+
+#### TODO
+- [ ] Install Hardhat 3 and dependencies
+  - [ ] hardhat, @nomicfoundation/hardhat-toolbox
+  - [ ] @nomicfoundation/hardhat-viem
+  - [ ] @openzeppelin/contracts-upgradeable
+- [ ] Create hardhat.config.ts
+- [ ] Create sample UUPS upgradeable contract
+  - [ ] contracts/ExampleUUPS.sol
+  - [ ] contracts/ExampleUUPSV2.sol (for upgrade testing)
+- [ ] Write comprehensive contract tests
+  - [ ] Deployment test
+  - [ ] Upgrade test
+  - [ ] Function access control tests
+- [ ] Create deployment script
+- [ ] Create .zerokey/ directory with specs
+  - [ ] deploy.yaml
+  - [ ] policy.rego
+- [ ] Verify all validation steps pass
+
+#### Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] Coverage at 100% (`bun run test:coverage`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`)
+- [ ] Build succeeds (`bun run build`)
+- [ ] Hardhat compile succeeds
+- [ ] Hardhat tests pass
+
+#### Progress Log
+
+##### Iteration 1 (08:15-08:45)
+**What was done:**
+- Installed Hardhat 3.0.7 and dependencies (hardhat, @nomicfoundation/hardhat-viem, @openzeppelin/contracts-upgradeable, viem)
+- Migrated project to ESM by adding `"type": "module"` to package.json
+- Created hardhat.config.js with ESM exports
+- Created ExampleUUPS.sol - UUPS upgradeable contract with storage pattern
+- Created ExampleUUPSV2.sol - upgrade test contract with increment() function
+- Successfully compiled contracts with `npx hardhat compile`
+- Created comprehensive test suite (ExampleUUPS.test.ts) with initialization, setValue, setMessage, and upgradeability tests
+
+**Test status:**
+- Contracts: Compiled successfully ✓
+- Tests: Created, execution pending due to ESM/vitest config issues
+- Coverage: Pending
+
+**Decisions made:**
+- Decision: Migrate entire project to ESM ("type": "module")
+- Reasoning: Hardhat 3 requires ESM, conflicts with mixed CommonJS/ESM setup
+- Impact: .next/ removed, some tool compatibility issues remain
+- Decision: Use hardhat-viem instead of hardhat-toolbox
+- Reasoning: hardhat-toolbox's hardhat-ethers has ESM compatibility issues
+- Alternatives: Could separate Hardhat into subdirectory, rejected for simplicity
+- Decision: Use "edr-simulated" network type
+- Reasoning: Hardhat 3 requires explicit network type configuration
+
+**Blockers/Issues:**
+- ESM migration causes esbuild issues with vitest.config.ts
+- Need to resolve test runner configuration for ESM mode
+- .next/package.json conflict (CommonJS vs ESM) - resolved by removing .next/
+
 ### Exec Plan: Setup AI-First Development Workflow
 Created: 2025-10-12 07:27
 Status: ✅ Completed
