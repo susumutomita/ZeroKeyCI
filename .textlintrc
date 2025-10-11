@@ -9,7 +9,8 @@
     "preset-ja-technical-writing": {
       "sentence-length": false,
       "no-doubled-joshi": false,
-      "max-kanji-continuous-len": false
+      "max-kanji-continuous-len": false,
+      "max-comma": false
     },
     "ja-no-abusage": true,
     "ja-no-inappropriate-words": true,

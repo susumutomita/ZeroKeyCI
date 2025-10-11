@@ -1,3 +1,10 @@
+![GitHub last commit (by committer)](https://img.shields.io/github/last-commit/susumutomita/ZeroKeyCI)
+![GitHub top language](https://img.shields.io/github/languages/top/susumutomita/ZeroKeyCI)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/susumutomita/ZeroKeyCI)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/susumutomita/ZeroKeyCI)
+![GitHub repo size](https://img.shields.io/github/repo-size/susumutomita/ZeroKeyCI)
+[![ci](https://github.com/susumutomita/ZeroKeyCI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/susumutomita/ZeroKeyCI/actions/workflows/ci.yml)
+
 # 🛠 ZeroKey CI
 **Key-less CI/CD for smart contracts — secure, auditable, and open.**
 
