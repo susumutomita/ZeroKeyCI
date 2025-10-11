@@ -86,7 +86,7 @@ Status: ✅ Completed / ✅ Completed / ⏸️ Paused / ❌ Blocked
 
 ### Exec Plan: Install Codex CLI in Devcontainer
 Created: 2025-10-12 09:05
-Status: 🟡 In Progress
+Status: ✅ Completed
 
 #### Objective
 Ensure the VS Code devcontainer image installs the OpenAI Codex CLI so agents have parity with local tooling.
@@ -98,13 +98,13 @@ Ensure the VS Code devcontainer image installs the OpenAI Codex CLI so agents ha
 
 #### TODO
 - [x] Review current devcontainer configuration.
-- [ ] Add Codex CLI installation to Dockerfile.
+- [x] Add Codex CLI installation to Dockerfile.
 - [ ] (Optional) Document availability in README/agents if needed.
-- [ ] Validate devcontainer image builds (`docker build -f .devcontainer/Dockerfile .`).
-- [ ] Update exec plan with progress and outcomes.
+- [x] Validate devcontainer image builds (`docker build -f .devcontainer/Dockerfile .devcontainer`).
+- [x] Update exec plan with progress and outcomes.
 
 #### Validation Steps
-- [ ] `docker build -f .devcontainer/Dockerfile .`
+- [x] `docker build -f .devcontainer/Dockerfile .devcontainer`
 
 #### Progress Log
 
@@ -113,6 +113,26 @@ Ensure the VS Code devcontainer image installs the OpenAI Codex CLI so agents ha
 - Tests: n/a
 - Decision: Install Codex via npm globally to align with Node-based image.
 
+##### Iteration 2 (09:25)
+- Added `npm install -g @openai/codex` to Dockerfile under existing CLI installs.
+- Tests: Pending build
+- Decision: Limit change to Dockerfile; documentation update deemed optional for now.
+
+##### Iteration 3 (09:35)
+- Successfully built devcontainer image with `.devcontainer` context verifying Codex installation.
+- Tests: `docker build -f .devcontainer/Dockerfile .devcontainer` ✓
+- Decision: Optional documentation not required; `AGENTS.md` already directs agents to exec plans for tooling.
+
+
+## Handoff Notes
+**Final Summary:**
+- Added Codex CLI installation to devcontainer Dockerfile and verified build.
+
+**Outstanding Risks:**
+- Optional documentation update still pending but non-blocking.
+
+**Follow-up Tasks:**
+- If future agents need explicit mention of Codex availability, update AGENTS.md accordingly.
 ### Exec Plan: Hardhat 3 Setup and Smart Contract Infrastructure
 Created: 2025-10-12 08:15
 Status: 🟡 In Progress
@@ -161,6 +181,26 @@ Implement core smart contract infrastructure for ZeroKey CI:
 - [ ] Hardhat tests pass
 
 #### Progress Log
+
+##### Iteration 2 (10:58-11:10)
+**What was done:**
+- Fixed Bun installation in Dockerfile
+- Added Bun v1.1.38 installation to devcontainer Dockerfile
+- Set BUN_INSTALL and PATH environment variables properly
+
+**Test status:**
+- Dockerfile: Updated ✓
+- Container build: Pending validation
+
+**Decisions made:**
+- Decision: Install Bun in Dockerfile rather than relying on npm/node
+- Reasoning: package.json specifies "packageManager": "bun@1.1.38", project uses Bun commands
+- Root cause: Agent didn't check package.json packageManager field before using npm
+- Prevention: Added directive to CLAUDE.md/AGENTS.md to always check packageManager field
+
+**Blockers/Issues:**
+- Initial attempt used npm instead of bun, causing dependency resolution issues
+- Bun installation script timeout in current session - resolved by adding to Dockerfile
 
 ##### Iteration 1 (08:15-08:45)
 **What was done:**

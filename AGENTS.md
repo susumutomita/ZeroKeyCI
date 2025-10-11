@@ -3,6 +3,7 @@ ZeroKey CI pairs Next.js 15, Bun, and Vitest. Work from a living exec plan and k
 
 ## Agent Execution Protocol
 - Read `CLAUDE.md` before coding; start or update the active exec plan in `plans.md`.
+- **CRITICAL: Check `package.json` `packageManager` field first.** This project uses Bun (`bun@1.1.38`). Never use `npm install` or `npm` commands when `packageManager` specifies `bun`.
 - Log scope, TODOs, validation steps, and decisions in the exec plan while you work.
 - Run the smallest failing test, iterate, and refuse to hand off while any check stays red.
 - Document new scripts or manual verification loops in `plans.md` so future runs stay reproducible.

@@ -60,9 +60,7 @@ describe("ExampleUUPS", () => {
     });
 
     it("should revert if value exceeds 1000000", async () => {
-      await expect(
-        exampleUUPS.write.setValue([1000001n])
-      ).rejects.toThrow();
+      await expect(exampleUUPS.write.setValue([1000001n])).rejects.toThrow();
     });
 
     it("should revert if non-owner tries to set value", async () => {
@@ -70,12 +68,10 @@ describe("ExampleUUPS", () => {
       const addr1Contract = await hre.viem.getContractAt(
         "ExampleUUPS",
         exampleUUPS.address,
-        { client: { wallet: addr1Client } }
+        { client: { wallet: addr1Client } },
       );
 
-      await expect(
-        addr1Contract.write.setValue([100n])
-      ).rejects.toThrow();
+      await expect(addr1Contract.write.setValue([100n])).rejects.toThrow();
     });
   });
 
@@ -96,9 +92,7 @@ describe("ExampleUUPS", () => {
     });
 
     it("should revert if message is empty", async () => {
-      await expect(
-        exampleUUPS.write.setMessage([""])
-      ).rejects.toThrow();
+      await expect(exampleUUPS.write.setMessage([""])).rejects.toThrow();
     });
 
     it("should revert if non-owner tries to set message", async () => {
@@ -106,11 +100,11 @@ describe("ExampleUUPS", () => {
       const addr1Contract = await hre.viem.getContractAt(
         "ExampleUUPS",
         exampleUUPS.address,
-        { client: { wallet: addr1Client } }
+        { client: { wallet: addr1Client } },
       );
 
       await expect(
-        addr1Contract.write.setMessage(["Unauthorized"])
+        addr1Contract.write.setMessage(["Unauthorized"]),
       ).rejects.toThrow();
     });
   });
@@ -121,15 +115,12 @@ describe("ExampleUUPS", () => {
       const ExampleUUPSV2 = await hre.viem.deployContract("ExampleUUPSV2");
 
       // Upgrade to V2
-      await exampleUUPS.write.upgradeToAndCall([
-        ExampleUUPSV2.address,
-        "0x",
-      ]);
+      await exampleUUPS.write.upgradeToAndCall([ExampleUUPSV2.address, "0x"]);
 
       // Get V2 contract at proxy address
       const upgradedContract = await hre.viem.getContractAt(
         "ExampleUUPSV2",
-        exampleUUPS.address
+        exampleUUPS.address,
       );
 
       // Verify version is 2.0.0
@@ -150,14 +141,11 @@ describe("ExampleUUPS", () => {
 
       // Deploy and upgrade to V2
       const ExampleUUPSV2 = await hre.viem.deployContract("ExampleUUPSV2");
-      await exampleUUPS.write.upgradeToAndCall([
-        ExampleUUPSV2.address,
-        "0x",
-      ]);
+      await exampleUUPS.write.upgradeToAndCall([ExampleUUPSV2.address, "0x"]);
 
       const upgradedContract = await hre.viem.getContractAt(
         "ExampleUUPSV2",
-        exampleUUPS.address
+        exampleUUPS.address,
       );
 
       // Use new increment function
@@ -173,11 +161,11 @@ describe("ExampleUUPS", () => {
       const addr1Contract = await hre.viem.getContractAt(
         "ExampleUUPS",
         exampleUUPS.address,
-        { client: { wallet: addr1Client } }
+        { client: { wallet: addr1Client } },
       );
 
       await expect(
-        addr1Contract.write.upgradeToAndCall([ExampleUUPSV2.address, "0x"])
+        addr1Contract.write.upgradeToAndCall([ExampleUUPSV2.address, "0x"]),
       ).rejects.toThrow();
     });
   });

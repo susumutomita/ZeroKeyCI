@@ -66,8 +66,18 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
 
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.1.38"
+ENV BUN_INSTALL="/home/node/.bun"
+ENV PATH="${BUN_INSTALL}/bin:${PATH}"
+RUN echo 'export BUN_INSTALL="$HOME/.bun"' >> /home/node/.zshrc && \
+  echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> /home/node/.zshrc
+
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code
+
+# Install OpenAI Codex CLI
+RUN npm install -g @openai/codex
 
 # Copy and set up firewall script
 COPY init-firewall.sh /usr/local/bin/

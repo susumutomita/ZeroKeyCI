@@ -7,6 +7,7 @@ Follow this checklist when you modify ZeroKey CI. The priority is to operate fro
 3. After each meaningful change, record what was done, which checks passed, and decisions made. Reference the exec plan in commit bodies and PR descriptions.
 
 ## Development Loop
+- **ALWAYS check `package.json` for the `packageManager` field before running any package installation commands.** If `packageManager` specifies `bun`, use `bun` commands. Never use `npm` if `bun` is specified.
 - Use `bun run test:watch` while iterating; keep the red-to-green cycle short.
 - Once changes stabilize, run `bun run test`, `bun run test:coverage`, and `make before_commit`. Stop immediately if any command fails and update the exec plan with the blocker.
 - Prefer incremental commits tied to individual TODO items from the plan.
