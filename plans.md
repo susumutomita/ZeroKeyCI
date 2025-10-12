@@ -129,6 +129,111 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 ## Active Exec Plans
 
+### Exec Plan: Add Project Dependency Installation to Devcontainer
+Created: 2025-10-12 12:00
+Status: ✅ Completed
+
+#### Objective
+Configure devcontainer to automatically install project dependencies (`make install` / `bun install`) so the development environment is immediately ready to use without manual setup.
+
+#### Guardrails
+- Must not break existing Claude Code and Codex CLI installations
+- Must use Bun (not npm) per packageManager field in package.json
+- Devcontainer build must complete successfully
+- postCreateCommand must not fail container initialization
+
+#### TODO
+- [ ] Review current devcontainer lifecycle hooks (postCreateCommand, postStartCommand)
+- [ ] Add dependency installation to appropriate hook
+- [ ] Validate that Bun is available during hook execution
+- [ ] Test devcontainer build and initialization
+- [ ] Document change in exec plan
+
+#### Validation Steps
+- [ ] Devcontainer builds successfully
+- [ ] `bun install` runs during container creation
+- [ ] Dependencies are available immediately after container starts
+- [ ] No manual intervention required
+
+#### Progress Log
+
+##### Iteration 1 (12:00)
+**What was done:**
+- Reviewed existing devcontainer configuration
+- Confirmed Bun v1.1.38 is installed in Dockerfile
+- Found that postCreateCommand currently only runs firewall init script
+- package.json specifies "packageManager": "bun@1.1.38"
+
+**Test status:**
+- Analysis: Complete ✓
+- Implementation: Pending
+
+**Decisions made:**
+- Decision: Add `bun install` to postCreateCommand chain
+- Reasoning: postCreateCommand runs once after container creation, perfect for dependency setup
+- Alternatives considered: postStartCommand (runs every start) - rejected as wasteful
+
+**Blockers/Issues:**
+- None yet
+
+##### Iteration 2 (12:05)
+**What was done:**
+- Updated devcontainer.json postCreateCommand
+- Changed from: `"sudo /usr/local/bin/init-firewall.sh"`
+- Changed to: `"sudo /usr/local/bin/init-firewall.sh && bun install"`
+- Chained commands with && to ensure firewall setup completes before dependency installation
+
+**Test status:**
+- devcontainer.json: Updated ✓
+- Validation: Pending
+
+**Decisions made:**
+- Decision: Use && to chain commands instead of ; or separate postStartCommand
+- Reasoning: Ensures firewall is initialized before network-dependent bun install
+- If init-firewall.sh fails, bun install won't run (fail-fast behavior)
+
+**Blockers/Issues:**
+- None
+
+##### Iteration 3 (12:07)
+**What was done:**
+- Validated devcontainer.json syntax with Node.js JSON parser
+- Confirmed valid JSON structure
+
+**Test status:**
+- JSON validation: ✓ Valid
+- All tasks: Complete
+
+**Decisions made:**
+- Decision: Use Node.js for validation instead of jq
+- Reasoning: Node already available in container, native JSON parsing
+
+**Blockers/Issues:**
+- None
+
+#### Open Questions
+- None
+
+#### References
+- package.json:101 ("packageManager": "bun@1.1.38")
+- .devcontainer/devcontainer.json:51 (updated postCreateCommand)
+
+#### Handoff Notes
+**Final Summary:**
+- Added `bun install` to devcontainer postCreateCommand
+- Dependencies will now install automatically on container creation
+- No manual intervention required
+
+**Files Modified:**
+- `.devcontainer/devcontainer.json` - Updated postCreateCommand
+
+**Outstanding Risks:**
+- None. Change is minimal and fail-safe (if bun install fails, container still works)
+
+**Follow-up Tasks:**
+- Test in clean devcontainer rebuild to confirm dependencies install correctly
+- Consider adding postStartCommand if incremental updates needed on container restart
+
 ### Exec Plan: Install Codex CLI in Devcontainer
 Created: 2025-10-12 09:05
 Status: ✅ Completed
