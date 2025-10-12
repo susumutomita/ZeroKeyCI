@@ -26,7 +26,8 @@
         "./src/*"
       ]
     },
-    "target": "ES2017"
+    "target": "ES2017",
+    "types": ["node", "react", "react-dom"]
   },
   "include": [
     "**/*.ts",
@@ -42,6 +43,8 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "scripts",
+    "test/contracts"
   ]
 }
