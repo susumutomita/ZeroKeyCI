@@ -150,12 +150,12 @@ Implement a CI/CD pipeline that can deploy smart contracts without storing priva
 - Small, focused commits and pull requests
 
 #### TODO
-- [ ] Phase 1: Safe Proposal Creation Infrastructure
-  - [ ] Install Safe SDK dependencies (@safe-global/safe-core-sdk, @safe-global/safe-ethers-adapters)
-  - [ ] Create SafeProposalBuilder class for transaction creation
-  - [ ] Write comprehensive tests for SafeProposalBuilder
-  - [ ] Implement proposal serialization (for CI artifacts)
-  - [ ] Add proposal validation logic
+- [x] Phase 1: Safe Proposal Creation Infrastructure
+  - [x] Install Safe SDK dependencies (@safe-global/safe-core-sdk, @safe-global/safe-ethers-adapters)
+  - [x] Create SafeProposalBuilder class for transaction creation
+  - [x] Write comprehensive tests for SafeProposalBuilder (18 tests, 100% passing)
+  - [x] Implement proposal serialization (for CI artifacts)
+  - [x] Add proposal validation logic
 
 - [ ] Phase 2: GitHub Actions Workflow
   - [ ] Create `.github/workflows/deploy.yml` for deployment pipeline
@@ -214,6 +214,36 @@ Implement a CI/CD pipeline that can deploy smart contracts without storing priva
 
 **Blockers/Issues:**
 - None yet
+
+##### Iteration 2 (16:30)
+**What was done:**
+- Implemented SafeProposalBuilder class using TDD approach
+- Created comprehensive test suite (18 tests) first
+- Installed Safe SDK dependencies (ethers, @safe-global/safe-core-sdk-types, @safe-global/protocol-kit)
+- Created type definitions for Safe transactions
+- Implemented all core functionality to pass tests
+
+**Test status:**
+- Tests: 18/18 passing ✓
+- Coverage: 100% ✓
+- All validation checks pass ✓
+
+**Decisions made:**
+- Decision: Use ethers v5 for compatibility with Safe SDK
+- Reasoning: Safe SDK is built on ethers v5, newer versions might have compatibility issues
+- Implementation: Import specific utilities from ethers to avoid bundle size issues
+
+- Decision: Implement type inference for constructor arguments
+- Reasoning: Simplifies usage without requiring explicit ABI specification
+- Alternatives: Requiring full ABI - rejected as too complex for CI usage
+
+**Blockers/Issues:**
+- Initial issue with ethers imports - resolved by using named imports
+- Address checksum validation - resolved by using proper checksummed addresses
+
+**PR Created:**
+- Branch: feat/safe-sdk-integration
+- Commit: a5afbcf - "feat: implement SafeProposalBuilder for keyless CI/CD deployment"
 
 #### Open Questions
 - **Q**: Should we support multiple Safe instances (dev/staging/prod)?
