@@ -1,12 +1,15 @@
 # Repository Guidelines
-ZeroKey CI pairs Next.js 15, Bun, and Vitest. Work from a living exec plan and keep tests green so autonomous agents can deliver safely.
+ZeroKey CI pairs Next.js 15, Bun, and Vitest. Drive each change from a living exec plan with green tests.
 
 ## Agent Execution Protocol
-- Read `CLAUDE.md` before coding; start or update the active exec plan in `plans.md`.
-- **CRITICAL: Check `package.json` `packageManager` field first.** This project uses Bun (`bun@1.1.38`). Never use `npm install` or `npm` commands when `packageManager` specifies `bun`.
-- Log scope, TODOs, validation steps, and decisions in the exec plan while you work.
-- Run the smallest failing test, iterate, and refuse to hand off while any check stays red.
-- Document new scripts or manual verification loops in `plans.md` so future runs stay reproducible.
+- Read `CLAUDE.md` before coding and refresh the active exec plan in `plans.md`.
+- Respect the Bun toolchain (`packageManager` is `bun@1.1.38`); never run `npm install`.
+- Keep the exec plan current with scope, TODOs, validation steps, and newly created scripts.
+- Stay in the red→green loop by rerunning the smallest failing test before handing anything off.
+- Follow textlint rules: sentences that include Japanese must end with `。` to keep `bun run lint_text` green.
+- After creating PR, immediately verify CI with `gh pr checks [PR_NUMBER]` and only report as ready when GREEN (MANDATORY)。
+- Perform self-review using `gh pr diff [PR_NUMBER]` before reporting PR as ready (MANDATORY)。
+- Document retrospectives for all issues in plans.md with Problem/Root Cause/Prevention format (MANDATORY)。
 
 ## Project Structure & Module Organization
 - `src/app/` holds App Router entries (`layout.tsx`, `page.tsx`) and shared styles in `globals.css`.
@@ -18,7 +21,7 @@ ZeroKey CI pairs Next.js 15, Bun, and Vitest. Work from a living exec plan and k
 - `bun install` (CI uses `bun run install:ci`) restores dependencies.
 - `bun run dev` or `make dev` launches the local app on http://localhost:3000.
 - `bun run build` / `make build` produces the production bundle; `bun run start` serves it.
-- Quality gates: `bun run lint`, `bun run typecheck`, `bun run format_check`, `bun run test`, and `make before_commit` to chain them.
+- Quality gates: `bun run lint`, `bun run typecheck`, `bun run format_check`, `bun run test`, `make before_commit`.
 
 ## Coding Style & Naming Conventions
 - Prettier enforces two-space indentation and single quotes; run `bun run format` before review.
@@ -33,4 +36,4 @@ ZeroKey CI pairs Next.js 15, Bun, and Vitest. Work from a living exec plan and k
 ## Commit & Pull Request Guidelines
 - Use Conventional Commit prefixes seen in history (e.g., `feat: Setup Next.js application (#2)`), adding scope when clarifying.
 - Keep commits focused, cite the exec plan in the body, and run `make before_commit` before pushing.
-- PRs must link issues or hackathon tasks, note Safe or contract impact, attach evidence (screens/logs), flag required env vars, and request review on signing or policy changes.
+- PRs must link issues or hackathon tasks, note Safe or contract impact, attach evidence, flag required env vars, and request review on signing or policy changes.
