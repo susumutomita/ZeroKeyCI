@@ -1,9 +1,9 @@
-import "@nomicfoundation/hardhat-viem";
+import '@nomicfoundation/hardhat-viem';
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config = {
   solidity: {
-    version: "0.8.24",
+    version: '0.8.24',
     settings: {
       optimizer: {
         enabled: true,
@@ -13,14 +13,14 @@ const config = {
   },
   networks: {
     hardhat: {
-      type: "edr-simulated",
+      type: 'edr-simulated',
     },
   },
   paths: {
-    sources: "./contracts",
-    tests: "./test/contracts",
-    cache: "./cache",
-    artifacts: "./artifacts",
+    sources: './contracts',
+    tests: './test/contracts',
+    cache: './cache',
+    artifacts: './artifacts',
   },
 };
 
