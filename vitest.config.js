@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'node',
+    environment: 'jsdom',
     globals: true,
     setupFiles: './vitest.setup.ts',
     include: ['**/__tests__/**/*.(ts|tsx|js)', '**/*.(test|spec).(ts|tsx|js)'],

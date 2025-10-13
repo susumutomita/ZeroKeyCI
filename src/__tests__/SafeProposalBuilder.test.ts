@@ -45,8 +45,8 @@ describe('SafeProposalBuilder', () => {
         contractName: 'ExampleUUPS',
         bytecode: '0x608060405234801561001057600080fd5b50',
         constructorArgs: [],
-        value: '0',
-      };
+        // Omit value to test the default fallback
+      } as any;
 
       const proposal = await builder.createDeploymentProposal(deploymentData);
 
@@ -82,6 +82,90 @@ describe('SafeProposalBuilder', () => {
         timestamp: expect.any(Number),
         contractName: 'ExampleUUPS',
       });
+    });
+
+    it('should handle address type in constructor args', async () => {
+      const deploymentData = {
+        contractName: 'ExampleUUPS',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: ['0x742D35CC6634c0532925A3b844BC9E7595F0BEb0'], // Valid address
+        value: '0',
+      };
+
+      const proposal = await builder.createDeploymentProposal(deploymentData);
+
+      expect(proposal.data).toBeDefined();
+      expect(proposal.data.length).toBeGreaterThan(
+        deploymentData.bytecode.length
+      );
+      // The encoded address should be included in the data
+      expect(proposal.data).toContain(
+        '742d35cc6634c0532925a3b844bc9e7595f0beb0'
+      );
+    });
+
+    it('should handle boolean type in constructor args', async () => {
+      const deploymentData = {
+        contractName: 'ExampleUUPS',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: [true, false], // Boolean values
+        value: '0',
+      };
+
+      const proposal = await builder.createDeploymentProposal(deploymentData);
+
+      expect(proposal.data).toBeDefined();
+      expect(proposal.data.length).toBeGreaterThan(
+        deploymentData.bytecode.length
+      );
+      // true is encoded as 1, false as 0 in the last 32 bytes of each argument
+      expect(proposal.data).toMatch(/0{63}1/); // true encoded
+      expect(proposal.data).toMatch(/0{64}/); // false encoded
+    });
+
+    it('should handle explicit value in deployment data', async () => {
+      const deploymentData = {
+        contractName: 'ExampleUUPS',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: [],
+        value: '1000000000000000000', // 1 ETH in wei
+      };
+
+      const proposal = await builder.createDeploymentProposal(deploymentData);
+
+      expect(proposal.value).toBe('1000000000000000000');
+      expect(proposal.value).not.toBe('0');
+    });
+
+    it('should handle mixed types including bigint in constructor args', async () => {
+      const deploymentData = {
+        contractName: 'ExampleUUPS',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: [
+          BigInt(12345), // bigint - will use uint256 encoding
+          Symbol('test'), // Symbol - will trigger default bytes32 encoding path
+        ],
+        value: '0',
+      };
+
+      // Symbol will cause encoding to fail, but we're testing the type detection path
+      await expect(
+        builder.createDeploymentProposal(deploymentData)
+      ).rejects.toThrow();
+
+      // Test with only bigint to ensure that path works
+      const deploymentData2 = {
+        contractName: 'ExampleUUPS',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: [BigInt(12345)],
+        value: '0',
+      };
+
+      const proposal = await builder.createDeploymentProposal(deploymentData2);
+      expect(proposal.data).toBeDefined();
+      expect(proposal.data.length).toBeGreaterThan(
+        deploymentData2.bytecode.length
+      );
     });
   });
 
@@ -208,6 +292,30 @@ describe('SafeProposalBuilder', () => {
         value: '0',
         data: '0x',
         operation: 3, // Invalid operation (should be 0 or 1)
+      };
+
+      const isValid = builder.validateProposal(proposal);
+      expect(isValid).toBe(false);
+    });
+
+    it('should reject proposal with data not starting with 0x', async () => {
+      const proposal: SafeTransactionData = {
+        to: '0x0000000000000000000000000000000000000000',
+        value: '0',
+        data: 'invalid-data', // Data should start with 0x
+        operation: 0,
+      };
+
+      const isValid = builder.validateProposal(proposal);
+      expect(isValid).toBe(false);
+    });
+
+    it('should handle validation errors gracefully', async () => {
+      const proposal: SafeTransactionData = {
+        to: '0x0000000000000000000000000000000000000000',
+        value: 'not-a-number', // This will throw when parsed as BigNumber
+        data: '0x',
+        operation: 0,
       };
 
       const isValid = builder.validateProposal(proposal);
