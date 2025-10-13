@@ -129,6 +129,90 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 ## Active Exec Plans
 
+### Exec Plan: Refactor deploy.yml to Remove Hardcoded Script
+Created: 2025-10-13 04:15
+Status: 🟡 In Progress
+
+#### Objective
+Remove hardcoded TypeScript code from `.github/workflows/deploy.yml` (lines 74-151) and use the existing `scripts/create-safe-proposal.ts` instead. This improves maintainability and eliminates code duplication.
+
+#### Guardrails
+- Cannot directly modify `.github/workflows/` files due to GitHub App permissions
+- Must provide clear documentation for manual workflow update
+- Existing script functionality must be preserved
+- All validation checks must pass
+
+#### TODO
+- [x] Identify hardcoded script in deploy.yml
+- [x] Confirm existing `scripts/create-safe-proposal.ts` has all necessary functionality
+- [ ] Create documentation file with updated workflow YAML
+- [ ] Update exec plan with instructions for manual workflow update
+- [ ] Run validation checks (lint, typecheck, test)
+- [ ] Commit documentation and update plans.md
+
+#### Validation Steps
+- [ ] `bun run lint_text` (markdown)
+- [ ] `bun run lint` (code)
+- [ ] `bun run typecheck` (TypeScript)
+- [ ] `bun run test` (unit tests)
+
+#### Progress Log
+
+##### Iteration 1 (04:15)
+**What was done:**
+- Analyzed deploy.yml and found hardcoded TypeScript (lines 74-151)
+- Reviewed existing scripts/create-safe-proposal.ts
+- Confirmed existing script is more comprehensive and handles all use cases
+- Identified that workflow hardcoded script duplicates existing functionality
+
+**Test status:**
+- Analysis: Complete ✓
+- Implementation: Pending
+
+**Decisions made:**
+- Decision: Use existing scripts/create-safe-proposal.ts instead of hardcoded version
+- Reasoning: Existing script is more complete, includes error handling, YAML config parsing, and GitHub outputs
+- Alternatives: Fix hardcoded version - rejected as it duplicates existing code
+
+**Blockers/Issues:**
+- Cannot directly modify .github/workflows/ files due to GitHub App permissions
+- Will provide updated workflow YAML in documentation file for manual update
+
+##### Iteration 2 (04:17)
+**What was done:**
+- Created comprehensive documentation file: `docs/DEPLOY_WORKFLOW_REFACTOR.md`
+- Documented the problem, solution, and exact workflow changes needed
+- Provided step-by-step migration instructions
+- Updated exec plan with progress
+- Created detailed refactoring guide for manual workflow update
+
+**Test status:**
+- Documentation: Created ✓
+- Validation: Pending (requires dependency installation)
+
+**Decisions made:**
+- Decision: Create comprehensive migration documentation instead of just providing YAML snippet
+- Reasoning: User needs full context, verification steps, and rollback plan
+- Implementation: Structured document with problem, solution, steps, and verification checklist
+
+**Blockers/Issues:**
+- Cannot run validation commands without approval (bun install, bun run lint_text)
+- Will commit documentation changes and let CI run validation
+
+#### References
+- Issue #9: deploy.ymlにコードがベタガキで書かれている
+- Existing script: scripts/create-safe-proposal.ts:1-173
+
+#### Handoff Notes
+**Final Summary:** _In progress_
+
+**Outstanding Risks:**
+- Manual workflow update required (cannot be automated due to permissions)
+
+**Follow-up Tasks:**
+- User must manually update .github/workflows/deploy.yml with provided changes
+- Consider adding CI check to detect hardcoded scripts in workflows
+
 ### Exec Plan: Keyless CI/CD Smart Contract Deployment
 Created: 2025-10-12 16:15
 Status: 🟡 In Progress
