@@ -22,10 +22,12 @@ signers:
   # Minimum number of signatures required
   threshold: 2
   # List of signer addresses (Safe owners)
+  # WARNING: These are EXAMPLE addresses only - DO NOT use in production!
+  # Replace with your actual Safe owner addresses before deployment
   addresses:
-    - "0x1234567890123456789012345678901234567890" # Owner 1
-    - "0x2345678901234567890123456789012345678901" # Owner 2
-    - "0x3456789012345678901234567890123456789012" # Owner 3
+    - "0x0000000000000000000000000000000000000001" # EXAMPLE Owner 1 - REPLACE ME
+    - "0x0000000000000000000000000000000000000002" # EXAMPLE Owner 2 - REPLACE ME
+    - "0x0000000000000000000000000000000000000003" # EXAMPLE Owner 3 - REPLACE ME
 
 # Deployment metadata
 metadata:
