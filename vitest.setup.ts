@@ -1,4 +1,6 @@
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 // Try to load dotenv if available
 try {
@@ -26,3 +28,8 @@ global.console = {
   // Silence log output during tests
   log: vi.fn(),
 };
+
+// Clean up after each test
+afterEach(() => {
+  cleanup();
+});

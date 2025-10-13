@@ -129,6 +129,147 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 ## Active Exec Plans
 
+### Exec Plan: Keyless CI/CD Smart Contract Deployment
+Created: 2025-10-12 16:15
+Status: 🟡 In Progress
+
+#### Objective
+Implement a CI/CD pipeline that can deploy smart contracts without storing private keys in CI environment. The system will:
+- Create Safe transaction proposals in CI (no signing)
+- Use external signers (Safe owners, Lit Protocol, or KMS) for actual execution
+- Validate all deployments through OPA policies
+- Enable fully automated, secure contract deployment
+
+#### Guardrails (Non-negotiable constraints)
+- **ZERO private keys** in GitHub Actions or any CI environment
+- All deployments must go through Safe multisig proposals
+- Every deployment must pass OPA policy validation
+- Complete audit trail from PR → deployment transaction
+- No direct contract deployment - only Safe proposals
+- Test-driven development with 100% coverage
+- Small, focused commits and pull requests
+
+#### TODO
+- [x] Phase 1: Safe Proposal Creation Infrastructure
+  - [x] Install Safe SDK dependencies (@safe-global/safe-core-sdk, @safe-global/safe-ethers-adapters)
+  - [x] Create SafeProposalBuilder class for transaction creation
+  - [x] Write comprehensive tests for SafeProposalBuilder (18 tests, 100% passing)
+  - [x] Implement proposal serialization (for CI artifacts)
+  - [x] Add proposal validation logic
+
+- [ ] Phase 2: GitHub Actions Workflow
+  - [ ] Create `.github/workflows/deploy.yml` for deployment pipeline
+  - [ ] Add deployment trigger (on merge to main with deploy label)
+  - [ ] Implement contract compilation and artifact generation
+  - [ ] Create Safe proposal from deployment intent
+  - [ ] Upload proposal as GitHub artifact
+
+- [ ] Phase 3: Policy Validation (OPA)
+  - [ ] Install OPA dependencies
+  - [ ] Create policy validation service
+  - [ ] Write tests for policy validation
+  - [ ] Implement deployment constraints (network, gas limits, selectors)
+  - [ ] Add policy tests
+
+- [ ] Phase 4: Deployment Scripts
+  - [ ] Create `scripts/create-safe-proposal.ts` for proposal generation
+  - [ ] Create `scripts/validate-deployment.ts` for policy checks
+  - [ ] Add deployment configuration loader (.zerokey/deploy.yaml)
+  - [ ] Implement deterministic deployment addresses
+
+- [ ] Phase 5: Integration & Testing
+  - [ ] Create mock Safe for testing
+  - [ ] Write end-to-end deployment tests
+  - [ ] Test policy validation scenarios
+  - [ ] Document deployment workflow
+
+#### Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] Safe proposal creation works without private keys
+- [ ] OPA policies correctly validate/reject deployments
+- [ ] GitHub Actions workflow runs successfully
+- [ ] Deployment artifacts are properly generated
+- [ ] Complete audit trail is maintained
+
+#### Progress Log
+
+##### Iteration 1 (16:15)
+**What was done:**
+- Created comprehensive exec plan for keyless deployment
+- Analyzed architecture requirements from README
+- Identified key components: Safe SDK, OPA, GitHub Actions
+- Added test-driven development requirements to guardrails
+
+**Test status:**
+- Planning phase - no tests yet
+
+**Decisions made:**
+- Decision: Start with Safe SDK integration as foundation
+- Reasoning: Safe proposals are the core of keyless deployment
+- Alternatives considered: Starting with GitHub Actions - rejected as we need the SDK logic first
+
+- Decision: Use test-driven development approach
+- Reasoning: User explicitly requested TDD approach
+- Implementation: Write tests before implementing each component
+
+**Blockers/Issues:**
+- None yet
+
+##### Iteration 2 (16:30)
+**What was done:**
+- Implemented SafeProposalBuilder class using TDD approach
+- Created comprehensive test suite (18 tests) first
+- Installed Safe SDK dependencies (ethers, @safe-global/safe-core-sdk-types, @safe-global/protocol-kit)
+- Created type definitions for Safe transactions
+- Implemented all core functionality to pass tests
+
+**Test status:**
+- Tests: 18/18 passing ✓
+- Coverage: 100% ✓
+- All validation checks pass ✓
+
+**Decisions made:**
+- Decision: Use ethers v5 for compatibility with Safe SDK
+- Reasoning: Safe SDK is built on ethers v5, newer versions might have compatibility issues
+- Implementation: Import specific utilities from ethers to avoid bundle size issues
+
+- Decision: Implement type inference for constructor arguments
+- Reasoning: Simplifies usage without requiring explicit ABI specification
+- Alternatives: Requiring full ABI - rejected as too complex for CI usage
+
+**Blockers/Issues:**
+- Initial issue with ethers imports - resolved by using named imports
+- Address checksum validation - resolved by using proper checksummed addresses
+
+**PR Created:**
+- Branch: feat/safe-sdk-integration
+- Commit: a5afbcf - "feat: implement SafeProposalBuilder for keyless CI/CD deployment"
+
+#### Open Questions
+- **Q**: Should we support multiple Safe instances (dev/staging/prod)?
+  - **A**: TBD - likely yes for different environments
+
+- **Q**: How to handle proposal execution notification?
+  - **A**: TBD - might use GitHub comments or external monitoring
+
+#### References
+- Safe SDK docs: https://docs.safe.global/sdk/protocol-kit
+- OPA documentation: https://www.openpolicyagent.org/
+- GitHub Actions artifacts: https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts
+
+#### Handoff Notes
+**Final Summary:**
+- _In progress_
+
+**Outstanding Risks:**
+- Need to ensure Safe addresses are properly configured per environment
+- Policy rules must be comprehensive to prevent malicious deployments
+
+**Follow-up Tasks:**
+- Setup Safe multisig wallets for testing
+- Configure Lit Protocol Vincent for delegated signing
+- Integrate Blockscout and Envio for monitoring
+
 ### Exec Plan: Add Project Dependency Installation to Devcontainer
 Created: 2025-10-12 12:00
 Status: ✅ Completed
@@ -303,18 +444,18 @@ Implement core smart contract infrastructure for ZeroKey CI:
 - All specs must be validated before use
 
 #### TODO
-- [ ] Install Hardhat 3 and dependencies
-  - [ ] hardhat, @nomicfoundation/hardhat-toolbox
-  - [ ] @nomicfoundation/hardhat-viem
-  - [ ] @openzeppelin/contracts-upgradeable
-- [ ] Create hardhat.config.ts
-- [ ] Create sample UUPS upgradeable contract
-  - [ ] contracts/ExampleUUPS.sol
-  - [ ] contracts/ExampleUUPSV2.sol (for upgrade testing)
-- [ ] Write comprehensive contract tests
-  - [ ] Deployment test
-  - [ ] Upgrade test
-  - [ ] Function access control tests
+- [x] Install Hardhat 3 and dependencies
+  - [x] hardhat, @nomicfoundation/hardhat-toolbox
+  - [x] @nomicfoundation/hardhat-viem
+  - [x] @openzeppelin/contracts-upgradeable
+- [x] Create hardhat.config.js (ESM)
+- [x] Create sample UUPS upgradeable contract
+  - [x] contracts/ExampleUUPS.sol
+  - [x] contracts/ExampleUUPSV2.sol (for upgrade testing)
+- [x] Write comprehensive contract tests
+  - [x] Deployment test
+  - [x] Upgrade test
+  - [x] Function access control tests
 - [ ] Create deployment script
 - [ ] Create .zerokey/ directory with specs
   - [ ] deploy.yaml
@@ -433,6 +574,23 @@ Implement core smart contract infrastructure for ZeroKey CI:
 - Reasoning: ESM + esbuild transformation causing local issues, .js works in CI
 - Decision: Exclude Hardhat directories from TypeScript checking
 - Reasoning: Hardhat uses plugin augmentations not available in Next.js context
+
+##### Iteration 5 (Time N/A - sandbox restriction)
+**What was done:**
+- Reviewed repository state after prior Hardhat setup to confirm config, contracts, and tests are present.
+- Identified remaining scope: deployment script, .zerokey specs, and validation command runs.
+- Documented ongoing inability to run Hardhat compile/tests inside sandbox due to solc download restrictions.
+
+**Test status:**
+- Hardhat compile/test: Blocked (solc download requires network access).
+- Bun validation commands: Pending rerun.
+
+**Decisions made:**
+- Decision: Keep `hardhat.config.js` ESM configuration instead of reverting to `.ts` to satisfy Hardhat 3 requirements.
+- Next focus: Implement deterministic deployment script plus ZeroKey specs before re-running validations.
+
+**Blockers/Issues:**
+- Landlock sandbox prevents Hardhat from downloading Solidity compiler binaries.
 
 **Problem & Retrospective:**
 
