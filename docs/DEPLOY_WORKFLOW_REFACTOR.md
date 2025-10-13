@@ -52,15 +52,15 @@ Replace the "Generate Safe proposal" step (lines 63-158 in the original file) wi
 
 ### Benefits
 
-- **Maintainability**: Script can be tested and modified independently
-- **Reusability**: Same script can be used locally or in other workflows
-- **Testability**: Existing unit tests cover the script functionality
-- **Clarity**: Workflow file focuses on orchestration, not implementation
-- **DRY Principle**: No code duplication between workflow and scripts
+- Maintainability - Script can be tested and modified independently
+- Reusability - Same script can be used locally or in other workflows
+- Testability - Existing unit tests cover the script functionality
+- Clarity - Workflow file focuses on orchestration, not implementation
+- DRY Principle - No code duplication between workflow and scripts
 
 ### Migration Steps
 
-1. **Backup Current Workflow**:
+1. **バックアップ Current Workflow**:
    ```bash
    cp .github/workflows/deploy.yml .github/workflows/deploy.yml.backup
    ```
@@ -92,7 +92,7 @@ After updating the workflow, verify:
 
 ### Notes
 
-⚠️ **Important**: Due to GitHub App permissions, this workflow file cannot be automatically updated. Manual update is required.
+Important: Due to GitHub App permissions, this workflow file cannot be automatically updated. Manual update is required.
 
 ### References
 
