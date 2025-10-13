@@ -1,0 +1,46 @@
+# ZeroKeyCI Deployment Configuration
+# This file defines the deployment parameters for smart contracts
+
+# Network to deploy to (sepolia, mainnet, polygon, arbitrum, optimism, base)
+network: sepolia
+
+# Contract to deploy
+contract: ExampleUUPS
+
+# Constructor arguments (if any)
+constructorArgs: []
+
+# Value to send with deployment (in wei)
+value: "0"
+
+# Gas configuration (optional)
+gasLimit: 5000000
+gasPrice: "20000000000" # 20 gwei
+
+# Safe configuration
+signers:
+  # Minimum number of signatures required
+  threshold: 2
+  # List of signer addresses (Safe owners)
+  addresses:
+    - "0x1234567890123456789012345678901234567890" # Owner 1
+    - "0x2345678901234567890123456789012345678901" # Owner 2
+    - "0x3456789012345678901234567890123456789012" # Owner 3
+
+# Deployment metadata
+metadata:
+  description: "Deploy ExampleUUPS contract to Sepolia testnet"
+  requestor: "CI/CD Pipeline"
+  jiraTicket: "ZERO-001"
+  auditReport: "https://example.com/audit-report"
+
+# Deployment validations
+validations:
+  # Require all tests to pass
+  requireTests: true
+  # Require security audit
+  requireAudit: false
+  # Require specific coverage percentage
+  minCoverage: 100
+  # Allowed deployer addresses (if restricted)
+  allowedDeployers: []
