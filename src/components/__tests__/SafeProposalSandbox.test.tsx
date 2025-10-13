@@ -3,22 +3,35 @@ import { describe, it, expect, vi } from 'vitest';
 import SafeProposalSandbox from '../SafeProposalSandbox';
 
 // Mock the SafeProposalBuilder
-vi.mock('@/services/SafeProposalBuilder', () => ({
-  SafeProposalBuilder: vi.fn().mockImplementation(() => ({
-    createDeploymentProposal: vi.fn().mockResolvedValue({
-      to: '0x0000000000000000000000000000000000000000',
-      value: '0',
-      data: '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe',
-      operation: 0,
-      gasLimit: 5000000,
-    }),
-    validateProposal: vi.fn().mockReturnValue(true),
-    generateValidationHash: vi.fn().mockReturnValue('0xmockhash123'),
-    calculateDeploymentAddress: vi
-      .fn()
-      .mockReturnValue('0x7b9244DBD2Bb84C57a8e5C4b8135d412bFE8f1b7'),
-  })),
-}));
+vi.mock('@/services/SafeProposalBuilder', () => {
+  return {
+    SafeProposalBuilder: class MockSafeProposalBuilder {
+      constructor() {}
+
+      async createDeploymentProposal() {
+        return {
+          to: '0x0000000000000000000000000000000000000000',
+          value: '0',
+          data: '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe',
+          operation: 0,
+          safeTxGas: '5000000',
+        };
+      }
+
+      validateProposal() {
+        return true;
+      }
+
+      generateValidationHash() {
+        return '0xmockhash123';
+      }
+
+      calculateDeploymentAddress() {
+        return '0x7b9244DBD2Bb84C57a8e5C4b8135d412bFE8f1b7';
+      }
+    },
+  };
+});
 
 describe('SafeProposalSandbox', () => {
   it('should render the sandbox title', () => {
