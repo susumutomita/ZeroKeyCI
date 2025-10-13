@@ -129,6 +129,111 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 ## Active Exec Plans
 
+### Exec Plan: Add make before-commit to Claude Workflow Completion Conditions (Issue #11)
+Created: 2025-10-13 04:37
+Status: 🟡 In Progress
+
+#### Objective
+Add `make before-commit` validation checks to run AFTER Claude Code executes in both `.github/workflows/claude.yml` and `.github/workflows/claude-code-review.yml`. This ensures that all code changes made by Claude Code pass validation before the workflow is marked as complete.
+
+#### Guardrails
+- Cannot directly modify `.github/workflows/` files due to GitHub App permissions
+- Must provide clear, correct instructions for manual workflow updates
+- Validation must run AFTER Claude Code, not before
+- All validation checks (lint_text, lint, typecheck, format_check, build, test_coverage) must pass
+
+#### TODO
+- [x] Read and analyze current workflow files
+- [x] Understand user's requirement (validation AFTER Claude runs)
+- [x] Review Makefile to understand `make before-commit` targets
+- [x] Design correct solution (post-Claude validation steps)
+- [x] Provide manual modification instructions
+- [x] Update plans.md with retrospective about previous mistake
+- [ ] Wait for user to manually apply changes
+- [ ] Verify solution works in practice
+
+#### Validation Steps
+- [ ] User manually applies workflow changes
+- [ ] Test with a new issue to verify `make before-commit` runs after Claude
+- [ ] Verify workflow fails if validation checks fail
+- [ ] Verify workflow succeeds if all checks pass
+
+#### Progress Log
+
+##### Iteration 1 (04:37)
+**What was done:**
+- Read both workflow files (claude.yml and claude-code-review.yml)
+- Analyzed current structure - workflows run Claude Code and immediately complete
+- Read Makefile to understand `make before-commit` targets:
+  - lint_text (markdown linting)
+  - lint (code linting with ESLint)
+  - typecheck (TypeScript type checking)
+  - format_check (Prettier formatting validation)
+  - build (Next.js build)
+  - test_coverage (unit tests with coverage)
+
+**Test status:**
+- Analysis: Complete ✓
+- Solution design: Complete ✓
+
+**Decisions made:**
+- Decision: Add validation steps AFTER Claude Code action completes
+- Reasoning: User explicitly stated "claude codeが動作した後の完了後に必ず実行する"
+- Previous mistake: First attempt added validation BEFORE Claude ran (wrong)
+
+**Blockers/Issues:**
+- Cannot directly modify workflow files (GitHub App permissions restriction)
+- Must provide manual modification instructions
+
+##### Retrospective: Understanding User Requirements
+
+**Problem**: Previous implementation (claude/issue-11-20251013-0432) misunderstood the requirement and added validation BEFORE Claude Code ran instead of AFTER.
+
+**Root Cause**:
+- Misread user's Japanese requirement "完了条件にmake before-commitを追加する"
+- Interpreted as "add pre-condition checks" instead of "add to completion conditions"
+- Did not confirm understanding before implementing
+
+**Impact**:
+- Provided incorrect solution that would block Claude from running if pre-existing code had issues
+- Wasted user's time requiring correction
+- Lost trust in implementation quality
+
+**Prevention**:
+1. When requirements are unclear or in non-English, ALWAYS confirm understanding first
+2. For workflow changes, explicitly state "BEFORE X" or "AFTER X" in confirmation
+3. Consider the logical flow: validation should happen after code changes, not before
+4. Add to CLAUDE.md: "Confirm understanding of execution order when modifying CI workflows"
+
+**Correct Understanding**:
+- User wants validation to run AFTER Claude Code completes its work
+- This ensures Claude's changes are validated before marking task as complete
+- If validation fails, the workflow should fail (not mark task as complete)
+- This prevents situations where Claude creates code with lint/type/test errors
+
+#### References
+- Issue #11: claude.yaml claude-core-review.ymlの完了条件にmake before-commitを追加する
+- Makefile:21 (before_commit target definition)
+- .github/workflows/claude.yml:33-42
+- .github/workflows/claude-code-review.yml:34-56
+
+#### Handoff Notes
+**Final Summary:**
+- TBD (waiting for user to apply manual changes)
+
+**Outstanding Risks:**
+- Manual workflow updates required
+- Cannot test until user applies changes
+- Need to verify solution works with real Claude Code execution
+
+**Follow-up Tasks:**
+- User must manually update both workflow files
+- Test with new issue to verify validation runs after Claude
+- Consider requesting `workflows: write` permission if frequent workflow updates needed
+- Update CLAUDE.md with workflow modification best practices
+
+## Active Exec Plans
+
 ### Exec Plan: Refactor deploy.yml to Remove Hardcoded Script
 Created: 2025-10-13 04:15
 Status: ✅ Completed
