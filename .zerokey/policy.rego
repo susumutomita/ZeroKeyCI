@@ -42,9 +42,9 @@ valid_gas_limit {
 
 # Ensure no private keys in configuration
 no_private_keys {
-  not contains(input, "privateKey")
-  not contains(input, "mnemonic")
-  not contains(input, "secret")
+  not has_key(input, "privateKey")
+  not has_key(input, "mnemonic")
+  not has_key(input, "secret")
 }
 
 # Check contract is valid UUPS upgradeable
@@ -68,6 +68,6 @@ deny[msg] {
 }
 
 # Helper function to check if object contains a key
-contains(obj, key) {
+has_key(obj, key) {
   obj[key]
 }

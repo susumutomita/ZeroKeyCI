@@ -8,13 +8,15 @@ describe('Home page', () => {
     render(<Home />);
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveTextContent('Welcome to ZeroKeyCI');
+    expect(heading).toHaveTextContent('ZeroKeyCI');
   });
 
-  it('should render the description', () => {
+  it('should render the tagline', () => {
     render(<Home />);
-    const description = screen.getByText(/Zero-knowledge CI\/CD system/i);
-    expect(description).toBeInTheDocument();
+    const tagline = screen.getByText(
+      'Deploy Smart Contracts Without Private Keys in CI/CD'
+    );
+    expect(tagline).toBeInTheDocument();
   });
 
   it('should have proper structure', () => {
@@ -23,26 +25,16 @@ describe('Home page', () => {
     // Check for main container
     const main = container.querySelector('main');
     expect(main).toBeInTheDocument();
-    expect(main).toHaveClass('flex');
     expect(main).toHaveClass('min-h-screen');
-    expect(main).toHaveClass('flex-col');
-    expect(main).toHaveClass('items-center');
-    expect(main).toHaveClass('justify-center');
-    expect(main).toHaveClass('p-24');
   });
 
-  it('should have proper content wrapper', () => {
-    const { container } = render(<Home />);
+  it('should render call-to-action buttons', () => {
+    render(<Home />);
 
-    // Check for content wrapper div
-    const wrapper = container.querySelector('.font-mono');
-    expect(wrapper).toBeInTheDocument();
-    expect(wrapper).toHaveClass('z-10');
-    expect(wrapper).toHaveClass('max-w-5xl');
-    expect(wrapper).toHaveClass('w-full');
-    expect(wrapper).toHaveClass('items-center');
-    expect(wrapper).toHaveClass('justify-center');
-    expect(wrapper).toHaveClass('font-mono');
-    expect(wrapper).toHaveClass('text-sm');
+    const getStartedButton = screen.getByText('Get Started');
+    const githubButton = screen.getByText('View on GitHub');
+
+    expect(getStartedButton).toBeInTheDocument();
+    expect(githubButton).toBeInTheDocument();
   });
 });

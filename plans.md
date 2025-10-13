@@ -594,9 +594,9 @@ Implement core smart contract infrastructure for ZeroKey CI:
   - [x] Upgrade test
   - [x] Function access control tests
 - [ ] Create deployment script
-- [ ] Create .zerokey/ directory with specs
-  - [ ] deploy.yaml
-  - [ ] policy.rego
+- [x] Create .zerokey/ directory with specs
+  - [x] deploy.yaml
+  - [x] policy.rego
 - [ ] Verify all validation steps pass
 
 #### Validation Steps
@@ -712,6 +712,21 @@ Implement core smart contract infrastructure for ZeroKey CI:
 - Decision: Exclude Hardhat directories from TypeScript checking
 - Reasoning: Hardhat uses plugin augmentations not available in Next.js context
 
+##### Iteration 6 (Time N/A - review fix)
+**What was done:**
+- Addressed review feedback by renaming the helper to `has_key` to avoid conflicts with OPA built-in `contains`.
+- Checked all policy references to ensure they now use `has_key` and no additional built-in overrides remain.
+
+**Test status:**
+- Policy compile: Expected pass (rename resolves built-in conflict; sandbox prevents direct rego compile).
+- Other validations: Pending rerun.
+
+**Decisions made:**
+- Decision: Keep minimal helper implementation and rely on OPA object indexing for key existence checks.
+- Decision: Defer broader policy refactor until deployment script work resumes.
+
+**Blockers/Issues:**
+- Landlock sandbox still blocks Hardhat solc downloads; no change.
 ##### Iteration 5 (Time N/A - sandbox restriction)
 **What was done:**
 - Reviewed repository state after prior Hardhat setup to confirm config, contracts, and tests are present.

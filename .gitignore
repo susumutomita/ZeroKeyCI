@@ -142,3 +142,7 @@ vite.config.ts.timestamp-*
 artifacts/
 cache/
 *.config.ts.bak
+
+# Test artifacts
+test-safe-proposal.json
+safe-proposal.json
