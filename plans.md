@@ -151,10 +151,10 @@ Remove hardcoded TypeScript code from `.github/workflows/deploy.yml` (lines 74-1
 - [x] Commit documentation and update plans.md
 
 #### Validation Steps
-- [ ] `bun run lint_text` (markdown)
-- [ ] `bun run lint` (code)
-- [ ] `bun run typecheck` (TypeScript)
-- [ ] `bun run test` (unit tests)
+- [x] `bun run lint_text` (markdown)
+- [x] `bun run lint` (code)
+- [x] `bun run typecheck` (TypeScript)
+- [x] `bun run test` (unit tests)
 
 #### Progress Log
 
