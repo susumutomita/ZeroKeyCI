@@ -184,6 +184,22 @@ export class SafeProposalBuilder {
   }
 
   /**
+   * Generate a validation hash for the proposal
+   * @param proposal The SafeTransactionData to hash
+   * @returns string hash of the proposal
+   */
+  generateValidationHash(proposal: SafeTransactionData): string {
+    const dataToHash = {
+      to: proposal.to,
+      value: proposal.value,
+      data: proposal.data,
+      operation: proposal.operation,
+    };
+    const hash = utils.keccak256(utils.toUtf8Bytes(JSON.stringify(dataToHash)));
+    return hash;
+  }
+
+  /**
    * Validate a proposal structure
    * @param proposal The proposal to validate
    * @returns True if valid, false otherwise

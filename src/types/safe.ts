@@ -68,6 +68,14 @@ export interface DeploymentMetadata {
   timestamp?: number;
   /** Contract name for reference */
   contractName?: string;
+  /** Description of deployment */
+  description?: string;
+  /** Requestor of deployment */
+  requestor?: string;
+  /** Network for deployment */
+  network?: string;
+  /** Additional arbitrary metadata */
+  [key: string]: any;
 }
 
 /**
