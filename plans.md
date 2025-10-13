@@ -157,12 +157,12 @@ Implement a CI/CD pipeline that can deploy smart contracts without storing priva
   - [x] Implement proposal serialization (for CI artifacts)
   - [x] Add proposal validation logic
 
-- [ ] Phase 2: GitHub Actions Workflow
-  - [ ] Create `.github/workflows/deploy.yml` for deployment pipeline
-  - [ ] Add deployment trigger (on merge to main with deploy label)
-  - [ ] Implement contract compilation and artifact generation
-  - [ ] Create Safe proposal from deployment intent
-  - [ ] Upload proposal as GitHub artifact
+- [x] Phase 2: GitHub Actions Workflow
+  - [x] Create `.github/workflows/deploy.yml` for deployment pipeline
+  - [x] Add deployment trigger (on merge to main with deploy label)
+  - [x] Implement contract compilation and artifact generation
+  - [x] Create Safe proposal from deployment intent
+  - [x] Upload proposal as GitHub artifact
 
 - [ ] Phase 3: Policy Validation (OPA)
   - [ ] Install OPA dependencies
@@ -171,11 +171,11 @@ Implement a CI/CD pipeline that can deploy smart contracts without storing priva
   - [ ] Implement deployment constraints (network, gas limits, selectors)
   - [ ] Add policy tests
 
-- [ ] Phase 4: Deployment Scripts
-  - [ ] Create `scripts/create-safe-proposal.ts` for proposal generation
-  - [ ] Create `scripts/validate-deployment.ts` for policy checks
-  - [ ] Add deployment configuration loader (.zerokey/deploy.yaml)
-  - [ ] Implement deterministic deployment addresses
+- [x] Phase 4: Deployment Scripts
+  - [x] Create `scripts/create-safe-proposal.ts` for proposal generation
+  - [x] Create `scripts/validate-deployment.ts` for policy checks
+  - [x] Add deployment configuration loader (.zerokey/deploy.yaml)
+  - [x] Implement deterministic deployment addresses
 
 - [ ] Phase 5: Integration & Testing
   - [ ] Create mock Safe for testing
@@ -244,6 +244,45 @@ Implement a CI/CD pipeline that can deploy smart contracts without storing priva
 **PR Created:**
 - Branch: feat/safe-sdk-integration
 - Commit: a5afbcf - "feat: implement SafeProposalBuilder for keyless CI/CD deployment"
+- Status: ✅ Merged to main
+
+##### Iteration 3 (18:30)
+**What was done:**
+- Achieved 100% test coverage for SafeProposalBuilder
+- Added tests for all edge cases and type inference branches
+- Fixed test environment configuration for React components
+- PR successfully merged to main
+
+**Test status:**
+- Tests: 34/34 passing ✓
+- Coverage: 100% (lines, statements, functions, branches) ✓
+
+##### Iteration 4 (18:40)
+**What was done:**
+- Created GitHub Actions workflow for keyless deployment
+- Implemented deployment trigger on PR merge with 'deploy' label
+- Created scripts/create-safe-proposal.ts for CI proposal generation
+- Created scripts/validate-deployment.ts for OPA policy validation
+- Added js-yaml dependency for YAML configuration parsing
+
+**Test status:**
+- Workflow: Created ✓
+- Scripts: Implemented ✓
+- Dependencies: Installed ✓
+
+**Decisions made:**
+- Decision: Trigger deployment only on merged PRs with 'deploy' label
+- Reasoning: Provides explicit control over when deployments happen
+- Alternatives: Auto-deploy on every merge - rejected as too risky
+
+- Decision: Use GitHub artifacts for proposal storage
+- Reasoning: Provides audit trail and allows manual review before execution
+- Retention: 30 days for compliance requirements
+
+**Files created:**
+- .github/workflows/deploy.yml - Main deployment workflow
+- scripts/create-safe-proposal.ts - Proposal generation script
+- scripts/validate-deployment.ts - Policy validation script
 
 #### Open Questions
 - **Q**: Should we support multiple Safe instances (dev/staging/prod)?
