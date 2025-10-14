@@ -117,45 +117,46 @@ contract MyContract is UUPSUpgradeable {
   };
 
   return (
-    <div className="glass-strong rounded-3xl p-8 animate-fade-in-up">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
-          Try It Live - Safe Proposal Sandbox
+    <div className="card-modern-bordered backdrop-blur-glass-strong p-10 md:p-12 animate-fade-in-up">
+      <div className="mb-12 text-center">
+        <h2 className="heading-section mb-6 text-gray-900 dark:text-white">
+          <span className="text-gradient-vibrant">Try It Live</span> - Safe
+          Proposal Sandbox
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 text-lg">
+        <p className="text-body text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
           Generate a Safe transaction proposal without any keys. Edit the
           configuration and see the results instantly.
         </p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 mb-8 flex-wrap">
+      <div className="flex gap-3 mb-10 flex-wrap justify-center">
         <button
           onClick={() => setActiveTab('config')}
-          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+          className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
             activeTab === 'config'
-              ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
-              : 'glass text-gray-700 dark:text-gray-300 hover:scale-105'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl scale-105'
+              : 'glass-strong text-gray-700 dark:text-gray-300 hover:scale-105 hover:shadow-lg'
           }`}
         >
           Configuration
         </button>
         <button
           onClick={() => setActiveTab('code')}
-          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+          className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
             activeTab === 'code'
-              ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
-              : 'glass text-gray-700 dark:text-gray-300 hover:scale-105'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl scale-105'
+              : 'glass-strong text-gray-700 dark:text-gray-300 hover:scale-105 hover:shadow-lg'
           }`}
         >
           Contract Code
         </button>
         <button
           onClick={() => setActiveTab('proposal')}
-          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+          className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
             activeTab === 'proposal'
-              ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
-              : 'glass text-gray-700 dark:text-gray-300 hover:scale-105'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl scale-105'
+              : 'glass-strong text-gray-700 dark:text-gray-300 hover:scale-105 hover:shadow-lg'
           }`}
         >
           Generated Proposal
@@ -287,7 +288,7 @@ contract MyContract is UUPSUpgradeable {
 
           <button
             onClick={generateProposal}
-            className="glass-button w-full glow-on-hover bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-500 hover:to-purple-500 text-lg py-4"
+            className="btn-primary-modern w-full text-xl py-5 mt-4"
           >
             Generate Safe Proposal
           </button>
