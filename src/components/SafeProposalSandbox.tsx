@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { SafeProposalBuilder } from '@/services/SafeProposalBuilder';
 import { SafeTransactionData } from '@/types/safe';
 
@@ -117,45 +117,45 @@ contract MyContract is UUPSUpgradeable {
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+    <div className="glass-strong rounded-3xl p-8 animate-fade-in-up">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
           Try It Live - Safe Proposal Sandbox
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
           Generate a Safe transaction proposal without any keys. Edit the
           configuration and see the results instantly.
         </p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-8 flex-wrap">
         <button
           onClick={() => setActiveTab('config')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
             activeTab === 'config'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+              ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
+              : 'glass text-gray-700 dark:text-gray-300 hover:scale-105'
           }`}
         >
           Configuration
         </button>
         <button
           onClick={() => setActiveTab('code')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
             activeTab === 'code'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+              ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
+              : 'glass text-gray-700 dark:text-gray-300 hover:scale-105'
           }`}
         >
           Contract Code
         </button>
         <button
           onClick={() => setActiveTab('proposal')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
             activeTab === 'proposal'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+              ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
+              : 'glass text-gray-700 dark:text-gray-300 hover:scale-105'
           }`}
         >
           Generated Proposal
@@ -164,12 +164,12 @@ contract MyContract is UUPSUpgradeable {
 
       {/* Configuration Tab */}
       {activeTab === 'config' && (
-        <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-6 animate-fade-in">
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label
                 htmlFor="contractName"
-                className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200"
               >
                 Contract Name
               </label>
@@ -180,14 +180,14 @@ contract MyContract is UUPSUpgradeable {
                 onChange={(e) =>
                   setConfig({ ...config, contractName: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="glass-input w-full text-gray-900 dark:text-gray-100"
                 placeholder="MyContract"
               />
             </div>
             <div>
               <label
                 htmlFor="network"
-                className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200"
               >
                 Network
               </label>
@@ -197,7 +197,7 @@ contract MyContract is UUPSUpgradeable {
                 onChange={(e) =>
                   setConfig({ ...config, network: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="glass-input w-full text-gray-900 dark:text-gray-100"
               >
                 <option value="sepolia">Sepolia</option>
                 <option value="mainnet">Mainnet</option>
@@ -212,7 +212,7 @@ contract MyContract is UUPSUpgradeable {
           <div>
             <label
               htmlFor="safeAddress"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+              className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200"
             >
               Safe Address
             </label>
@@ -223,7 +223,7 @@ contract MyContract is UUPSUpgradeable {
               onChange={(e) =>
                 setConfig({ ...config, safeAddress: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-lg font-mono text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              className="glass-input w-full font-mono text-sm text-gray-900 dark:text-gray-100"
               placeholder="0x..."
             />
           </div>
@@ -231,7 +231,7 @@ contract MyContract is UUPSUpgradeable {
           <div>
             <label
               htmlFor="bytecode"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+              className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200"
             >
               Bytecode (hex)
             </label>
@@ -241,16 +241,16 @@ contract MyContract is UUPSUpgradeable {
               onChange={(e) =>
                 setConfig({ ...config, bytecode: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-lg font-mono text-xs h-24 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              className="glass-input w-full font-mono text-xs h-24 text-gray-900 dark:text-gray-100"
               placeholder="0x608060..."
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label
                 htmlFor="constructorArgs"
-                className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200"
               >
                 Constructor Args (JSON)
               </label>
@@ -261,14 +261,14 @@ contract MyContract is UUPSUpgradeable {
                 onChange={(e) =>
                   setConfig({ ...config, constructorArgs: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-lg font-mono text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="glass-input w-full font-mono text-sm text-gray-900 dark:text-gray-100"
                 placeholder="[]"
               />
             </div>
             <div>
               <label
                 htmlFor="value"
-                className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200"
               >
                 Value (wei)
               </label>
@@ -279,7 +279,7 @@ contract MyContract is UUPSUpgradeable {
                 onChange={(e) =>
                   setConfig({ ...config, value: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="glass-input w-full text-gray-900 dark:text-gray-100"
                 placeholder="0"
               />
             </div>
@@ -287,7 +287,7 @@ contract MyContract is UUPSUpgradeable {
 
           <button
             onClick={generateProposal}
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            className="glass-button w-full glow-on-hover bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-500 hover:to-purple-500 text-lg py-4"
           >
             Generate Safe Proposal
           </button>
@@ -296,13 +296,13 @@ contract MyContract is UUPSUpgradeable {
 
       {/* Contract Code Tab */}
       {activeTab === 'code' && (
-        <div>
-          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+        <div className="animate-fade-in">
+          <div className="glass-strong rounded-2xl p-6 overflow-x-auto">
             <pre className="text-gray-100 text-sm">
               <code>{sampleContract}</code>
             </pre>
           </div>
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="mt-6 glass rounded-2xl p-6">
             <p className="text-sm text-blue-700 dark:text-blue-300">
               <strong>Note:</strong> This is a sample UUPS upgradeable contract.
               In production, you would compile your actual contract and use the
@@ -314,69 +314,71 @@ contract MyContract is UUPSUpgradeable {
 
       {/* Generated Proposal Tab */}
       {activeTab === 'proposal' && (
-        <div>
+        <div className="animate-fade-in">
           {proposal ? (
-            <div className="space-y-4">
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                <h3 className="font-semibold text-green-800 dark:text-green-300 mb-2">
-                  ✅ Proposal Generated Successfully
+            <div className="space-y-6">
+              <div className="glass-strong rounded-2xl p-6 border-2 border-green-500/30">
+                <h3 className="font-bold text-green-700 dark:text-green-300 mb-4 text-xl flex items-center gap-2">
+                  <span className="text-2xl">✅</span>
+                  Proposal Generated Successfully
                 </h3>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">
+                <div className="space-y-3 text-sm">
+                  <div className="glass rounded-xl p-4">
+                    <span className="text-gray-600 dark:text-gray-400 font-semibold block mb-2">
                       Validation Hash:
                     </span>
-                    <code className="ml-2 text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    <code className="text-xs glass-medium px-3 py-2 rounded block overflow-x-auto text-gray-900 dark:text-gray-100">
                       {validationHash}
                     </code>
                   </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">
+                  <div className="glass rounded-xl p-4">
+                    <span className="text-gray-600 dark:text-gray-400 font-semibold block mb-2">
                       Deployment Address:
                     </span>
-                    <code className="ml-2 text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    <code className="text-xs glass-medium px-3 py-2 rounded block overflow-x-auto text-gray-900 dark:text-gray-100">
                       {deploymentAddress}
                     </code>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+              <div className="glass-strong rounded-2xl p-6 overflow-x-auto">
                 <pre className="text-gray-100 text-xs">
                   <code>{JSON.stringify(proposal, null, 2)}</code>
                 </pre>
               </div>
 
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                <div className="glass-card p-6">
+                  <h4 className="font-semibold mb-3 text-gray-900 dark:text-white text-lg">
                     Transaction Type
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600 dark:text-gray-300 font-mono">
                     {proposal.operation === 0 ? 'CREATE' : 'CALL'}
                   </p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                <div className="glass-card p-6">
+                  <h4 className="font-semibold mb-3 text-gray-900 dark:text-white text-lg">
                     Gas Limit
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600 dark:text-gray-300 font-mono">
                     {proposal.safeTxGas || 'Default'}
                   </p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
+                <div className="glass-card p-6">
+                  <h4 className="font-semibold mb-3 text-gray-900 dark:text-white text-lg">
                     Value
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600 dark:text-gray-300 font-mono">
                     {proposal.value} wei
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400">
+            <div className="text-center py-16 glass rounded-3xl">
+              <div className="text-6xl mb-4">📋</div>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">
                 Configure your deployment and click &quot;Generate Safe
                 Proposal&quot; to see the result
               </p>
@@ -387,9 +389,10 @@ contract MyContract is UUPSUpgradeable {
 
       {/* Error Display */}
       {error && (
-        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        <div className="mt-6 glass-strong rounded-2xl p-6 border-2 border-red-500/30 animate-fade-in">
           <p className="text-red-700 dark:text-red-300">
-            <strong>Error:</strong> {error}
+            <strong className="text-lg">⚠ Error:</strong>
+            <span className="ml-2">{error}</span>
           </p>
         </div>
       )}

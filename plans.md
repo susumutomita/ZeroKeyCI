@@ -129,6 +129,117 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 ## Active Exec Plans
 
+### Exec Plan: Liquid Glass UI Redesign
+Created: 2025-10-13 15:00
+Status: 🟡 In Progress
+
+#### Objective
+Redesign ZeroKeyCI's UI with modern Liquid Glass design inspired by Apple's 2025 design system. Implement glassmorphism effects with:
+- Real-time translucent layers with blur and transparency
+- Dynamic background effects and depth perception
+- Improved visual hierarchy and focus states
+- Enhanced accessibility and contrast
+- Smooth animations and micro-interactions
+- Both light and dark mode support
+
+#### Guardrails
+- Must maintain 100% test coverage
+- Must pass all accessibility standards (WCAG AA minimum)
+- No breaking changes to existing functionality
+- All validation checks must pass
+- Preserve existing component logic
+- Ensure readable contrast ratios on all glass effects
+
+#### TODO
+- [x] Research Liquid Glass design trends for 2025
+- [ ] Analyze current design and identify enhancement opportunities
+- [ ] Create enhanced design system in globals.css
+  - [ ] Add glassmorphism CSS variables
+  - [ ] Implement backdrop blur utilities
+  - [ ] Add smooth transition tokens
+  - [ ] Define depth layers and shadows
+- [ ] Update Tailwind configuration
+  - [ ] Add glass effect utilities
+  - [ ] Configure animation timings
+  - [ ] Add gradient and blur utilities
+- [ ] Refactor main landing page (page.tsx)
+  - [ ] Hero section with glass effects
+  - [ ] Feature cards with translucent layers
+  - [ ] Interactive elements with hover states
+  - [ ] Smooth scroll animations
+- [ ] Refactor SafeProposalSandbox component
+  - [ ] Glass container with backdrop blur
+  - [ ] Enhanced tab navigation
+  - [ ] Interactive form elements
+  - [ ] Code block with glass overlay
+- [ ] Run validation checks
+  - [ ] Linting (lint_text, lint)
+  - [ ] Type checking
+  - [ ] Tests (all existing tests must pass)
+  - [ ] Build verification
+- [ ] Create commit and PR
+
+#### Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] Coverage at 100% (`bun run test:coverage`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`, `bun run lint_text`)
+- [ ] Build succeeds (`bun run build`)
+- [ ] Visual verification in both light and dark modes
+- [ ] Accessibility checks (contrast ratios, focus states)
+
+#### Progress Log
+
+##### Iteration 1 (15:00)
+**What was done:**
+- Researched 2025 Liquid Glass design trends
+- Found Apple's Liquid Glass design system details
+- Key findings:
+  - Real-time lensing and refraction effects
+  - Dynamic adaptation to context and background
+  - Physically accurate blur and transparency
+  - Motion-responsive specular highlights
+  - Maintained accessibility with adaptive contrast
+- Analyzed current ZeroKeyCI UI
+- Created exec plan with comprehensive scope
+
+**Test status:**
+- Research: Complete ✓
+- Implementation: Pending
+
+**Decisions made:**
+- Decision: Implement CSS-based glassmorphism (not canvas/WebGL)
+- Reasoning: Better performance, accessibility, and maintainability
+- Alternatives: JavaScript-based effects - rejected for complexity
+- Decision: Focus on backdrop-filter and layering
+- Reasoning: Native browser support, hardware accelerated
+- Decision: Maintain existing component structure
+- Reasoning: Minimize risk of breaking functionality
+
+**Blockers/Issues:**
+- None
+
+#### Open Questions
+- **Q**: Should we add parallax scrolling effects?
+  - **A**: TBD - evaluate after basic glassmorphism implementation
+
+- **Q**: Should glass effects be opt-in via user preference?
+  - **A**: TBD - consider performance implications
+
+#### References
+- Apple Liquid Glass: https://www.apple.com/newsroom/2025/06/apple-introduces-a-delightful-and-elegant-new-software-design/
+- Glassmorphism 2025 trends: https://www.everydayux.net/glassmorphism-apple-liquid-glass-interface-design/
+- CSS implementation guide: https://dev.to/gruszdev/apples-liquid-glass-revolution-how-glassmorphism-is-shaping-ui-design-in-2025-with-css-code-1221
+
+#### Handoff Notes
+**Final Summary:** _TBD_
+
+**Outstanding Risks:** _TBD_
+
+**Follow-up Tasks:** _TBD_
+
+## Active Exec Plans
+
 ### Exec Plan: Refactor deploy.yml to Remove Hardcoded Script
 Created: 2025-10-13 04:15
 Status: ✅ Completed

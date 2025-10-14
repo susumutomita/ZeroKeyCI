@@ -96,7 +96,7 @@ describe('SafeProposalSandbox', () => {
     await waitFor(() => {
       fireEvent.click(screen.getByText('Generated Proposal'));
       expect(
-        screen.getByText('✅ Proposal Generated Successfully')
+        screen.getByText(/Proposal Generated Successfully/)
       ).toBeInTheDocument();
     });
   });
