@@ -247,6 +247,60 @@ describe('SafeProposalBuilder', () => {
     });
   });
 
+  describe('generateValidationHash', () => {
+    it('should generate a validation hash for a proposal', async () => {
+      const deploymentData = {
+        contractName: 'ExampleUUPS',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: [],
+        value: '0',
+      };
+
+      const proposal = await builder.createDeploymentProposal(deploymentData);
+      const hash = builder.generateValidationHash(proposal);
+
+      expect(hash).toMatch(/^0x[a-f0-9]{64}$/); // Valid keccak256 hash
+    });
+
+    it('should generate consistent hashes for same proposal', async () => {
+      const deploymentData = {
+        contractName: 'ExampleUUPS',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: [],
+        value: '0',
+      };
+
+      const proposal = await builder.createDeploymentProposal(deploymentData);
+      const hash1 = builder.generateValidationHash(proposal);
+      const hash2 = builder.generateValidationHash(proposal);
+
+      expect(hash1).toBe(hash2);
+    });
+
+    it('should generate different hashes for different proposals', async () => {
+      const deploymentData1 = {
+        contractName: 'Contract1',
+        bytecode: '0x608060405234801561001057600080fd5b50',
+        constructorArgs: [],
+        value: '0',
+      };
+
+      const deploymentData2 = {
+        contractName: 'Contract2',
+        bytecode: '0x608060405234801561001057600080fd5b51',
+        constructorArgs: [],
+        value: '0',
+      };
+
+      const proposal1 = await builder.createDeploymentProposal(deploymentData1);
+      const proposal2 = await builder.createDeploymentProposal(deploymentData2);
+      const hash1 = builder.generateValidationHash(proposal1);
+      const hash2 = builder.generateValidationHash(proposal2);
+
+      expect(hash1).not.toBe(hash2);
+    });
+  });
+
   describe('validateProposal', () => {
     it('should validate a valid proposal', async () => {
       const deploymentData = {
