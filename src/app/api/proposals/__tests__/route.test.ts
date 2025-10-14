@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../route';
-import {
-  setStorage,
-  InMemoryStorageAdapter,
-} from '@/services/ProposalStorage';
+import { setStorage, InMemoryStorageAdapter } from '@/services/ProposalStorage';
 
 // Use in-memory storage for tests
 const testStorage = new InMemoryStorageAdapter();
@@ -62,7 +59,6 @@ vi.mock('@/services/SafeProposalBuilder', () => {
 });
 
 describe('API /api/proposals', () => {
-
   describe('GET /api/proposals', () => {
     it('should return empty array when no proposals exist', async () => {
       const request = new NextRequest('http://localhost:3000/api/proposals');

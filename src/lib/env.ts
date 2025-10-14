@@ -43,9 +43,7 @@ export function getEnvConfig(): EnvConfig {
     );
   }
 
-  const storageType = (process.env.STORAGE_TYPE || 'file') as
-    | 'file'
-    | 'memory';
+  const storageType = (process.env.STORAGE_TYPE || 'file') as 'file' | 'memory';
   const storageDir = process.env.STORAGE_DIR;
 
   return {
