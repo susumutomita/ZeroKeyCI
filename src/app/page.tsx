@@ -25,31 +25,26 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative px-6 py-24 text-center">
-        <div className="max-w-4xl mx-auto">
-          <div className="glass-strong rounded-3xl p-12 animate-fade-in-up backdrop-blur-2xl">
-            <h1 className="text-6xl font-bold mb-6 animate-fade-in">
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-sm">
-                ZeroKeyCI
-              </span>
+      <section className="section-spacing relative">
+        <div className="container-modern">
+          <div className="card-modern-bordered backdrop-blur-glass-strong animate-fade-in-up max-w-5xl mx-auto text-center">
+            <h1 className="heading-hero mb-8 animate-scale-in">
+              <span className="text-gradient">ZeroKeyCI</span>
             </h1>
-            <p className="text-2xl text-gray-800 dark:text-gray-100 mb-4 font-semibold">
+            <p className="text-body-lg text-gray-800 dark:text-gray-100 mb-6 font-semibold max-w-3xl mx-auto">
               Deploy Smart Contracts Without Private Keys in CI/CD
             </p>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-12 leading-relaxed">
+            <p className="text-body text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-12 leading-relaxed">
               Secure, keyless deployment system using Gnosis Safe multisig
               proposals. Never store private keys in your CI environment again.
             </p>
-            <div className="flex gap-4 justify-center flex-wrap">
-              <a
-                href="#getting-started"
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-2xl hover:from-blue-500 hover:to-purple-500 transition-all duration-300 hover:scale-105 border-2 border-blue-400/50"
-              >
+            <div className="flex gap-6 justify-center flex-wrap">
+              <a href="#getting-started" className="btn-primary-modern">
                 Get Started
               </a>
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI"
-                className="px-8 py-4 rounded-xl font-semibold text-lg glass-strong text-gray-900 dark:text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-gray-300 dark:border-gray-600"
+                className="btn-secondary-modern"
               >
                 View on GitHub
               </a>
@@ -59,12 +54,12 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+      <section className="section-spacing-sm relative">
+        <div className="container-modern">
+          <h2 className="heading-section text-center mb-16 text-gray-900 dark:text-white animate-fade-in">
             How It Works
           </h2>
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-4 gap-8">
             {[
               {
                 num: 1,
@@ -89,18 +84,18 @@ export default function Home() {
             ].map((step, idx) => (
               <div
                 key={step.num}
-                className="glass-card p-6 text-center group animate-fade-in-up hover:shadow-xl transition-all"
+                className="card-modern text-center group"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <span className="text-2xl font-bold text-white">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-blue-500 dark:via-purple-500 dark:to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
+                  <span className="text-3xl font-bold text-white">
                     {step.num}
                   </span>
                 </div>
-                <h3 className="font-semibold mb-2 text-gray-900 dark:text-white text-lg">
+                <h3 className="heading-card mb-4 text-gray-900 dark:text-white">
                   {step.title}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
                   {step.desc}
                 </p>
               </div>
@@ -110,56 +105,64 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+      <section className="section-spacing relative">
+        <div className="container-modern">
+          <h2 className="heading-section text-center mb-20 text-gray-900 dark:text-white animate-fade-in">
             Key Features
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
             {[
               {
                 title: 'No Private Keys in CI',
                 desc: 'Private keys never touch your CI environment. All signing happens through Safe multisig.',
                 Icon: Lock,
+                gradient: 'from-blue-500 to-cyan-500',
               },
               {
                 title: 'Policy Validation',
                 desc: 'OPA policies ensure deployments meet your security and compliance requirements.',
                 Icon: CheckCircle2,
+                gradient: 'from-purple-500 to-pink-500',
               },
               {
                 title: 'Audit Trail',
                 desc: 'Complete audit trail from PR to deployment with all approvals tracked on-chain.',
                 Icon: FileText,
+                gradient: 'from-green-500 to-emerald-500',
               },
               {
                 title: 'UUPS Upgradeable',
                 desc: 'Built-in support for UUPS proxy pattern for upgradeable contracts.',
                 Icon: RefreshCw,
+                gradient: 'from-orange-500 to-red-500',
               },
               {
                 title: 'Deterministic Addresses',
                 desc: 'Calculate deployment addresses before deployment using CREATE2.',
                 Icon: Target,
+                gradient: 'from-indigo-500 to-purple-500',
               },
               {
                 title: '100% Test Coverage',
                 desc: 'Thoroughly tested with comprehensive test suite ensuring reliability.',
                 Icon: CheckCheck,
+                gradient: 'from-pink-500 to-rose-500',
               },
             ].map((feature, idx) => (
               <div
                 key={feature.title}
-                className="glass-card p-8 group animate-fade-in-up hover:shadow-2xl transition-all"
-                style={{ animationDelay: `${idx * 0.1}s` }}
+                className="card-modern-bordered group"
+                style={{ animationDelay: `${idx * 0.08}s` }}
               >
-                <div className="w-14 h-14 glass-strong rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all">
-                  <feature.Icon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+                <div
+                  className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-xl`}
+                >
+                  <feature.Icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+                <h3 className="heading-card mb-4 text-gray-900 dark:text-white">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
                   {feature.desc}
                 </p>
               </div>
@@ -169,23 +172,23 @@ export default function Home() {
       </section>
 
       {/* Getting Started Section */}
-      <section id="getting-started" className="relative px-6 py-16">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+      <section id="getting-started" className="section-spacing relative">
+        <div className="container-modern max-w-6xl">
+          <h2 className="heading-section text-center mb-16 text-gray-900 dark:text-white animate-fade-in">
             Getting Started
           </h2>
 
           {/* Tab Navigation */}
-          <div className="flex justify-center mb-8">
-            <div className="glass-strong rounded-2xl p-2 inline-flex gap-2">
+          <div className="flex justify-center mb-12">
+            <div className="card-modern-bordered p-2 inline-flex gap-2 animate-scale-in">
               {['overview', 'setup', 'deploy', 'test'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 rounded-xl capitalize font-medium transition-all duration-200 ${
+                  className={`px-8 py-4 rounded-xl capitalize font-semibold text-base transition-all duration-300 ${
                     activeTab === tab
-                      ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:scale-105'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl scale-105'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5 hover:scale-105'
                   }`}
                 >
                   {tab}
@@ -195,7 +198,7 @@ export default function Home() {
           </div>
 
           {/* Tab Content */}
-          <div className="glass-strong rounded-3xl p-8 animate-fade-in">
+          <div className="card-modern-bordered backdrop-blur-glass p-10 md:p-12 animate-fade-in">
             {activeTab === 'overview' && (
               <div className="prose prose-gray dark:prose-invert max-w-none">
                 <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
@@ -397,20 +400,20 @@ bun run scripts/validate-deployment.ts`}</code>
       </section>
 
       {/* Interactive Sandbox Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
+      <section className="section-spacing relative">
+        <div className="container-modern">
           <SafeProposalSandbox />
         </div>
       </section>
 
       {/* Architecture Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+      <section className="section-spacing-sm relative">
+        <div className="container-modern">
+          <h2 className="heading-section text-center mb-16 text-gray-900 dark:text-white animate-fade-in">
             System Architecture
           </h2>
-          <div className="glass-strong rounded-3xl p-8">
-            <pre className="text-sm text-gray-700 dark:text-gray-200 overflow-x-auto">
+          <div className="card-modern-bordered backdrop-blur-glass p-10 md:p-12 animate-scale-in">
+            <pre className="text-sm md:text-base text-gray-700 dark:text-gray-200 overflow-x-auto leading-relaxed">
               {`
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │              │     │              │     │              │
@@ -452,30 +455,32 @@ bun run scripts/validate-deployment.ts`}</code>
       </section>
 
       {/* Footer */}
-      <footer className="relative px-6 py-12 text-center">
-        <div className="max-w-4xl mx-auto glass-strong rounded-3xl p-8">
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            Built with security and simplicity in mind
-          </p>
-          <div className="flex justify-center gap-6 flex-wrap">
-            <a
-              href="https://github.com/susumutomita/ZeroKeyCI"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="/docs"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-            >
-              Documentation
-            </a>
-            <a
-              href="https://github.com/susumutomita/ZeroKeyCI/issues"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-            >
-              Issues
-            </a>
+      <footer className="section-spacing-sm relative">
+        <div className="container-modern">
+          <div className="card-modern-bordered backdrop-blur-glass p-12 text-center max-w-4xl mx-auto animate-fade-in">
+            <p className="text-body text-gray-600 dark:text-gray-300 mb-8">
+              Built with security and simplicity in mind
+            </p>
+            <div className="flex justify-center gap-8 flex-wrap">
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI"
+                className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent hover:scale-110 transition-transform duration-300"
+              >
+                GitHub
+              </a>
+              <a
+                href="/docs"
+                className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent hover:scale-110 transition-transform duration-300"
+              >
+                Documentation
+              </a>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/issues"
+                className="text-lg font-semibold bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-400 dark:to-rose-400 bg-clip-text text-transparent hover:scale-110 transition-transform duration-300"
+              >
+                Issues
+              </a>
+            </div>
           </div>
         </div>
       </footer>
