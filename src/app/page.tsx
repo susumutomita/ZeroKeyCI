@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import SafeProposalSandbox from '@/components/SafeProposalSandbox';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -381,6 +382,13 @@ bun run scripts/validate-deployment.ts`}</code>
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* Interactive Sandbox Section */}
+      <section className="px-6 py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <SafeProposalSandbox />
         </div>
       </section>
 
