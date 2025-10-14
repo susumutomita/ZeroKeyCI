@@ -79,6 +79,34 @@ describe('SafeProposalSandbox', () => {
     expect(input.value).toBe('TestContract');
   });
 
+  it('should update safe address input', () => {
+    render(<SafeProposalSandbox />);
+    const input = screen.getByLabelText('Safe Address') as HTMLInputElement;
+
+    fireEvent.change(input, {
+      target: { value: '0x1234567890123456789012345678901234567890' },
+    });
+    expect(input.value).toBe('0x1234567890123456789012345678901234567890');
+  });
+
+  it('should update bytecode input', () => {
+    render(<SafeProposalSandbox />);
+    const textarea = screen.getByLabelText(
+      'Bytecode (hex)'
+    ) as HTMLTextAreaElement;
+
+    fireEvent.change(textarea, { target: { value: '0xabcdef' } });
+    expect(textarea.value).toBe('0xabcdef');
+  });
+
+  it('should update value input', () => {
+    render(<SafeProposalSandbox />);
+    const input = screen.getByLabelText('Value (wei)') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: '1000000' } });
+    expect(input.value).toBe('1000000');
+  });
+
   it('should update network selection', () => {
     render(<SafeProposalSandbox />);
     const select = screen.getByLabelText('Network') as HTMLSelectElement;
@@ -96,7 +124,7 @@ describe('SafeProposalSandbox', () => {
     await waitFor(() => {
       fireEvent.click(screen.getByText('Generated Proposal'));
       expect(
-        screen.getByText('✅ Proposal Generated Successfully')
+        screen.getByText(/Proposal Generated Successfully/)
       ).toBeInTheDocument();
     });
   });

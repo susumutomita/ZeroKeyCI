@@ -23,6 +23,7 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/**/*.stories.tsx',
         'src/**/__tests__/**/*',
+        'src/types/**/*.ts', // Exclude type definition files
         'mcp-server/src/**/__tests__/**/*',
         'mcp-server/src/test-search.ts',
       ],
