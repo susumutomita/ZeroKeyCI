@@ -190,6 +190,24 @@ describe('API /api/proposals', () => {
       // Restore real timers
       vi.useRealTimers();
     });
+
+    it('should handle non-Error exceptions in GET', async () => {
+      const request = new NextRequest('http://localhost:3000/api/proposals');
+
+      // Mock searchParams.get to throw a non-Error object
+      Object.defineProperty(request.nextUrl, 'searchParams', {
+        get: () => {
+          throw 'String error'; // Non-Error object
+        },
+      });
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Unknown error');
+    });
   });
 
   describe('POST /api/proposals', () => {
@@ -376,6 +394,31 @@ describe('API /api/proposals', () => {
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
       expect(data.error).toBeDefined();
+    });
+
+    it('should handle non-Error exceptions in POST', async () => {
+      const request = new NextRequest('http://localhost:3000/api/proposals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      // Mock request.json() to throw a non-Error object
+      Object.defineProperty(request, 'json', {
+        value: async () => {
+          throw { message: 'Not an Error instance' }; // Non-Error object
+        },
+        writable: true,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Unknown error');
     });
   });
 });
