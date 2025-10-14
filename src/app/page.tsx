@@ -2,6 +2,14 @@
 
 import { useState } from 'react';
 import SafeProposalSandbox from '@/components/SafeProposalSandbox';
+import {
+  Lock,
+  CheckCircle2,
+  FileText,
+  RefreshCw,
+  Target,
+  CheckCheck,
+} from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -20,8 +28,10 @@ export default function Home() {
       <section className="relative px-6 py-24 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="glass-strong rounded-3xl p-12 animate-fade-in-up backdrop-blur-2xl">
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-6 animate-fade-in">
-              ZeroKeyCI
+            <h1 className="text-6xl font-bold mb-6 animate-fade-in">
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-sm">
+                ZeroKeyCI
+              </span>
             </h1>
             <p className="text-2xl text-gray-800 dark:text-gray-100 mb-4 font-semibold">
               Deploy Smart Contracts Without Private Keys in CI/CD
@@ -33,13 +43,13 @@ export default function Home() {
             <div className="flex gap-4 justify-center flex-wrap">
               <a
                 href="#getting-started"
-                className="glass-button glow-on-hover bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-500 hover:to-purple-500"
+                className="px-8 py-4 rounded-xl font-semibold text-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-2xl hover:from-blue-500 hover:to-purple-500 transition-all duration-300 hover:scale-105 border-2 border-blue-400/50"
               >
                 Get Started
               </a>
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI"
-                className="glass-button text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white"
+                className="px-8 py-4 rounded-xl font-semibold text-lg glass-strong text-gray-900 dark:text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-gray-300 dark:border-gray-600"
               >
                 View on GitHub
               </a>
@@ -79,11 +89,11 @@ export default function Home() {
             ].map((step, idx) => (
               <div
                 key={step.num}
-                className="glass-card p-6 text-center group animate-fade-in-up"
+                className="glass-card p-6 text-center group animate-fade-in-up hover:shadow-xl transition-all"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
-                <div className="w-16 h-16 glass-strong rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl font-bold bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                  <span className="text-2xl font-bold text-white">
                     {step.num}
                   </span>
                 </div>
@@ -110,41 +120,41 @@ export default function Home() {
               {
                 title: 'No Private Keys in CI',
                 desc: 'Private keys never touch your CI environment. All signing happens through Safe multisig.',
-                icon: '🔐',
+                Icon: Lock,
               },
               {
                 title: 'Policy Validation',
                 desc: 'OPA policies ensure deployments meet your security and compliance requirements.',
-                icon: '✓',
+                Icon: CheckCircle2,
               },
               {
                 title: 'Audit Trail',
                 desc: 'Complete audit trail from PR to deployment with all approvals tracked on-chain.',
-                icon: '📋',
+                Icon: FileText,
               },
               {
                 title: 'UUPS Upgradeable',
                 desc: 'Built-in support for UUPS proxy pattern for upgradeable contracts.',
-                icon: '🔄',
+                Icon: RefreshCw,
               },
               {
                 title: 'Deterministic Addresses',
                 desc: 'Calculate deployment addresses before deployment using CREATE2.',
-                icon: '🎯',
+                Icon: Target,
               },
               {
                 title: '100% Test Coverage',
                 desc: 'Thoroughly tested with comprehensive test suite ensuring reliability.',
-                icon: '✅',
+                Icon: CheckCheck,
               },
             ].map((feature, idx) => (
               <div
                 key={feature.title}
-                className="glass-card p-8 group animate-fade-in-up"
+                className="glass-card p-8 group animate-fade-in-up hover:shadow-2xl transition-all"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform inline-block">
-                  {feature.icon}
+                <div className="w-14 h-14 glass-strong rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all">
+                  <feature.Icon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
                   {feature.title}
