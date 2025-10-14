@@ -91,7 +91,9 @@ describe('SafeProposalSandbox', () => {
 
   it('should update bytecode input', () => {
     render(<SafeProposalSandbox />);
-    const textarea = screen.getByLabelText('Bytecode (hex)') as HTMLTextAreaElement;
+    const textarea = screen.getByLabelText(
+      'Bytecode (hex)'
+    ) as HTMLTextAreaElement;
 
     fireEvent.change(textarea, { target: { value: '0xabcdef' } });
     expect(textarea.value).toBe('0xabcdef');

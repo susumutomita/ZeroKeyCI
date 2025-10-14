@@ -75,11 +75,14 @@ describe('API /api/proposals', () => {
         bytecode: '0x608060',
         network: 'sepolia',
       };
-      const postRequest = new NextRequest('http://localhost:3000/api/proposals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(postRequestBody),
-      });
+      const postRequest = new NextRequest(
+        'http://localhost:3000/api/proposals',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postRequestBody),
+        }
+      );
       Object.defineProperty(postRequest, 'json', {
         value: async () => postRequestBody,
         writable: true,
@@ -137,6 +140,49 @@ describe('API /api/proposals', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.proposals.length).toBeLessThanOrEqual(5);
+    });
+
+    it('should sort proposals by creation date (newest first)', async () => {
+      // Create multiple proposals with different timestamps
+      const createProposal = async (contractName: string) => {
+        const requestBody = {
+          contractName,
+          bytecode: '0x608060',
+          network: 'sepolia',
+        };
+        const request = new NextRequest('http://localhost:3000/api/proposals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        });
+        Object.defineProperty(request, 'json', {
+          value: async () => requestBody,
+          writable: true,
+        });
+        await POST(request);
+        // Add small delay to ensure different timestamps
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      };
+
+      await createProposal('First');
+      await createProposal('Second');
+      await createProposal('Third');
+
+      const request = new NextRequest('http://localhost:3000/api/proposals');
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.proposals.length).toBeGreaterThanOrEqual(3);
+
+      // Verify sorted by newest first
+      const timestamps = data.proposals.map((p: any) =>
+        new Date(p.createdAt).getTime()
+      );
+      for (let i = 0; i < timestamps.length - 1; i++) {
+        expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i + 1]);
+      }
     });
   });
 

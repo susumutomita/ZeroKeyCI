@@ -24,6 +24,22 @@ describe('GET /api/proposals/[id]', () => {
     global.proposals = [];
   });
 
+  it('should initialize global.proposals if undefined', async () => {
+    // Delete global.proposals to test initialization
+    delete (global as any).proposals;
+
+    const request = createRequest('GET', '/api/proposals/test-id');
+    const params = { id: 'test-id' };
+
+    const response = await GET(request, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(data.error).toBe('Proposal not found');
+    // Verify that global.proposals was initialized
+    expect(Array.isArray(global.proposals)).toBe(true);
+  });
+
   it('should return 404 when proposal not found', async () => {
     const request = createRequest('GET', '/api/proposals/test-id');
     const params = { id: 'test-id' };
