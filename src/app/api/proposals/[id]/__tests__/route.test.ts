@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { GET, PATCH, DELETE } from '../route';
 import { NextRequest } from 'next/server';
+import {
+  setStorage,
+  InMemoryStorageAdapter,
+} from '@/services/ProposalStorage';
+
+// Use in-memory storage for tests
+const testStorage = new InMemoryStorageAdapter();
 
 // Helper to create NextRequest
 const createRequest = (
@@ -20,24 +27,9 @@ const createRequest = (
 
 describe('GET /api/proposals/[id]', () => {
   beforeEach(() => {
-    // Reset global proposals store
-    global.proposals = [];
-  });
-
-  it('should initialize global.proposals if undefined', async () => {
-    // Delete global.proposals to test initialization
-    delete (global as any).proposals;
-
-    const request = createRequest('GET', '/api/proposals/test-id');
-    const params = { id: 'test-id' };
-
-    const response = await GET(request, { params });
-    const data = await response.json();
-
-    expect(response.status).toBe(404);
-    expect(data.error).toBe('Proposal not found');
-    // Verify that global.proposals was initialized
-    expect(Array.isArray(global.proposals)).toBe(true);
+    // Clear storage and set test adapter
+    testStorage.clear();
+    setStorage(testStorage);
   });
 
   it('should return 404 when proposal not found', async () => {
@@ -55,22 +47,25 @@ describe('GET /api/proposals/[id]', () => {
   });
 
   it('should return proposal when found', async () => {
-    // Setup: Add a proposal to global store
-    global.proposals = [
-      {
-        id: 'test-id',
-        transaction: {
-          to: '0x123',
-          value: '0',
-          data: '0x',
-          operation: 0,
-        },
-        status: 'pending',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedAt: '2025-01-01T00:00:00.000Z',
-        metadata: {},
+    // Setup: Add a proposal to storage
+    await testStorage.create({
+      id: 'test-id',
+      proposal: {
+        to: '0x123',
+        value: '0',
+        data: '0x',
+        operation: 0,
       },
-    ];
+      safeAddress: '0x123',
+      chainId: 11155111,
+      network: 'sepolia',
+      contractName: 'TestContract',
+      validationHash: '0xhash',
+      status: 'pending',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedAt: '2025-01-01T00:00:00.000Z',
+      metadata: {},
+    });
 
     const request = createRequest('GET', '/api/proposals/test-id');
     const params = { id: 'test-id' };
@@ -84,26 +79,28 @@ describe('GET /api/proposals/[id]', () => {
   });
 
   it('should handle errors gracefully', async () => {
-    global.proposals = [
-      {
-        id: 'test-id',
-        transaction: { to: '0x123', value: '0', data: '0x', operation: 0 },
-        status: 'pending',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedAt: '2025-01-01T00:00:00.000Z',
-        metadata: {},
-      },
-    ];
+    await testStorage.create({
+      id: 'test-id',
+      proposal: { to: '0x123', value: '0', data: '0x', operation: 0 },
+      safeAddress: '0x123',
+      chainId: 11155111,
+      network: 'sepolia',
+      contractName: 'TestContract',
+      validationHash: '0xhash',
+      status: 'pending',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedAt: '2025-01-01T00:00:00.000Z',
+      metadata: {},
+    });
 
     const request = createRequest('GET', '/api/proposals/test-id');
 
-    // Mock global.proposals to throw when accessed
-    Object.defineProperty(global, 'proposals', {
-      get: () => {
-        throw new Error('Mock error');
-      },
-      configurable: true,
-    });
+    // Mock storage to throw error
+    const mockStorage = {
+      ...testStorage,
+      getById: vi.fn().mockRejectedValue(new Error('Mock error')),
+    };
+    setStorage(mockStorage as any);
 
     const response = await GET(request, { params: { id: 'test-id' } });
     const data = await response.json();
@@ -113,11 +110,7 @@ describe('GET /api/proposals/[id]', () => {
     expect(data.error).toBeDefined();
 
     // Restore
-    Object.defineProperty(global, 'proposals', {
-      value: [],
-      writable: true,
-      configurable: true,
-    });
+    setStorage(testStorage);
   });
 
   it('should handle non-Error exceptions in GET', async () => {
@@ -149,7 +142,8 @@ describe('GET /api/proposals/[id]', () => {
 
 describe('PATCH /api/proposals/[id]', () => {
   beforeEach(() => {
-    global.proposals = [];
+    testStorage.clear();
+    setStorage(testStorage);
   });
 
   it('should return 404 when proposal not found', async () => {

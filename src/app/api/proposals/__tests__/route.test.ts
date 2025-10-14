@@ -1,6 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../route';
+import {
+  setStorage,
+  InMemoryStorageAdapter,
+} from '@/services/ProposalStorage';
+
+// Use in-memory storage for tests
+const testStorage = new InMemoryStorageAdapter();
+
+beforeEach(() => {
+  // Clear storage and set test adapter before each test
+  testStorage.clear();
+  setStorage(testStorage);
+});
 
 // Mock the SafeProposalBuilder
 vi.mock('@/services/SafeProposalBuilder', () => {
@@ -49,12 +62,6 @@ vi.mock('@/services/SafeProposalBuilder', () => {
 });
 
 describe('API /api/proposals', () => {
-  beforeEach(() => {
-    // Reset global proposals storage if it exists
-    if (typeof global !== 'undefined') {
-      (global as any).proposals = [];
-    }
-  });
 
   describe('GET /api/proposals', () => {
     it('should return empty array when no proposals exist', async () => {
