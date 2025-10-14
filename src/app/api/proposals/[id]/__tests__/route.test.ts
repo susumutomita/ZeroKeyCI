@@ -119,6 +119,32 @@ describe('GET /api/proposals/[id]', () => {
       configurable: true,
     });
   });
+
+  it('should handle non-Error exceptions in GET', async () => {
+    const request = createRequest('GET', '/api/proposals/test-id');
+
+    // Mock global.proposals to throw a non-Error object
+    Object.defineProperty(global, 'proposals', {
+      get: () => {
+        throw 'String error'; // Non-Error object
+      },
+      configurable: true,
+    });
+
+    const response = await GET(request, { params: { id: 'test-id' } });
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Unknown error');
+
+    // Restore
+    Object.defineProperty(global, 'proposals', {
+      value: [],
+      writable: true,
+      configurable: true,
+    });
+  });
 });
 
 describe('PATCH /api/proposals/[id]', () => {
@@ -234,6 +260,32 @@ describe('PATCH /api/proposals/[id]', () => {
     expect(data.success).toBe(false);
     expect(data.error).toBeDefined();
   });
+
+  it('should handle non-Error exceptions in PATCH', async () => {
+    const request = createRequest('PATCH', '/api/proposals/test-id', {});
+
+    // Mock global.proposals to throw a non-Error object
+    Object.defineProperty(global, 'proposals', {
+      get: () => {
+        throw { code: 500 }; // Non-Error object
+      },
+      configurable: true,
+    });
+
+    const response = await PATCH(request, { params: { id: 'test-id' } });
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Unknown error');
+
+    // Restore
+    Object.defineProperty(global, 'proposals', {
+      value: [],
+      writable: true,
+      configurable: true,
+    });
+  });
 });
 
 describe('DELETE /api/proposals/[id]', () => {
@@ -330,6 +382,32 @@ describe('DELETE /api/proposals/[id]', () => {
     expect(response.status).toBe(500);
     expect(data.success).toBe(false);
     expect(data.error).toBeDefined();
+
+    // Restore
+    Object.defineProperty(global, 'proposals', {
+      value: [],
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it('should handle non-Error exceptions in DELETE', async () => {
+    const request = createRequest('DELETE', '/api/proposals/test-id');
+
+    // Mock global.proposals to throw a non-Error object
+    Object.defineProperty(global, 'proposals', {
+      get: () => {
+        throw null; // Non-Error object (null)
+      },
+      configurable: true,
+    });
+
+    const response = await DELETE(request, { params: { id: 'test-id' } });
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Unknown error');
 
     // Restore
     Object.defineProperty(global, 'proposals', {
