@@ -143,6 +143,9 @@ describe('API /api/proposals', () => {
     });
 
     it('should sort proposals by creation date (newest first)', async () => {
+      // Use fake timers to control timestamps
+      vi.useFakeTimers();
+
       // Create multiple proposals with different timestamps
       const createProposal = async (contractName: string) => {
         const requestBody = {
@@ -160,8 +163,8 @@ describe('API /api/proposals', () => {
           writable: true,
         });
         await POST(request);
-        // Add small delay to ensure different timestamps
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        // Advance time by 10ms to ensure different timestamps
+        vi.advanceTimersByTime(10);
       };
 
       await createProposal('First');
@@ -183,6 +186,9 @@ describe('API /api/proposals', () => {
       for (let i = 0; i < timestamps.length - 1; i++) {
         expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i + 1]);
       }
+
+      // Restore real timers
+      vi.useRealTimers();
     });
   });
 
