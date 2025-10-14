@@ -3,18 +3,25 @@ import { describe, it, expect, vi } from 'vitest';
 import SafeProposalSandbox from '../SafeProposalSandbox';
 
 // Mock the SafeProposalBuilder
+let mockOperation = 0;
+let mockSafeTxGas: string | undefined = '5000000';
+let mockThrowNonError = false;
+
 vi.mock('@/services/SafeProposalBuilder', () => {
   return {
     SafeProposalBuilder: class MockSafeProposalBuilder {
       constructor() {}
 
       async createDeploymentProposal() {
+        if (mockThrowNonError) {
+          throw 'String error'; // Non-Error object
+        }
         return {
           to: '0x0000000000000000000000000000000000000000',
           value: '0',
           data: '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe',
-          operation: 0,
-          safeTxGas: '5000000',
+          operation: mockOperation,
+          safeTxGas: mockSafeTxGas,
         };
       }
 
@@ -195,5 +202,60 @@ describe('SafeProposalSandbox', () => {
       expect(screen.getByText('CREATE')).toBeInTheDocument();
       expect(screen.getByText('Gas Limit')).toBeInTheDocument();
     });
+  });
+
+  it('should display CALL operation type', async () => {
+    // Set operation to 1 (CALL)
+    mockOperation = 1;
+
+    render(<SafeProposalSandbox />);
+
+    const button = screen.getByText('Generate Safe Proposal');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Generated Proposal'));
+      expect(screen.getByText('CALL')).toBeInTheDocument();
+    });
+
+    // Reset
+    mockOperation = 0;
+  });
+
+  it('should display Default gas limit when safeTxGas is undefined', async () => {
+    // Set safeTxGas to undefined
+    mockSafeTxGas = undefined;
+
+    render(<SafeProposalSandbox />);
+
+    const button = screen.getByText('Generate Safe Proposal');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Generated Proposal'));
+      expect(screen.getByText('Default')).toBeInTheDocument();
+    });
+
+    // Reset
+    mockSafeTxGas = '5000000';
+  });
+
+  it('should handle non-Error exceptions', async () => {
+    // Enable throwing non-Error
+    mockThrowNonError = true;
+
+    render(<SafeProposalSandbox />);
+
+    const button = screen.getByText('Generate Safe Proposal');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Failed to generate proposal/)
+      ).toBeInTheDocument();
+    });
+
+    // Reset
+    mockThrowNonError = false;
   });
 });

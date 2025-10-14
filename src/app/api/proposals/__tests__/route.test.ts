@@ -143,6 +143,9 @@ describe('API /api/proposals', () => {
     });
 
     it('should sort proposals by creation date (newest first)', async () => {
+      // Use fake timers to control timestamps
+      vi.useFakeTimers();
+
       // Create multiple proposals with different timestamps
       const createProposal = async (contractName: string) => {
         const requestBody = {
@@ -160,8 +163,8 @@ describe('API /api/proposals', () => {
           writable: true,
         });
         await POST(request);
-        // Add small delay to ensure different timestamps
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        // Advance time by 10ms to ensure different timestamps
+        vi.advanceTimersByTime(10);
       };
 
       await createProposal('First');
@@ -183,6 +186,27 @@ describe('API /api/proposals', () => {
       for (let i = 0; i < timestamps.length - 1; i++) {
         expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i + 1]);
       }
+
+      // Restore real timers
+      vi.useRealTimers();
+    });
+
+    it('should handle non-Error exceptions in GET', async () => {
+      const request = new NextRequest('http://localhost:3000/api/proposals');
+
+      // Mock searchParams.get to throw a non-Error object
+      Object.defineProperty(request.nextUrl, 'searchParams', {
+        get: () => {
+          throw 'String error'; // Non-Error object
+        },
+      });
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Unknown error');
     });
   });
 
@@ -370,6 +394,31 @@ describe('API /api/proposals', () => {
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
       expect(data.error).toBeDefined();
+    });
+
+    it('should handle non-Error exceptions in POST', async () => {
+      const request = new NextRequest('http://localhost:3000/api/proposals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      // Mock request.json() to throw a non-Error object
+      Object.defineProperty(request, 'json', {
+        value: async () => {
+          throw { message: 'Not an Error instance' }; // Non-Error object
+        },
+        writable: true,
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Unknown error');
     });
   });
 });
