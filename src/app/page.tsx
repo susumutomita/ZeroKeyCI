@@ -2,470 +2,562 @@
 
 import { useState } from 'react';
 import SafeProposalSandbox from '@/components/SafeProposalSandbox';
+import GitHubSetupWizard from '@/components/GitHubSetupWizard';
+import {
+  Lock,
+  CheckCircle2,
+  FileText,
+  RefreshCw,
+  Target,
+  AlertTriangle,
+  Shield,
+  GitBranch,
+  Users,
+  Zap,
+  ArrowRight,
+  Code,
+  Activity,
+  Rocket,
+} from 'lucide-react';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('problem');
 
   return (
-    <main className="min-h-screen bg-gradient-mesh relative overflow-hidden">
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 via-purple-50/30 to-pink-50/50 dark:from-gray-900/90 dark:via-blue-900/20 dark:to-purple-900/20" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-float" />
-      <div
-        className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-float"
-        style={{ animationDelay: '-3s' }}
-      />
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-full blur-3xl animate-float-slow" />
 
-      {/* Hero Section */}
-      <section className="relative px-6 py-24 text-center">
-        <div className="max-w-4xl mx-auto">
-          <div className="glass-strong rounded-3xl p-12 animate-fade-in-up backdrop-blur-2xl">
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-6 animate-fade-in">
-              ZeroKeyCI
+      {/* Hero Section - The Problem */}
+      <section className="relative min-h-screen flex items-center">
+        <div className="container mx-auto px-6 lg:px-12 py-24">
+          <div className="max-w-6xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-6 py-3 mb-8 animate-fade-in-up">
+              <Shield className="w-5 h-5 text-blue-400" />
+              <span className="text-blue-300 font-semibold">
+                Secure Smart Contract Deployment
+              </span>
+            </div>
+
+            <h1 className="text-6xl md:text-8xl font-black mb-8 animate-scale-in bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400">
+              Deploy Contracts
+              <br />
+              Without Private Keys
             </h1>
-            <p className="text-2xl text-gray-800 dark:text-gray-100 mb-4 font-semibold">
-              Deploy Smart Contracts Without Private Keys in CI/CD
+
+            <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Secure CI/CD deployment using Gnosis Safe multisig. No private
+              keys in your pipeline, full audit trail, multi-signature approval.
             </p>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-12 leading-relaxed">
-              Secure, keyless deployment system using Gnosis Safe multisig
-              proposals. Never store private keys in your CI environment again.
-            </p>
-            <div className="flex gap-4 justify-center flex-wrap">
+
+            <div className="flex gap-6 justify-center flex-wrap mb-16">
               <a
-                href="#getting-started"
-                className="glass-button glow-on-hover bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-500 hover:to-purple-500"
+                href="#setup"
+                className="group px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
-                Get Started
+                <Rocket className="w-6 h-6" />
+                Get Started in 3 Minutes
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </a>
               <a
-                href="https://github.com/susumutomita/ZeroKeyCI"
-                className="glass-button text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white"
+                href="#demo"
+                className="px-10 py-5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl font-bold text-xl text-white transition-all duration-300 hover:scale-105"
               >
-                View on GitHub
+                Try Demo
               </a>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* How It Works Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-            How It Works
-          </h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              {
-                num: 1,
-                title: 'Create PR',
-                desc: 'Developer creates PR with smart contract changes and adds deploy label',
-              },
-              {
-                num: 2,
-                title: 'CI Generates Proposal',
-                desc: 'GitHub Actions creates unsigned Safe transaction proposal',
-              },
-              {
-                num: 3,
-                title: 'Review & Sign',
-                desc: 'Safe owners review and sign the deployment transaction',
-              },
-              {
-                num: 4,
-                title: 'Deploy',
-                desc: 'Contract is deployed to blockchain once threshold is met',
-              },
-            ].map((step, idx) => (
-              <div
-                key={step.num}
-                className="glass-card p-6 text-center group animate-fade-in-up"
-                style={{ animationDelay: `${idx * 0.1}s` }}
-              >
-                <div className="w-16 h-16 glass-strong rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl font-bold bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-                    {step.num}
-                  </span>
-                </div>
-                <h3 className="font-semibold mb-2 text-gray-900 dark:text-white text-lg">
-                  {step.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-            Key Features
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: 'No Private Keys in CI',
-                desc: 'Private keys never touch your CI environment. All signing happens through Safe multisig.',
-                icon: '🔐',
-              },
-              {
-                title: 'Policy Validation',
-                desc: 'OPA policies ensure deployments meet your security and compliance requirements.',
-                icon: '✓',
-              },
-              {
-                title: 'Audit Trail',
-                desc: 'Complete audit trail from PR to deployment with all approvals tracked on-chain.',
-                icon: '📋',
-              },
-              {
-                title: 'UUPS Upgradeable',
-                desc: 'Built-in support for UUPS proxy pattern for upgradeable contracts.',
-                icon: '🔄',
-              },
-              {
-                title: 'Deterministic Addresses',
-                desc: 'Calculate deployment addresses before deployment using CREATE2.',
-                icon: '🎯',
-              },
-              {
-                title: '100% Test Coverage',
-                desc: 'Thoroughly tested with comprehensive test suite ensuring reliability.',
-                icon: '✅',
-              },
-            ].map((feature, idx) => (
-              <div
-                key={feature.title}
-                className="glass-card p-8 group animate-fade-in-up"
-                style={{ animationDelay: `${idx * 0.1}s` }}
-              >
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform inline-block">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {feature.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Getting Started Section */}
-      <section id="getting-started" className="relative px-6 py-16">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-            Getting Started
-          </h2>
-
-          {/* Tab Navigation */}
-          <div className="flex justify-center mb-8">
-            <div className="glass-strong rounded-2xl p-2 inline-flex gap-2">
-              {['overview', 'setup', 'deploy', 'test'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 rounded-xl capitalize font-medium transition-all duration-200 ${
-                    activeTab === tab
-                      ? 'glass-strong text-gray-900 dark:text-white shadow-lg scale-105'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:scale-105'
-                  }`}
+            {/* Key Benefits */}
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                {
+                  icon: Shield,
+                  title: 'Multi-Signature Security',
+                  desc: 'Require multiple approvals for every deployment',
+                  color: 'blue',
+                },
+                {
+                  icon: FileText,
+                  title: 'Complete Audit Trail',
+                  desc: 'Every action tracked on-chain with full transparency',
+                  color: 'purple',
+                },
+                {
+                  icon: CheckCircle2,
+                  title: 'Policy Enforcement',
+                  desc: 'OPA policies ensure compliance and security standards',
+                  color: 'green',
+                },
+              ].map((item, idx) => (
+                <div
+                  key={item.title}
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:scale-105 animate-fade-in-up"
+                  style={{ animationDelay: `${idx * 0.1}s` }}
                 >
-                  {tab}
-                </button>
+                  <div
+                    className={`w-14 h-14 bg-gradient-to-br from-${item.color}-500/20 to-${item.color}-600/20 rounded-xl flex items-center justify-center mb-4 mx-auto`}
+                  >
+                    <item.icon className={`w-7 h-7 text-${item.color}-400`} />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm">{item.desc}</p>
+                </div>
               ))}
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Tab Content */}
-          <div className="glass-strong rounded-3xl p-8 animate-fade-in">
-            {activeTab === 'overview' && (
-              <div className="prose prose-gray dark:prose-invert max-w-none">
-                <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-                  Overview
-                </h3>
-                <p className="mb-4 text-gray-700 dark:text-gray-300">
-                  ZeroKeyCI enables secure smart contract deployment without
-                  exposing private keys in your CI/CD pipeline. Here&apos;s what
-                  you need:
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
-                  <li>A GitHub repository with your smart contracts</li>
-                  <li>A Gnosis Safe multisig wallet</li>
-                  <li>GitHub Actions enabled in your repository</li>
-                  <li>Hardhat for contract compilation</li>
-                </ul>
+      {/* The Solution Section */}
+      <section id="solution" className="relative py-32 bg-black/30">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-6 py-3 mb-8">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span className="text-green-300 font-semibold">
+                  The Solution
+                </span>
               </div>
-            )}
+              <h2 className="text-5xl md:text-7xl font-black mb-6 text-white">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
+                  ZeroKeyCI
+                </span>
+              </h2>
+              <p className="text-2xl text-gray-300 max-w-3xl mx-auto">
+                Deploy smart contracts without{' '}
+                <span className="text-white font-bold">ever</span> exposing
+                private keys in CI/CD
+              </p>
+            </div>
 
-            {activeTab === 'setup' && (
-              <div className="space-y-6">
-                <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-                  Initial Setup
-                </h3>
-
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      1. Configure GitHub Secrets
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`# In GitHub repository settings:
-Settings → Secrets → Actions → New repository secret
-
-SAFE_ADDRESS=0x742D35CC6634c0532925A3b844BC9E7595F0BEb0`}</code>
-                    </pre>
+            {/* Value Props */}
+            <div className="grid md:grid-cols-2 gap-8 mb-20">
+              {[
+                {
+                  icon: Shield,
+                  title: 'Zero Private Keys in CI',
+                  desc: 'Private keys never touch your GitHub Actions. All signing happens through Gnosis Safe multisig - the gold standard for treasury management.',
+                  gradient: 'from-blue-500 to-cyan-500',
+                },
+                {
+                  icon: Users,
+                  title: 'Multi-Signature Security',
+                  desc: 'Require 2-of-3, 3-of-5, or any threshold. One compromised account cannot deploy malicious code.',
+                  gradient: 'from-purple-500 to-pink-500',
+                },
+                {
+                  icon: FileText,
+                  title: 'Complete Audit Trail',
+                  desc: 'Every deployment tracked from PR to blockchain. Know exactly who approved what, when, and why.',
+                  gradient: 'from-green-500 to-emerald-500',
+                },
+                {
+                  icon: Zap,
+                  title: 'Seamless GitHub Integration',
+                  desc: 'Add a label to your PR. CI generates the proposal. Safe owners approve. Done. No complex setup.',
+                  gradient: 'from-orange-500 to-red-500',
+                },
+              ].map((feature, idx) => (
+                <div
+                  key={feature.title}
+                  className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                  style={{ animationDelay: `${idx * 0.1}s` }}
+                >
+                  <div
+                    className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-xl`}
+                  >
+                    <feature.icon className="w-8 h-8 text-white" />
                   </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      2. Create Deployment Configuration
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`# .zerokey/deploy.yaml
-network: sepolia
-contract: YourContract
-signers:
-  threshold: 2
-  addresses:
-    - 0xAddress1
-    - 0xAddress2
-gasLimit: 5000000
-metadata:
-  description: Deploy YourContract to Sepolia
-  requestor: CI/CD Pipeline`}</code>
-                    </pre>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      3. Set Up OPA Policies
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`# .zerokey/policy.rego
-package deployment
-
-default allow = false
-
-allow {
-  valid_network
-  valid_signers
-  valid_gas_limit
-  no_private_keys
-}`}</code>
-                    </pre>
-                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    {feature.desc}
+                  </p>
                 </div>
-              </div>
-            )}
-
-            {activeTab === 'deploy' && (
-              <div className="space-y-6">
-                <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-                  Deployment Process
-                </h3>
-
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      1. Create Your Contract
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`// contracts/YourContract.sol
-pragma solidity ^0.8.20;
-
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-
-contract YourContract is UUPSUpgradeable {
-    // Your contract logic
-}`}</code>
-                    </pre>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      2. Create PR with Deploy Label
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`git checkout -b feat/deploy-contract
-git add contracts/
-git commit -m "feat: add YourContract"
-git push origin feat/deploy-contract
-
-# Create PR on GitHub and add 'deploy' label`}</code>
-                    </pre>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      3. CI Generates Proposal
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300 mb-2">
-                      When you merge the PR, GitHub Actions will:
-                    </p>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-300">
-                      <li>Compile your contracts</li>
-                      <li>Generate Safe transaction proposal</li>
-                      <li>Upload proposal as artifact</li>
-                      <li>Comment on PR with details</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      4. Sign and Execute
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Safe owners review the proposal, sign the transaction, and
-                      execute deployment once threshold is met.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'test' && (
-              <div className="space-y-6">
-                <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-                  Local Testing
-                </h3>
-
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      Run Local Test Script
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`# Test SafeProposalBuilder locally
-bun run scripts/test-local-deployment.ts
-
-# Output:
-# ✅ Proposal created successfully
-# ✅ Validation result: Valid
-# 📍 Expected deployment address: 0x7b9244...
-# 💾 Proposal saved to: test-safe-proposal.json`}</code>
-                    </pre>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      Run Test Suite
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`# Run all tests with coverage
-bun run test:coverage
-
-# Run validation checks
-make before_commit`}</code>
-                    </pre>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">
-                      Verify Proposal
-                    </h4>
-                    <pre className="glass-medium rounded-xl p-4 overflow-x-auto">
-                      <code className="text-sm text-gray-800 dark:text-gray-200">{`# Check generated proposal
-cat test-safe-proposal.json | jq .
-
-# Validate with OPA
-bun run scripts/validate-deployment.ts`}</code>
-                    </pre>
-                  </div>
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Interactive Sandbox Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <SafeProposalSandbox />
+      {/* How It Actually Works - Visual Flow */}
+      <section className="relative py-32">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-5xl md:text-6xl font-black text-center mb-20 text-white">
+              How It{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
+                Actually
+              </span>{' '}
+              Works
+            </h2>
+
+            <div className="relative">
+              {/* Vertical connecting line */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-500 to-emerald-500 hidden md:block" />
+
+              {[
+                {
+                  num: '01',
+                  title: 'Developer Creates PR',
+                  desc: 'Write your smart contract, create a PR, add the "deploy" label. That\'s it.',
+                  icon: Code,
+                  color: 'blue',
+                  side: 'left',
+                },
+                {
+                  num: '02',
+                  title: 'GitHub Actions Compiles & Validates',
+                  desc: 'CI compiles your contract, runs tests, validates with OPA policies. All without any private keys.',
+                  icon: Activity,
+                  color: 'purple',
+                  side: 'right',
+                },
+                {
+                  num: '03',
+                  title: 'Generates Safe Transaction Proposal',
+                  desc: 'Creates unsigned transaction proposal with your deployment parameters. Posted as PR comment.',
+                  icon: FileText,
+                  color: 'pink',
+                  side: 'left',
+                },
+                {
+                  num: '04',
+                  title: 'Safe Owners Review & Sign',
+                  desc: 'Multiple signers review the exact bytecode, constructor args, and deployment config. Sign when confident.',
+                  icon: Users,
+                  color: 'green',
+                  side: 'right',
+                },
+                {
+                  num: '05',
+                  title: 'Deployed to Blockchain',
+                  desc: 'Once threshold is met, contract is deployed. Full audit trail from code to chain.',
+                  icon: Zap,
+                  color: 'orange',
+                  side: 'left',
+                },
+              ].map((step, idx) => (
+                <div
+                  key={step.num}
+                  className={`relative mb-16 md:mb-24 ${
+                    step.side === 'left' ? 'md:pr-[55%]' : 'md:pl-[55%]'
+                  }`}
+                >
+                  {/* Number badge on the line */}
+                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full items-center justify-center text-white font-black text-xl shadow-2xl z-10">
+                    {step.num}
+                  </div>
+
+                  <div
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                    style={{ animationDelay: `${idx * 0.15}s` }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={`w-14 h-14 bg-gradient-to-br from-${step.color}-500 to-${step.color}-600 rounded-xl flex items-center justify-center flex-shrink-0`}
+                      >
+                        <step.icon className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-3">
+                          {step.title}
+                        </h3>
+                        <p className="text-gray-400 leading-relaxed">
+                          {step.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Architecture Section */}
-      <section className="relative px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-            System Architecture
-          </h2>
-          <div className="glass-strong rounded-3xl p-8">
-            <pre className="text-sm text-gray-700 dark:text-gray-200 overflow-x-auto">
-              {`
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│              │     │              │     │              │
-│  Developer   │────▶│   GitHub     │────▶│   CI/CD      │
-│              │     │     PR       │     │  (Actions)   │
-└──────────────┘     └──────────────┘     └──────────────┘
-                                                  │
-                                                  ▼
-                                          ┌──────────────┐
-                                          │              │
-                                          │ SafeProposal │
-                                          │   Builder    │
-                                          └──────────────┘
-                                                  │
-                                                  ▼
-                                          ┌──────────────┐
-                                          │              │
-                                          │     OPA      │
-                                          │  Validation  │
-                                          └──────────────┘
-                                                  │
-                                                  ▼
-                                          ┌──────────────┐
-                                          │              │
-                                          │   Proposal   │
-                                          │   Artifact   │
-                                          └──────────────┘
-                                                  │
-                                                  ▼
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│              │     │              │     │              │
-│ Safe Owners  │────▶│ Gnosis Safe  │────▶│  Blockchain  │
-│              │     │              │     │              │
-└──────────────┘     └──────────────┘     └──────────────┘
-              `}
-            </pre>
+      {/* Interactive Demo Section */}
+      <section
+        id="demo"
+        className="relative py-32 bg-gradient-to-br from-cyan-900/20 to-blue-900/20"
+      >
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                Try It{' '}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
+                  Right Now
+                </span>
+              </h2>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                Generate a real Safe transaction proposal in your browser. No
+                wallet required.
+              </p>
+            </div>
+
+            <SafeProposalSandbox />
+          </div>
+        </div>
+      </section>
+
+      {/* Setup Wizard Section */}
+      <section id="setup" className="relative py-32">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-6 py-3 mb-8">
+                <Rocket className="w-5 h-5 text-green-400" />
+                <span className="text-green-300 font-semibold">
+                  3-Minute Setup
+                </span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                Deploy Your First Contract
+                <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
+                  In 3 Minutes
+                </span>
+              </h2>
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                Configure your Safe address, download the files, and start
+                deploying with enterprise-grade security.
+              </p>
+            </div>
+
+            <GitHubSetupWizard />
+          </div>
+        </div>
+      </section>
+
+      {/* Problem/Solution Tabs */}
+      <section className="relative py-32">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-5xl font-black text-center mb-12 text-white">
+              Why This Matters
+            </h2>
+
+            <div className="flex justify-center mb-12">
+              <div className="inline-flex gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-2">
+                {['problem', 'traditional', 'zerokey'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-8 py-4 rounded-xl capitalize font-semibold transition-all duration-300 ${
+                      activeTab === tab
+                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-2xl'
+                        : 'text-gray-400 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {tab === 'zerokey' ? 'With ZeroKeyCI' : tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12">
+              {activeTab === 'problem' && (
+                <div className="space-y-6">
+                  <h3 className="text-3xl font-bold text-blue-400 mb-6">
+                    Traditional Approach: Challenges
+                  </h3>
+                  <div className="space-y-4 text-gray-300">
+                    <p className="text-lg leading-relaxed">
+                      <strong className="text-white">
+                        Common patterns in Web3 CI/CD:
+                      </strong>{' '}
+                      Private keys stored as GitHub secrets, accessible to
+                      developers with repository access.
+                    </p>
+                    <ul className="space-y-3 list-none">
+                      {[
+                        'Shared secret access across team members',
+                        'Access control requires key rotation',
+                        'Limited visibility into deployment actions',
+                        'Operational challenges with credential management',
+                        'Dependencies on infrastructure security',
+                      ].map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6 mt-8">
+                      <p className="text-blue-300 font-semibold">
+                        Industry best practice: Multi-signature wallets provide
+                        enhanced security through distributed key management and
+                        approval workflows.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'traditional' && (
+                <div className="space-y-6">
+                  <h3 className="text-3xl font-bold text-yellow-400 mb-6">
+                    Traditional Solution: Manual Deployments
+                  </h3>
+                  <div className="space-y-4 text-gray-300">
+                    <p className="text-lg leading-relaxed">
+                      <strong className="text-white">
+                        The &quot;safe&quot; approach:
+                      </strong>{' '}
+                      CTO manually deploys from their laptop. No automation, no
+                      CI/CD.
+                    </p>
+                    <ul className="space-y-3 list-none">
+                      {[
+                        'CTO becomes bottleneck - deployments wait days',
+                        'Manual process = human error (wrong params, wrong network)',
+                        'No reproducibility - "works on my machine"',
+                        'Single point of failure - CTO on vacation? No deployments.',
+                        "Still doesn't solve the private key problem",
+                      ].map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-1" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-6 mt-8">
+                      <p className="text-yellow-300 font-semibold">
+                        You can have security OR automation. Not both. Until
+                        now.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'zerokey' && (
+                <div className="space-y-6">
+                  <h3 className="text-3xl font-bold text-green-400 mb-6">
+                    ZeroKeyCI: Security + Automation
+                  </h3>
+                  <div className="space-y-4 text-gray-300">
+                    <p className="text-lg leading-relaxed">
+                      <strong className="text-white">
+                        The best of both worlds:
+                      </strong>{' '}
+                      Fully automated CI/CD with enterprise-grade security
+                      through Gnosis Safe.
+                    </p>
+                    <ul className="space-y-3 list-none">
+                      {[
+                        "Zero private keys in CI - impossible to leak what doesn't exist",
+                        'Multi-sig approval - requires 2+ owners to deploy anything',
+                        'Complete audit trail - every deployment tracked on-chain',
+                        'Instant access revocation - remove signer from Safe, done',
+                        'Policy enforcement - OPA validates every deployment',
+                        'Seamless developer experience - just add a label to PR',
+                      ].map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-1" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 mt-8">
+                      <p className="text-green-300 font-semibold text-lg">
+                        Same deployment speed. 100x better security. Zero
+                        compromise.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative py-32">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-5xl md:text-6xl font-black mb-8 text-white">
+              Ready to Deploy
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
+                Without Fear?
+              </span>
+            </h2>
+            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+              Start deploying with multi-signature security and full audit
+              trails
+            </p>
+            <div className="flex gap-6 justify-center flex-wrap">
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI"
+                className="group px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              >
+                <GitBranch className="w-6 h-6" />
+                View on GitHub
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+
+            <div className="mt-16 grid md:grid-cols-3 gap-8">
+              {[
+                { num: '0', label: 'Private Keys in CI', icon: Lock },
+                { num: '100%', label: 'Open Source', icon: Code },
+                { num: '∞', label: 'Peace of Mind', icon: Shield },
+              ].map((stat, idx) => (
+                <div
+                  key={stat.label}
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 animate-fade-in-up"
+                  style={{ animationDelay: `${idx * 0.1}s` }}
+                >
+                  <stat.icon className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
+                  <div className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400 mb-2">
+                    {stat.num}
+                  </div>
+                  <div className="text-gray-400 font-semibold">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative px-6 py-12 text-center">
-        <div className="max-w-4xl mx-auto glass-strong rounded-3xl p-8">
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            Built with security and simplicity in mind
-          </p>
-          <div className="flex justify-center gap-6 flex-wrap">
-            <a
-              href="https://github.com/susumutomita/ZeroKeyCI"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="/docs"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-            >
-              Documentation
-            </a>
-            <a
-              href="https://github.com/susumutomita/ZeroKeyCI/issues"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-            >
-              Issues
-            </a>
+      <footer className="relative py-16 border-t border-white/10">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto text-center">
+            <p className="text-gray-400 mb-8">
+              Built with security and developer experience in mind
+            </p>
+            <div className="flex justify-center gap-8 flex-wrap">
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI"
+                className="text-lg font-semibold text-gray-400 hover:text-white transition-colors"
+              >
+                GitHub
+              </a>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PRODUCTION-SETUP.md"
+                className="text-lg font-semibold text-gray-400 hover:text-white transition-colors"
+              >
+                Documentation
+              </a>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/issues"
+                className="text-lg font-semibold text-gray-400 hover:text-white transition-colors"
+              >
+                Issues
+              </a>
+            </div>
           </div>
         </div>
       </footer>

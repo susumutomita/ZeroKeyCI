@@ -43,9 +43,8 @@ vi.mock('@/services/SafeProposalBuilder', () => {
 describe('SafeProposalSandbox', () => {
   it('should render the sandbox title', () => {
     render(<SafeProposalSandbox />);
-    expect(
-      screen.getByText('Try It Live - Safe Proposal Sandbox')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Try It Live')).toBeInTheDocument();
+    expect(screen.getByText('- Safe Proposal Sandbox')).toBeInTheDocument();
   });
 
   it('should render all tabs', () => {

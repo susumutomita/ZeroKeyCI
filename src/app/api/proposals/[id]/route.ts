@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getStorage } from '@/services/ProposalStorage';
 import {
   ProposalWithMetadata,
   UpdateProposalStatusRequest,
   UpdateProposalStatusResponse,
 } from '@/types/api';
-
-// This would be shared with the main route in production (use a database)
-// For demo purposes, we'll use a simple in-memory store
-const getProposalStore = (): ProposalWithMetadata[] => {
-  if (!global.proposals) {
-    global.proposals = [];
-  }
-  return global.proposals;
-};
 
 /**
  * GET /api/proposals/[id]
@@ -23,8 +15,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const proposals = getProposalStore();
-    const proposal = proposals.find((p) => p.id === params.id);
+    const storage = getStorage();
+    const proposal = await storage.getById(params.id);
 
     if (!proposal) {
       return NextResponse.json(
@@ -55,10 +47,10 @@ export async function PATCH(
 ) {
   try {
     const body: Partial<UpdateProposalStatusRequest> = await request.json();
-    const proposals = getProposalStore();
-    const proposalIndex = proposals.findIndex((p) => p.id === params.id);
+    const storage = getStorage();
+    const proposal = await storage.getById(params.id);
 
-    if (proposalIndex === -1) {
+    if (!proposal) {
       const response: UpdateProposalStatusResponse = {
         success: false,
         error: 'Proposal not found',
@@ -67,7 +59,6 @@ export async function PATCH(
     }
 
     // Update proposal
-    const proposal = proposals[proposalIndex];
     if (body.status) {
       proposal.status = body.status;
     }
@@ -88,6 +79,9 @@ export async function PATCH(
         error: body.error,
       };
     }
+
+    // Save updated proposal
+    await storage.update(params.id, proposal);
 
     const response: UpdateProposalStatusResponse = {
       success: true,
@@ -113,17 +107,15 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const proposals = getProposalStore();
-    const proposalIndex = proposals.findIndex((p) => p.id === params.id);
+    const storage = getStorage();
+    const proposal = await storage.getById(params.id);
 
-    if (proposalIndex === -1) {
+    if (!proposal) {
       return NextResponse.json(
         { success: false, error: 'Proposal not found' },
         { status: 404 }
       );
     }
-
-    const proposal = proposals[proposalIndex];
 
     // Only allow deletion of pending proposals
     if (proposal.status !== 'pending') {
@@ -136,8 +128,8 @@ export async function DELETE(
       );
     }
 
-    // Remove proposal
-    proposals.splice(proposalIndex, 1);
+    // Remove proposal from storage
+    await storage.delete(params.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -149,10 +141,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
-
-// Declare global type for proposals storage
-declare global {
-  // eslint-disable-next-line no-var
-  var proposals: ProposalWithMetadata[] | undefined;
 }

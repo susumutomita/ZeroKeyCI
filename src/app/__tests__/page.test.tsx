@@ -8,13 +8,14 @@ describe('Home page', () => {
     render(<Home />);
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveTextContent('ZeroKeyCI');
+    expect(heading).toHaveTextContent('Deploy Contracts');
+    expect(heading).toHaveTextContent('Without Private Keys');
   });
 
   it('should render the tagline', () => {
     render(<Home />);
     const tagline = screen.getByText(
-      'Deploy Smart Contracts Without Private Keys in CI/CD'
+      /Secure CI\/CD deployment using Gnosis Safe multisig/i
     );
     expect(tagline).toBeInTheDocument();
   });
@@ -31,7 +32,7 @@ describe('Home page', () => {
   it('should render call-to-action buttons', () => {
     render(<Home />);
 
-    const getStartedButton = screen.getByText('Get Started');
+    const getStartedButton = screen.getByText(/Get Started in 3 Minutes/i);
     const githubButton = screen.getByText('View on GitHub');
 
     expect(getStartedButton).toBeInTheDocument();

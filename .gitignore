@@ -146,3 +146,6 @@ cache/
 # Test artifacts
 test-safe-proposal.json
 safe-proposal.json
+
+# ZeroKeyCI storage
+.zerokey/storage/
