@@ -129,6 +129,209 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 ## Active Exec Plans
 
+### Exec Plan: Production Readiness
+Created: 2025-10-15 06:09
+Status: 🟡 In Progress
+
+#### Objective
+Prepare ZeroKeyCI for production use by implementing all critical production features:
+- Complete OPA policy validation integration
+- Production environment configuration and secrets management
+- Deployment monitoring and observability
+- Production deployment documentation and checklist
+- Security hardening and audit trail
+- Error handling and recovery procedures
+
+#### Guardrails
+- Must maintain 100% test coverage
+- No private keys in code or CI environments
+- All Safe proposals must pass OPA validation
+- Complete audit trail for all deployments
+- Production secrets must use GitHub Secrets or KMS
+- All validation checks must pass before deployment
+- Documentation must be complete and actionable
+
+#### TODO
+- [x] Analyze current production readiness state
+  - [x] Review existing test coverage (100% ✓)
+  - [x] Check validation tools (lint, typecheck, test all passing ✓)
+  - [x] Review deployment workflow (.github/workflows/deploy.yml)
+  - [x] Review spec files (.zerokey/deploy.yaml, policy.rego)
+- [ ] Implement OPA policy validation
+  - [ ] Install OPA CLI or use OPA library
+  - [ ] Create validation script to check deploy.yaml against policy.rego
+  - [ ] Add OPA validation to GitHub Actions workflow
+  - [ ] Write tests for policy validation
+- [ ] Add production environment configuration
+  - [ ] Document required GitHub Secrets (SAFE_ADDRESS, RPC_URL, etc.)
+  - [ ] Create environment-specific configuration files
+  - [ ] Add network configuration for mainnet/testnet
+  - [ ] Implement safe address validation
+- [ ] Implement deployment monitoring
+  - [ ] Add structured logging for all deployment steps
+  - [ ] Add error handling and recovery procedures
+  - [ ] Create deployment status tracking
+  - [ ] Add notification system (GitHub comments, Slack, Discord)
+- [ ] Create production documentation
+  - [ ] Production deployment guide (DEPLOYMENT.md)
+  - [ ] Security best practices guide
+  - [ ] Troubleshooting guide
+  - [ ] Production checklist
+- [ ] Run validation checks
+  - [ ] All tests pass (bun run test)
+  - [ ] Coverage at 100% (bun run test:coverage)
+  - [ ] TypeScript compiles (bun run typecheck)
+  - [ ] Linting passes (bun run lint, bun run lint_text)
+  - [ ] Build succeeds (bun run build)
+
+#### Validation Steps
+- [ ] All tests pass (bun run test)
+- [ ] Coverage at 100% (bun run test:coverage)
+- [ ] TypeScript compiles (bun run typecheck)
+- [ ] Linting passes (bun run lint, bun run lint_text)
+- [ ] Build succeeds (bun run build)
+- [ ] OPA policy validation works
+- [ ] Deployment workflow can create Safe proposals
+- [ ] Documentation is complete and accurate
+
+#### Progress Log
+
+##### Iteration 1 (06:09)
+**What was done:**
+- Analyzed current codebase state
+- Test coverage: 100% (174 tests passing) ✓
+- All validation checks passing (lint, typecheck, lint_text) ✓
+- Reviewed existing infrastructure:
+  - SafeProposalBuilder: Complete with 27 tests
+  - ProposalStorage: Complete with 26 tests
+  - GitHub Actions workflow: deploy.yml exists but has hardcoded script (Issue #9)
+  - Spec files: deploy.yaml and policy.rego exist with comprehensive rules
+  - Landing page: Modern design with GitHub setup wizard
+
+**Current state assessment:**
+1. ✅ Core functionality: SafeProposalBuilder, ProposalStorage
+2. ✅ Test coverage: 100% across all files
+3. ✅ UI: Professional landing page with interactive demo
+4. ⚠️ OPA validation: Policy file exists but not integrated into workflow
+5. ⚠️ Production config: Example addresses in deploy.yaml (need documentation)
+6. ⚠️ Monitoring: No logging or notification system
+7. ⚠️ Documentation: No production deployment guide
+
+**Test status:**
+- Tests: 174/174 passing ✓
+- Coverage: 100% (statements, branches, functions, lines) ✓
+- Validation: All checks passing ✓
+
+**Decisions made:**
+- Decision: Focus on OPA integration and production documentation
+- Reasoning: Core functionality is solid, need to complete the security validation layer
+- Alternatives: Could add new features first - rejected as security validation is critical
+
+**Blockers/Issues:**
+- None blocking. Issue #9 (deploy.yml hardcoded script) exists but documented separately
+
+#### Open Questions
+- **Q**: Should we integrate with external monitoring services (DataDog, Sentry)?
+  - **A**: TBD - start with basic logging, add integrations as optional
+
+- **Q**: What notification channels to support initially?
+  - **A**: GitHub PR comments (required), Slack/Discord (optional)
+
+- **Q**: Should we support multiple Safe addresses per environment?
+  - **A**: TBD - evaluate during configuration implementation
+
+#### References
+- Issue #9: deploy.yml hardcoded script refactoring
+- Exec Plan: Keyless CI/CD Smart Contract Deployment (partially complete)
+- OPA Documentation: https://www.openpolicyagent.org/
+
+##### Iteration 2 (06:15)
+**What was done:**
+- Created comprehensive production documentation:
+  - DEPLOYMENT.md: Complete deployment workflow guide (300+ lines)
+  - SECURITY.md: Detailed security architecture explanation (400+ lines)
+  - HOW_IT_WORKS.md: Step-by-step explanation of keyless deployment (450+ lines)
+- Updated README.md with clearer architecture diagram
+- Added visual ASCII art diagrams showing CI/CD flow
+- Implemented OPA policy validation in GitHub Actions workflow
+- Created yaml-to-json.ts helper script for YAML parsing
+- Enhanced deploy.yml workflow with:
+  - OPA CLI installation step
+  - Deployment config validation against policy.rego
+  - Proposal structure validation
+  - Detailed error messages
+
+**Documentation highlights:**
+1. SECURITY.md explains:
+   - Zero private keys in CI/CD (core principle)
+   - Comparison with traditional approaches
+   - Attack surface analysis
+   - What IS and ISN'T stored in CI
+   - Security boundaries and audit trail
+
+2. HOW_IT_WORKS.md covers:
+   - Traditional vs ZeroKeyCI comparison
+   - Step-by-step deployment process (9 steps)
+   - How Gnosis Safe enables keyless deployment
+   - Account Abstraction comparison
+   - FAQs in Japanese
+
+3. DEPLOYMENT.md provides:
+   - Prerequisites (Safe setup, GitHub Secrets)
+   - Complete deployment workflow
+   - Production checklist
+   - Troubleshooting guide
+   - Advanced topics (multi-environment, upgrades, emergency procedures)
+
+**Test status:**
+- Documentation: Created ✓
+- OPA integration: Added to workflow ✓
+- Validation: Pending local test
+
+**Decisions made:**
+- Decision: Use OPA CLI in GitHub Actions instead of JavaScript library
+- Reasoning: Simpler, no additional dependencies, native OPA experience
+- Implementation: Install OPA binary, validate YAML→JSON→OPA
+
+- Decision: Create three separate documentation files
+- Reasoning: Separation of concerns - security, usage, and detailed explanation
+- Alternatives: Single large doc - rejected as too overwhelming
+
+- Decision: Focus on Gnosis Safe as primary signing method
+- Reasoning: Battle-tested, widely used, excellent UX with Safe UI
+- Alternatives: Account Abstraction - documented as future option
+
+**Blockers/Issues:**
+- None
+
+#### Handoff Notes
+**Final Summary:**
+- Production-ready documentation complete
+- OPA validation integrated into CI/CD workflow
+- Clear explanation of keyless architecture
+- Security model thoroughly documented
+
+**Files Created:**
+- docs/DEPLOYMENT.md - Production deployment guide
+- docs/SECURITY.md - Security architecture documentation
+- docs/HOW_IT_WORKS.md - Detailed technical explanation
+- scripts/yaml-to-json.ts - YAML to JSON converter for OPA
+
+**Files Modified:**
+- README.md - Enhanced architecture section with visual diagrams
+- .github/workflows/deploy.yml - Added OPA validation steps
+- plans.md - Updated with iteration log
+
+**Outstanding Risks:**
+- OPA validation not tested locally (needs Safe address configuration)
+- Need to verify workflow runs successfully in CI
+
+**Follow-up Tasks:**
+- Test OPA validation locally
+- Create example Safe for testing
+- Add monitoring and notification integrations (Slack/Discord)
+- Consider adding Lit Protocol Vincent integration for automated signing
+
 ### Exec Plan: Liquid Glass UI Redesign
 Created: 2025-10-13 15:00
 Status: 🟡 In Progress
