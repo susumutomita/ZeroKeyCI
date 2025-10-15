@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SafeProposalBuilder } from '@/services/SafeProposalBuilder';
+import { getStorage } from '@/services/ProposalStorage';
+import { getSafeAddress } from '@/lib/env';
 import {
   CreateProposalRequest,
   CreateProposalResponse,
@@ -7,9 +9,6 @@ import {
   ProposalWithMetadata,
   ProposalStatus,
 } from '@/types/api';
-
-// In-memory storage for demo (in production, use a database)
-const proposals: ProposalWithMetadata[] = [];
 
 /**
  * GET /api/proposals
@@ -23,8 +22,14 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
+    // Get storage instance
+    const storage = getStorage();
+
+    // Get all proposals from storage
+    const allProposals = await storage.getAll();
+
     // Filter proposals
-    let filtered = [...proposals];
+    let filtered = [...allProposals];
 
     if (network) {
       filtered = filtered.filter((p) => p.network === network);
@@ -78,9 +83,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status: 400 });
     }
 
-    // Get Safe address from environment or use default for demo
-    const safeAddress =
-      process.env.SAFE_ADDRESS || '0x742D35CC6634c0532925A3b844BC9E7595F0BEb0';
+    // Get Safe address from environment (with validation)
+    const safeAddress = getSafeAddress();
 
     // Get chain ID based on network
     const chainIds: Record<string, number> = {
@@ -155,8 +159,9 @@ export async function POST(request: NextRequest) {
       metadata: body.metadata,
     };
 
-    // Store proposal (in production, save to database)
-    proposals.push(proposalWithMetadata);
+    // Store proposal using storage adapter
+    const storage = getStorage();
+    await storage.create(proposalWithMetadata);
 
     const response: CreateProposalResponse = {
       success: true,
