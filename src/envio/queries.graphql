@@ -1,0 +1,421 @@
+# Envio HyperIndex GraphQL Query Examples for ZeroKeyCI
+# Use these queries with Envio's GraphQL endpoint
+
+# ===========================================================================
+# Get all Safe proposals for a specific Safe
+# ===========================================================================
+query AllProposals($safeAddress: String!) {
+  safeTransactions(
+    where: { safe: $safeAddress }
+    orderBy: timestamp
+    orderDirection: desc
+    first: 100
+  ) {
+    id
+    to
+    value
+    data
+    operation
+    timestamp
+    executionDate
+    isExecuted
+    isSuccessful
+    prNumber
+    commitHash
+    contractName
+    deploymentType
+    confirmations {
+      owner
+      submissionDate
+      signatureType
+    }
+  }
+}
+
+# ===========================================================================
+# Get pending proposals awaiting execution
+# ===========================================================================
+query PendingProposals($safeAddress: String!) {
+  safeTransactions(
+    where: { safe: $safeAddress, isExecuted: false }
+    orderBy: submissionDate
+    orderDirection: asc
+  ) {
+    id
+    to
+    value
+    data
+    submissionDate
+    prNumber
+    commitHash
+    contractName
+    confirmations {
+      owner
+      submissionDate
+    }
+  }
+}
+
+# ===========================================================================
+# Get execution history (successful deployments)
+# ===========================================================================
+query ExecutionHistory($safeAddress: String!, $limit: Int!) {
+  executionSuccesses(
+    where: { safe: $safeAddress }
+    first: $limit
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    txHash
+    timestamp
+    payment
+    blockNumber
+    transaction {
+      to
+      value
+      data
+      contractName
+      prNumber
+      commitHash
+    }
+  }
+}
+
+# ===========================================================================
+# Get failed executions
+# ===========================================================================
+query ExecutionFailures($safeAddress: String!, $limit: Int!) {
+  executionFailures(
+    where: { safe: $safeAddress }
+    first: $limit
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    txHash
+    timestamp
+    payment
+    errorReason
+    transaction {
+      to
+      value
+      data
+      contractName
+      prNumber
+    }
+  }
+}
+
+# ===========================================================================
+# Get Safe statistics
+# ===========================================================================
+query SafeStatistics($safeAddress: String!) {
+  safeStats(id: $safeAddress) {
+    id
+    safe
+    totalProposals
+    executedProposals
+    failedProposals
+    pendingProposals
+    totalConfirmations
+    averageTimeToExecution
+    lastActivity
+    totalDeployments
+    totalUpgrades
+    lastDeployment
+  }
+}
+
+# ===========================================================================
+# Get all ZeroKeyCI deployments
+# ===========================================================================
+query ZeroKeyDeployments($safeAddress: String!) {
+  zeroKeyDeployments(
+    where: { safe: $safeAddress }
+    orderBy: proposalDate
+    orderDirection: desc
+    first: 50
+  ) {
+    id
+    safe
+    contractName
+    contractAddress
+    deploymentType
+    prNumber
+    commitHash
+    proposalDate
+    executionDate
+    status
+    timeToFirstConfirmation
+    timeToExecution
+    gasUsed
+    blockscoutUrl
+    transaction {
+      id
+      to
+      value
+      confirmations {
+        owner
+        submissionDate
+      }
+    }
+  }
+}
+
+# ===========================================================================
+# Get deployments by status
+# ===========================================================================
+query DeploymentsByStatus($safeAddress: String!, $status: String!) {
+  zeroKeyDeployments(
+    where: { safe: $safeAddress, status: $status }
+    orderBy: proposalDate
+    orderDirection: desc
+  ) {
+    id
+    contractName
+    deploymentType
+    prNumber
+    commitHash
+    proposalDate
+    executionDate
+    status
+  }
+}
+
+# ===========================================================================
+# Get deployments by contract name
+# ===========================================================================
+query DeploymentsByContract($safeAddress: String!, $contractName: String!) {
+  zeroKeyDeployments(
+    where: { safe: $safeAddress, contractName: $contractName }
+    orderBy: proposalDate
+    orderDirection: desc
+  ) {
+    id
+    contractName
+    contractAddress
+    deploymentType
+    prNumber
+    commitHash
+    proposalDate
+    executionDate
+    status
+    blockscoutUrl
+  }
+}
+
+# ===========================================================================
+# Get owner activity for a Safe
+# ===========================================================================
+query OwnerActivity($safeAddress: String!) {
+  ownerActivities(where: { safe: $safeAddress }) {
+    id
+    owner
+    safe
+    totalConfirmations
+    lastConfirmation
+    averageResponseTime
+  }
+}
+
+# ===========================================================================
+# Get specific owner's activity
+# ===========================================================================
+query SpecificOwnerActivity($owner: String!, $safeAddress: String!) {
+  ownerActivity(id: "${owner}-${safeAddress}") {
+    id
+    owner
+    safe
+    totalConfirmations
+    lastConfirmation
+    averageResponseTime
+  }
+}
+
+# ===========================================================================
+# Get proposal with full details
+# ===========================================================================
+query ProposalDetails($proposalId: ID!) {
+  safeTransaction(id: $proposalId) {
+    id
+    safe
+    to
+    value
+    data
+    operation
+    safeTxGas
+    baseGas
+    gasPrice
+    gasToken
+    refundReceiver
+    nonce
+    executionDate
+    submissionDate
+    isExecuted
+    isSuccessful
+    transactionHash
+    blockNumber
+    timestamp
+    prNumber
+    commitHash
+    contractName
+    deploymentType
+    confirmations {
+      id
+      owner
+      submissionDate
+      signature
+      signatureType
+      transactionHash
+      blockNumber
+    }
+  }
+}
+
+# ===========================================================================
+# Get deployment metrics (time to execution)
+# ===========================================================================
+query DeploymentMetrics($safeAddress: String!) {
+  zeroKeyDeployments(
+    where: { safe: $safeAddress, status: "executed" }
+    orderBy: proposalDate
+    orderDirection: desc
+    first: 10
+  ) {
+    id
+    contractName
+    prNumber
+    proposalDate
+    executionDate
+    timeToFirstConfirmation
+    timeToExecution
+    gasUsed
+    transaction {
+      confirmations {
+        owner
+        submissionDate
+      }
+    }
+  }
+}
+
+# ===========================================================================
+# Get recent activity across all Safes
+# ===========================================================================
+query RecentActivity($limit: Int!) {
+  safeTransactions(
+    orderBy: timestamp
+    orderDirection: desc
+    first: $limit
+  ) {
+    id
+    safe
+    to
+    timestamp
+    isExecuted
+    isSuccessful
+    contractName
+    prNumber
+    commitHash
+  }
+}
+
+# ===========================================================================
+# Get Safe setup information
+# ===========================================================================
+query SafeSetupInfo($safeAddress: String!) {
+  safeSetup(id: $safeAddress) {
+    id
+    safe
+    initiator
+    owners
+    threshold
+    initializer
+    fallbackHandler
+    timestamp
+    blockNumber
+  }
+}
+
+# ===========================================================================
+# Get all approvals for a specific hash
+# ===========================================================================
+query HashApprovals($approvedHash: String!) {
+  safeConfirmations(where: { signature: $approvedHash }) {
+    id
+    owner
+    submissionDate
+    signatureType
+    transactionHash
+    blockNumber
+  }
+}
+
+# ===========================================================================
+# Dashboard Query: Complete Safe Overview
+# ===========================================================================
+query SafeDashboard($safeAddress: String!) {
+  # Stats
+  safeStats(id: $safeAddress) {
+    totalProposals
+    executedProposals
+    failedProposals
+    pendingProposals
+    totalDeployments
+    totalUpgrades
+    lastActivity
+  }
+
+  # Recent proposals
+  recentProposals: safeTransactions(
+    where: { safe: $safeAddress }
+    orderBy: timestamp
+    orderDirection: desc
+    first: 5
+  ) {
+    id
+    to
+    timestamp
+    isExecuted
+    contractName
+    prNumber
+  }
+
+  # Pending proposals
+  pendingProposals: safeTransactions(
+    where: { safe: $safeAddress, isExecuted: false }
+    orderBy: submissionDate
+    orderDirection: asc
+  ) {
+    id
+    to
+    submissionDate
+    contractName
+    prNumber
+    confirmations {
+      owner
+    }
+  }
+
+  # Recent deployments
+  recentDeployments: zeroKeyDeployments(
+    where: { safe: $safeAddress }
+    orderBy: proposalDate
+    orderDirection: desc
+    first: 5
+  ) {
+    contractName
+    status
+    proposalDate
+    executionDate
+    blockscoutUrl
+  }
+
+  # Owner activity
+  ownerActivities(where: { safe: $safeAddress }) {
+    owner
+    totalConfirmations
+    lastConfirmation
+  }
+}
