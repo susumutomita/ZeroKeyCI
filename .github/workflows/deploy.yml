@@ -240,6 +240,49 @@ jobs:
           path: safe-proposal.json
           retention-days: 30
 
+      - name: Verify contract on Blockscout
+        if: success()
+        env:
+          CONTRACT_ADDRESS: ${{ steps.create-proposal.outputs.contract_address }}
+          CONTRACT_NAME: ${{ steps.deploy-config.outputs.contract }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+        run: |
+          echo "🔍 Verifying contract on Blockscout..."
+
+          # Run Blockscout verification script
+          bun run scripts/blockscout-verify.ts $CONTRACT_ADDRESS
+
+          echo "✅ Blockscout verification complete"
+
+      - name: Setup Blockscout MCP Integration
+        if: success()
+        run: |
+          echo "🤖 Setting up Blockscout MCP integration..."
+
+          # MCP server configuration
+          cat > .zerokey/mcp-config.json << 'EOF'
+          {
+            "mcpServers": {
+              "blockscout": {
+                "command": "docker",
+                "args": [
+                  "run",
+                  "--rm",
+                  "-i",
+                  "ghcr.io/blockscout/mcp-server:latest"
+                ],
+                "env": {
+                  "BLOCKSCOUT_API_URL": "https://eth-sepolia.blockscout.com/api",
+                  "CONTRACT_ADDRESS": "${{ steps.create-proposal.outputs.contract_address }}"
+                }
+              }
+            }
+          }
+          EOF
+
+          echo "✅ MCP integration configured"
+          cat .zerokey/mcp-config.json
+
       - name: Comment on PR with proposal details
         uses: actions/github-script@v7
         with:

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://blockscout.com/schema/explorer-config.json",
+  "version": "1.0",
+  "chain": {
+    "name": "ZeroKeyCI Testnet",
+    "chainId": 11155111,
+    "network": "sepolia",
+    "rpcUrl": "${SEPOLIA_RPC_URL}",
+    "wsUrl": "${SEPOLIA_WS_URL}",
+    "explorerUrl": "https://eth-sepolia.blockscout.com",
+    "gasTokenSymbol": "ETH",
+    "gasTokenName": "Ether"
+  },
+  "contracts": {
+    "ExampleUUPS": {
+      "description": "UUPS Upgradeable Example Contract for ZeroKeyCI",
+      "category": "DeFi",
+      "tags": ["upgradeable", "UUPS", "safe-deployment"],
+      "metadata": {
+        "framework": "Hardhat 3",
+        "deploymentMethod": "ZeroKeyCI - Keyless Deployment",
+        "upgradeability": "UUPS (Universal Upgradeable Proxy Standard)"
+      }
+    }
+  },
+  "autoscout": {
+    "enabled": true,
+    "customBranding": {
+      "logoUrl": "https://raw.githubusercontent.com/susumutomita/ZeroKeyCI/main/public/logo.png",
+      "primaryColor": "#6366f1",
+      "accentColor": "#8b5cf6"
+    },
+    "features": {
+      "contractVerification": true,
+      "apiAccess": true,
+      "customDomain": false
+    }
+  },
+  "monitoring": {
+    "deploymentEvents": {
+      "enabled": true,
+      "contractCreation": true,
+      "contractUpgrade": true,
+      "safeProposal": true
+    },
+    "notifications": {
+      "github": {
+        "enabled": true,
+        "events": ["deployment", "upgrade", "verification"]
+      }
+    }
+  },
+  "verification": {
+    "autoVerify": true,
+    "compilerVersion": "0.8.20",
+    "optimizationEnabled": true,
+    "optimizationRuns": 200,
+    "metadata": {
+      "sourceRepository": "https://github.com/susumutomita/ZeroKeyCI",
+      "commitHash": "${GITHUB_SHA}",
+      "prNumber": "${GITHUB_PR_NUMBER}"
+    }
+  },
+  "mcp": {
+    "enabled": true,
+    "serverUrl": "https://mcp.blockscout.com",
+    "features": [
+      "blockchain_analysis",
+      "address_lookup",
+      "transaction_tracking",
+      "contract_metadata"
+    ],
+    "tools": {
+      "get_address_info": true,
+      "get_transaction_details": true,
+      "get_contract_metadata": true,
+      "track_safe_proposals": true
+    }
+  },
+  "integration": {
+    "cicd": {
+      "platform": "GitHub Actions",
+      "deployWorkflow": ".github/workflows/deploy.yml",
+      "verificationWorkflow": ".github/workflows/verify.yml"
+    },
+    "safe": {
+      "enabled": true,
+      "safeAddress": "${SAFE_ADDRESS}",
+      "proposalTracking": true,
+      "executionMonitoring": true
+    }
+  }
+}

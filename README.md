@@ -14,8 +14,35 @@
 ---
 
 ## 🚀 Overview
-ZeroKey CI is a **key-less continuous deployment framework** for EVM-based smart contracts.
+ZeroKey CI is a **reusable GitHub Action** for keyless smart contract deployment.
 It removes the biggest security risk in Web3 DevOps: storing private keys in CI/CD pipelines.
+
+### ✨ 3-Minute Integration
+
+Add to your repository's workflow:
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy with ZeroKeyCI
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  deploy:
+    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+    with:
+      safe-address: ${{ vars.SAFE_ADDRESS }}
+      network: sepolia
+      contract-name: MyContract
+    secrets:
+      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
+```
+
+Done! No private keys in CI. Ever.
+
+**→ [Integration Guide (Complete Setup)](docs/INTEGRATION_GUIDE.md)**
 
 ### 🔑 The Key Innovation
 
@@ -34,10 +61,12 @@ ZeroKey CI makes smart-contract deployment:
 - ⚙️ **Developer-friendly** – runs free on any laptop or public CI
 - 🌐 **Composable** – integrates with Hardhat 3, Blockscout, Envio, Lit Protocol
 - 🧾 **Spec-first** – editor integration generates/validates deploy & policy specs
+- 📦 **Reusable** – import as GitHub Action into any repository
 
 **→ [How It Works (Detailed Explanation)](docs/HOW_IT_WORKS.md)**
 **→ [Security Architecture](docs/SECURITY.md)**
 **→ [Production Deployment Guide](docs/DEPLOYMENT.md)**
+**→ [Integration Guide (Use in Your Project)](docs/INTEGRATION_GUIDE.md)**
 
 ---
 
@@ -182,10 +211,70 @@ Each integration is open-source and reproducible without paid cloud services.
 
 ---
 
+---
+
+## 📦 Using ZeroKeyCI in Your Project
+
+ZeroKeyCI is designed as a **reusable GitHub Action** that you can integrate into any smart contract repository.
+
+### Quick Integration Steps
+
+1. **Add workflow to your repository**:
+
+```yaml
+# your-project/.github/workflows/deploy.yml
+name: Deploy Smart Contracts
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+    with:
+      safe-address: ${{ vars.SAFE_ADDRESS }}
+      network: sepolia
+      contract-name: MyContract
+      verify-blockscout: true
+    secrets:
+      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
+```
+
+2. **Configure GitHub secrets**:
+
+```bash
+gh secret set SEPOLIA_RPC_URL --body "https://sepolia.infura.io/v3/YOUR_KEY"
+gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
+```
+
+3. **Deploy**:
+   - Merge a PR → ZeroKeyCI creates Safe proposal
+   - Safe owners sign → Execute deployment
+   - No private keys in CI!
+
+### Integration Options
+
+- **Method 1**: Reusable workflow (recommended)
+- **Method 2**: Composite action (custom control)
+- **Method 3**: Fork and customize
+
+**→ [Complete Integration Guide](docs/INTEGRATION_GUIDE.md)**
+
+### Example Repositories
+
+- **ERC20 Token**: [zerokeyci-erc20-example](https://github.com/susumutomita/zerokeyci-erc20-example)
+- **UUPS Upgradeable**: [zerokeyci-uups-example](https://github.com/susumutomita/zerokeyci-uups-example)
+- **Multi-Network**: [zerokeyci-multichain-example](https://github.com/susumutomita/zerokeyci-multichain-example)
+
+---
+
 ## 📚 Next Steps
 - Add full **Vincent UI** for per-function delegation
 - Extend **OPA policies** for multi-network governance
-- Package reusable **GitHub Action template** for public use
+- Publish to **GitHub Marketplace** as official action
 - Optional **ZK-proof plugin** for deploy-policy attestations
 
 ---
