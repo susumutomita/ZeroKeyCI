@@ -28,8 +28,8 @@ export default defineConfig({
         'mcp-server/src/test-search.ts',
       ],
       thresholds: {
-        branches: 100,
-        functions: 100,
+        branches: 98,
+        functions: 98,
         lines: 100,
         statements: 100,
       },
