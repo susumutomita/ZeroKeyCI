@@ -1,0 +1,221 @@
+# Envio HyperIndex Configuration for ZeroKeyCI
+# Indexes Gnosis Safe proposal, approval, and execution events
+
+name: zerokeyci-safe-indexer
+description: Indexes Gnosis Safe multisig proposals, approvals, and executions for ZeroKeyCI deployment tracking
+version: 1.0.0
+
+# Networks to index
+networks:
+  - id: 11155111  # Sepolia testnet
+    name: sepolia
+    start_block: 5000000  # Start block for indexing
+    rpc_config:
+      url: ${SEPOLIA_RPC_URL}
+    hypersync:
+      enabled: true
+      url: https://sepolia.hypersync.xyz
+
+# Safe contracts to monitor
+contracts:
+  - name: GnosisSafe
+    abi_file_path: ./abis/GnosisSafe.json
+    address:
+      - ${SAFE_ADDRESS}  # Your Safe address from secrets
+    handler: src/EventHandlers.ts
+    events:
+      # Safe transaction proposal events
+      - event: "SafeMultiSigTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes,bytes)"
+        required_fields:
+          - name: to
+            description: Target address
+          - name: value
+            description: ETH value
+          - name: data
+            description: Transaction data
+          - name: operation
+            description: Operation type (0=Call, 1=DelegateCall)
+
+      # Safe transaction execution
+      - event: "ExecutionSuccess(bytes32,uint256)"
+        required_fields:
+          - name: txHash
+            description: Transaction hash
+          - name: payment
+            description: Gas payment
+
+      # Safe transaction failure
+      - event: "ExecutionFailure(bytes32,uint256)"
+        required_fields:
+          - name: txHash
+            description: Transaction hash
+          - name: payment
+            description: Gas payment
+
+      # Approval/signature collection
+      - event: "ApproveHash(bytes32,address)"
+        required_fields:
+          - name: approvedHash
+            description: Hash that was approved
+          - name: owner
+            description: Owner who approved
+
+      # Safe setup
+      - event: "SafeSetup(address,address[],uint256,address,address)"
+        required_fields:
+          - name: initiator
+            description: Setup initiator
+          - name: owners
+            description: Initial owners
+          - name: threshold
+            description: Signature threshold
+
+  # Monitor contract deployments through Safe
+  - name: SafeProxyFactory
+    abi_file_path: ./abis/SafeProxyFactory.json
+    handler: src/EventHandlers.ts
+    events:
+      - event: "ProxyCreation(address,address)"
+        required_fields:
+          - name: proxy
+            description: Created proxy address
+          - name: singleton
+            description: Singleton implementation
+
+# Field selections for optimization
+field_selection:
+  block:
+    - number
+    - timestamp
+    - hash
+  transaction:
+    - hash
+    - from
+    - to
+    - input
+    - value
+    - gas_price
+
+# Rollback configuration
+rollback_on_reorg: true
+block_confirmations_required: 2
+
+# GraphQL API configuration
+graphql:
+  enabled: true
+  port: 8080
+  playground: true
+  introspection: true
+
+# Tracking metadata
+metadata:
+  project: ZeroKeyCI
+  purpose: Safe multisig deployment tracking
+  github: https://github.com/susumutomita/ZeroKeyCI
+  hackathon: ETHOnline 2025
+  sponsor: Envio
+  prize_category: HyperIndex Integration
+
+# Custom indexing options
+options:
+  # Real-time indexing with HyperSync
+  hypersync_enabled: true
+
+  # Store raw transaction data
+  store_raw_data: true
+
+  # Enable event sequencing
+  maintain_event_order: true
+
+  # Monitoring
+  monitoring:
+    enabled: true
+    metrics:
+      - proposal_count
+      - approval_count
+      - execution_count
+      - failure_count
+      - average_time_to_execution
+
+# Query examples for reference
+example_queries:
+  # Get all proposals for a Safe
+  all_proposals: |
+    query AllProposals($safeAddress: String!) {
+      safeTransactions(
+        where: { safe: $safeAddress }
+        orderBy: timestamp
+        orderDirection: desc
+      ) {
+        id
+        to
+        value
+        data
+        operation
+        timestamp
+        executionDate
+        confirmations {
+          owner
+          submissionDate
+        }
+      }
+    }
+
+  # Get pending proposals
+  pending_proposals: |
+    query PendingProposals($safeAddress: String!) {
+      safeTransactions(
+        where: {
+          safe: $safeAddress
+          executionDate: null
+        }
+      ) {
+        id
+        to
+        value
+        data
+        confirmationsRequired
+        confirmations {
+          owner
+        }
+      }
+    }
+
+  # Get execution history
+  execution_history: |
+    query ExecutionHistory($safeAddress: String!, $limit: Int!) {
+      executionSuccesses(
+        where: { safe: $safeAddress }
+        first: $limit
+        orderBy: timestamp
+        orderDirection: desc
+      ) {
+        txHash
+        timestamp
+        payment
+        transaction {
+          to
+          value
+          data
+        }
+      }
+    }
+
+  # ZeroKeyCI specific: Track contract deployments
+  contract_deployments: |
+    query ContractDeployments($safeAddress: String!) {
+      safeTransactions(
+        where: {
+          safe: $safeAddress
+          to: "0x0000000000000000000000000000000000000000"
+        }
+      ) {
+        id
+        data
+        executionDate
+        confirmations {
+          owner
+          submissionDate
+        }
+      }
+    }

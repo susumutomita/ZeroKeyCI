@@ -14,36 +14,106 @@
 ---
 
 ## 🚀 Overview
-ZeroKey CI is a **key-less continuous deployment framework** for EVM-based smart contracts.
+ZeroKey CI is a **reusable GitHub Action** for keyless smart contract deployment.
 It removes the biggest security risk in Web3 DevOps: storing private keys in CI/CD pipelines.
 
-Instead of signing transactions inside GitHub Actions, the pipeline only **creates Safe proposals**.
-Execution happens later — through **Gnosis Safe**, **delegated signing via Lit Protocol Vincent**, or a **local KMS container** — ensuring that no private key ever lives in CI.
+### ✨ 3-Minute Integration
+
+Add to your repository's workflow:
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy with ZeroKeyCI
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  deploy:
+    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+    with:
+      safe-address: ${{ vars.SAFE_ADDRESS }}
+      network: sepolia
+      contract-name: MyContract
+    secrets:
+      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
+```
+
+Done! No private keys in CI. Ever.
+
+**→ [Integration Guide (Complete Setup)](docs/INTEGRATION_GUIDE.md)**
+
+### 🔑 The Key Innovation
+
+**CI/CD does NOT deploy. It only creates proposals.**
+
+Instead of signing transactions inside GitHub Actions, the pipeline only **creates Safe transaction proposals** (unsigned). Execution happens later — through **Gnosis Safe multisig owners**, **delegated signing via Lit Protocol Vincent**, or a **local KMS container** — ensuring that no private key ever lives in CI.
+
+```
+Traditional:  CI → Private Key → Sign → Broadcast → Deploy ❌
+ZeroKeyCI:    CI → Create Proposal → Owners Sign → Execute ✅
+```
 
 ZeroKey CI makes smart-contract deployment:
-- 🔐 **Secure** – non-exportable keys, policy-guarded signing
+- 🔐 **Secure** – NO private keys in CI, multisig approval required
 - 🧩 **Auditable** – every PR is linked to its on-chain transaction
 - ⚙️ **Developer-friendly** – runs free on any laptop or public CI
 - 🌐 **Composable** – integrates with Hardhat 3, Blockscout, Envio, Lit Protocol
 - 🧾 **Spec-first** – editor integration generates/validates deploy & policy specs
+- 📦 **Reusable** – import as GitHub Action into any repository
+
+**→ [How It Works (Detailed Explanation)](docs/HOW_IT_WORKS.md)**
+**→ [Security Architecture](docs/SECURITY.md)**
+**→ [Production Deployment Guide](docs/DEPLOYMENT.md)**
+**→ [Integration Guide (Use in Your Project)](docs/INTEGRATION_GUIDE.md)**
 
 ---
 
 ## 🧠 Architecture
 
-Developer → Pull Request
-↓
-Hardhat 3 (compile / test)
-↓
-CI (GitHub Actions)
-↓
-Policy Gateway + SoftKMS / Vault / Cloud KMS
-↓
-Safe Transaction Proposal
-↓
-Owner or Lit delegate approves
-↓
-Execution → Blockscout & Envio Dashboard
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Developer                            │
+│                     Creates Pull Request                     │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    GitHub Actions CI/CD                      │
+│                                                              │
+│  1. Compile contracts (Hardhat 3)                           │
+│  2. Run tests (100% coverage)                               │
+│  3. Validate against OPA policies                           │
+│  4. Create Safe transaction proposal (UNSIGNED)             │
+│  5. Upload proposal as artifact                             │
+│                                                              │
+│  ❌ NO PRIVATE KEYS                                         │
+│  ❌ NO SIGNING                                              │
+│  ❌ NO TRANSACTION EXECUTION                                │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+              [Safe Proposal Artifact]
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Gnosis Safe Multisig                      │
+│                                                              │
+│  👤 Owner 1 → Reviews & Signs (Hardware Wallet)            │
+│  👤 Owner 2 → Reviews & Signs (Hardware Wallet)            │
+│  👤 Owner 3 → Reviews & Signs (MetaMask/Mobile)            │
+│                                                              │
+│  When threshold reached (e.g., 2-of-3):                     │
+│    → Transaction validates                                   │
+│    → Contract deploys                                        │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Deployed Contract                         │
+│                                                              │
+│  📊 Blockscout Explorer: View transaction                   │
+│  📈 Envio Dashboard: Real-time monitoring                   │
+│  ✅ Full audit trail: PR → CI → Safe → On-chain            │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ### Core Components
 - **Hardhat 3** – build, simulation and testing suite
@@ -141,10 +211,70 @@ Each integration is open-source and reproducible without paid cloud services.
 
 ---
 
+---
+
+## 📦 Using ZeroKeyCI in Your Project
+
+ZeroKeyCI is designed as a **reusable GitHub Action** that you can integrate into any smart contract repository.
+
+### Quick Integration Steps
+
+1. **Add workflow to your repository**:
+
+```yaml
+# your-project/.github/workflows/deploy.yml
+name: Deploy Smart Contracts
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+    with:
+      safe-address: ${{ vars.SAFE_ADDRESS }}
+      network: sepolia
+      contract-name: MyContract
+      verify-blockscout: true
+    secrets:
+      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
+```
+
+2. **Configure GitHub secrets**:
+
+```bash
+gh secret set SEPOLIA_RPC_URL --body "https://sepolia.infura.io/v3/YOUR_KEY"
+gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
+```
+
+3. **Deploy**:
+   - Merge a PR → ZeroKeyCI creates Safe proposal
+   - Safe owners sign → Execute deployment
+   - No private keys in CI!
+
+### Integration Options
+
+- **Method 1**: Reusable workflow (recommended)
+- **Method 2**: Composite action (custom control)
+- **Method 3**: Fork and customize
+
+**→ [Complete Integration Guide](docs/INTEGRATION_GUIDE.md)**
+
+### Example Repositories
+
+- **ERC20 Token**: [zerokeyci-erc20-example](https://github.com/susumutomita/zerokeyci-erc20-example)
+- **UUPS Upgradeable**: [zerokeyci-uups-example](https://github.com/susumutomita/zerokeyci-uups-example)
+- **Multi-Network**: [zerokeyci-multichain-example](https://github.com/susumutomita/zerokeyci-multichain-example)
+
+---
+
 ## 📚 Next Steps
 - Add full **Vincent UI** for per-function delegation
 - Extend **OPA policies** for multi-network governance
-- Package reusable **GitHub Action template** for public use
+- Publish to **GitHub Marketplace** as official action
 - Optional **ZK-proof plugin** for deploy-policy attestations
 
 ---

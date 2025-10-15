@@ -157,12 +157,53 @@ jobs:
           PROPOSAL_HASH=$(cat safe-proposal.json | jq -r '.validationHash')
           echo "proposal_hash=$PROPOSAL_HASH" >> $GITHUB_OUTPUT
 
-      - name: Validate proposal with OPA
+      - name: Install OPA
         run: |
-          echo "🔍 Validating proposal against OPA policies..."
+          # Install Open Policy Agent CLI
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
 
-          # TODO: Implement OPA validation
-          # For now, just check the proposal exists and is valid JSON
+      - name: Validate deployment config with OPA
+        run: |
+          echo "🔍 Validating deployment configuration against OPA policies..."
+
+          # Check if policy file exists
+          if [ ! -f ".zerokey/policy.rego" ]; then
+            echo "::error::OPA policy not found at .zerokey/policy.rego"
+            exit 1
+          fi
+
+          # Check if deploy config exists
+          if [ ! -f ".zerokey/deploy.yaml" ]; then
+            echo "::error::Deployment config not found at .zerokey/deploy.yaml"
+            exit 1
+          fi
+
+          # Parse YAML to JSON for OPA
+          bun run scripts/yaml-to-json.ts < .zerokey/deploy.yaml > deploy-input.json
+
+          # Validate with OPA
+          opa eval --data .zerokey/policy.rego --input deploy-input.json "data.deployment.allow" --format pretty
+
+          # Check if validation passed
+          ALLOW=$(opa eval --data .zerokey/policy.rego --input deploy-input.json "data.deployment.allow" --format raw)
+          if [ "$ALLOW" != "true" ]; then
+            echo "::error::OPA policy validation failed"
+
+            # Show deny reasons
+            DENY_REASONS=$(opa eval --data .zerokey/policy.rego --input deploy-input.json "data.deployment.deny" --format pretty)
+            echo "::error::Deny reasons: $DENY_REASONS"
+            exit 1
+          fi
+
+          echo "✅ OPA policy validation passed"
+
+      - name: Validate proposal structure
+        run: |
+          echo "🔍 Validating Safe proposal structure..."
+
+          # Check the proposal exists and is valid JSON
           if [ ! -f "safe-proposal.json" ]; then
             echo "::error::Safe proposal not found"
             exit 1
@@ -174,7 +215,23 @@ jobs:
             exit 1
           }
 
-          echo "✅ Proposal validation passed"
+          # Validate required fields
+          jq -e '.safe' safe-proposal.json > /dev/null || {
+            echo "::error::Missing 'safe' field in proposal"
+            exit 1
+          }
+
+          jq -e '.to' safe-proposal.json > /dev/null || {
+            echo "::error::Missing 'to' field in proposal"
+            exit 1
+          }
+
+          jq -e '.data' safe-proposal.json > /dev/null || {
+            echo "::error::Missing 'data' field in proposal"
+            exit 1
+          }
+
+          echo "✅ Proposal structure validation passed"
 
       - name: Upload Safe proposal artifact
         uses: actions/upload-artifact@v4
@@ -182,6 +239,49 @@ jobs:
           name: safe-proposal-${{ github.event.pull_request.number }}-${{ github.sha }}
           path: safe-proposal.json
           retention-days: 30
+
+      - name: Verify contract on Blockscout
+        if: success()
+        env:
+          CONTRACT_ADDRESS: ${{ steps.create-proposal.outputs.contract_address }}
+          CONTRACT_NAME: ${{ steps.deploy-config.outputs.contract }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+        run: |
+          echo "🔍 Verifying contract on Blockscout..."
+
+          # Run Blockscout verification script
+          bun run scripts/blockscout-verify.ts $CONTRACT_ADDRESS
+
+          echo "✅ Blockscout verification complete"
+
+      - name: Setup Blockscout MCP Integration
+        if: success()
+        run: |
+          echo "🤖 Setting up Blockscout MCP integration..."
+
+          # MCP server configuration
+          cat > .zerokey/mcp-config.json << 'EOF'
+          {
+            "mcpServers": {
+              "blockscout": {
+                "command": "docker",
+                "args": [
+                  "run",
+                  "--rm",
+                  "-i",
+                  "ghcr.io/blockscout/mcp-server:latest"
+                ],
+                "env": {
+                  "BLOCKSCOUT_API_URL": "https://eth-sepolia.blockscout.com/api",
+                  "CONTRACT_ADDRESS": "${{ steps.create-proposal.outputs.contract_address }}"
+                }
+              }
+            }
+          }
+          EOF
+
+          echo "✅ MCP integration configured"
+          cat .zerokey/mcp-config.json
 
       - name: Comment on PR with proposal details
         uses: actions/github-script@v7

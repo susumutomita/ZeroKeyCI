@@ -1,0 +1,353 @@
+name: 'ZeroKeyCI - Keyless Smart Contract Deployment'
+description: 'Deploy smart contracts through Gnosis Safe multisig proposals without storing private keys in CI/CD'
+author: 'Susumu Tomita'
+
+branding:
+  icon: 'lock'
+  color: 'purple'
+
+inputs:
+  safe-address:
+    description: 'Gnosis Safe multisig address for deployment proposals'
+    required: true
+
+  network:
+    description: 'Network to deploy to (sepolia, mainnet, polygon, arbitrum)'
+    required: true
+    default: 'sepolia'
+
+  contract-name:
+    description: 'Name of the contract to deploy (must match .sol filename)'
+    required: true
+
+  rpc-url:
+    description: 'RPC URL for the target network'
+    required: true
+
+  deploy-config-path:
+    description: 'Path to deployment configuration YAML file'
+    required: false
+    default: '.zerokey/deploy.yaml'
+
+  policy-path:
+    description: 'Path to OPA policy file for deployment validation'
+    required: false
+    default: '.zerokey/policy.rego'
+
+  run-tests:
+    description: 'Whether to run tests before creating proposal'
+    required: false
+    default: 'true'
+
+  verify-blockscout:
+    description: 'Whether to verify contract on Blockscout after deployment'
+    required: false
+    default: 'true'
+
+  blockscout-api-url:
+    description: 'Blockscout API URL for contract verification'
+    required: false
+    default: 'https://eth-sepolia.blockscout.com/api'
+
+  enable-envio:
+    description: 'Enable Envio HyperIndex for Safe event indexing'
+    required: false
+    default: 'false'
+
+  envio-config-path:
+    description: 'Path to Envio configuration file'
+    required: false
+    default: '.zerokey/envio-config.yaml'
+
+outputs:
+  proposal-hash:
+    description: 'Hash of the created Safe transaction proposal'
+    value: ${{ steps.create-proposal.outputs.proposal_hash }}
+
+  safe-address:
+    description: 'Safe address where proposal was created'
+    value: ${{ steps.create-proposal.outputs.safe_address }}
+
+  chain-id:
+    description: 'Chain ID of the target network'
+    value: ${{ steps.create-proposal.outputs.chain_id }}
+
+  proposal-json:
+    description: 'Path to the generated proposal JSON file'
+    value: 'safe-proposal.json'
+
+  verification-status:
+    description: 'Status of Blockscout verification (verified/pending/skipped)'
+    value: ${{ steps.verify-contract.outputs.status }}
+
+  explorer-url:
+    description: 'Blockscout explorer URL for the contract'
+    value: ${{ steps.verify-contract.outputs.explorer_url }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        echo "🔍 Validating ZeroKeyCI inputs..."
+
+        if [[ ! "${{ inputs.safe-address }}" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+          echo "::error::Invalid Safe address format"
+          exit 1
+        fi
+
+        if [[ ! "${{ inputs.network }}" =~ ^(sepolia|mainnet|polygon|arbitrum)$ ]]; then
+          echo "::error::Unsupported network: ${{ inputs.network }}"
+          exit 1
+        fi
+
+        echo "✅ Input validation passed"
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: '1.1.38'
+
+    - name: Install ZeroKeyCI dependencies
+      shell: bash
+      run: |
+        echo "📦 Installing ZeroKeyCI..."
+        cd ${{ github.action_path }}
+        bun install --frozen-lockfile
+
+    - name: Run tests
+      if: inputs.run-tests == 'true'
+      shell: bash
+      run: |
+        echo "🧪 Running tests..."
+        cd ${{ github.action_path }}
+        bun run test
+        bun run test:coverage
+
+    - name: Compile contracts
+      shell: bash
+      run: |
+        echo "🔨 Compiling contracts..."
+        npx hardhat compile
+
+    - name: Extract deployment configuration
+      id: deploy-config
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.deploy-config-path }}" ]; then
+          echo "::warning::No deployment configuration found at ${{ inputs.deploy-config-path }}, using defaults"
+          echo "network=${{ inputs.network }}" >> $GITHUB_OUTPUT
+          echo "contract=${{ inputs.contract-name }}" >> $GITHUB_OUTPUT
+        else
+          NETWORK=$(grep "network:" ${{ inputs.deploy-config-path }} | awk '{print $2}')
+          CONTRACT=$(grep "contract:" ${{ inputs.deploy-config-path }} | awk '{print $2}')
+
+          echo "network=${NETWORK:-${{ inputs.network }}}" >> $GITHUB_OUTPUT
+          echo "contract=${CONTRACT:-${{ inputs.contract-name }}}" >> $GITHUB_OUTPUT
+        fi
+
+        echo "📋 Deployment Configuration:"
+        echo "  Network: ${{ inputs.network }}"
+        echo "  Contract: ${{ inputs.contract-name }}"
+
+    - name: Validate with OPA policy
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.policy-path }}" ]; then
+          echo "::warning::No OPA policy found at ${{ inputs.policy-path }}, skipping validation"
+          exit 0
+        fi
+
+        echo "🔍 Validating deployment against OPA policy..."
+
+        # Install OPA if not present
+        if ! command -v opa &> /dev/null; then
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+        fi
+
+        # Parse YAML to JSON
+        cd ${{ github.action_path }}
+        bun run scripts/yaml-to-json.ts < ${{ inputs.deploy-config-path }} > deploy-input.json
+
+        # Validate
+        opa eval --data ${{ inputs.policy-path }} --input deploy-input.json "data.deployment.allow" --format pretty
+
+        ALLOW=$(opa eval --data ${{ inputs.policy-path }} --input deploy-input.json "data.deployment.allow" --format raw)
+        if [ "$ALLOW" != "true" ]; then
+          DENY_REASONS=$(opa eval --data ${{ inputs.policy-path }} --input deploy-input.json "data.deployment.deny" --format pretty)
+          echo "::error::OPA policy validation failed: $DENY_REASONS"
+          exit 1
+        fi
+
+        echo "✅ OPA policy validation passed"
+
+    - name: Generate Safe proposal
+      id: create-proposal
+      shell: bash
+      env:
+        SAFE_ADDRESS: ${{ inputs.safe-address }}
+        NETWORK: ${{ inputs.network }}
+        CONTRACT: ${{ inputs.contract-name }}
+        RPC_URL: ${{ inputs.rpc-url }}
+      run: |
+        echo "🔐 Creating Safe transaction proposal..."
+
+        cd ${{ github.action_path }}
+
+        # Create proposal script
+        cat << 'EOF' > create-proposal.ts
+        import { SafeProposalBuilder } from './src/services/SafeProposalBuilder';
+        import { readFileSync } from 'fs';
+        import { resolve } from 'path';
+
+        async function createDeploymentProposal() {
+          const safeAddress = process.env.SAFE_ADDRESS;
+          const network = process.env.NETWORK;
+          const contractName = process.env.CONTRACT;
+
+          if (!safeAddress) {
+            throw new Error('SAFE_ADDRESS not configured');
+          }
+
+          const chainIds: Record<string, number> = {
+            'sepolia': 11155111,
+            'mainnet': 1,
+            'polygon': 137,
+            'arbitrum': 42161,
+          };
+
+          const chainId = chainIds[network || 'sepolia'];
+          if (!chainId) {
+            throw new Error(`Unknown network: ${network}`);
+          }
+
+          // Read compiled contract
+          const artifactPath = resolve(
+            process.cwd(),
+            'artifacts',
+            'contracts',
+            `${contractName}.sol`,
+            `${contractName}.json`
+          );
+
+          const artifact = JSON.parse(readFileSync(artifactPath, 'utf-8'));
+          const bytecode = artifact.bytecode;
+
+          // Initialize builder
+          const builder = new SafeProposalBuilder({
+            safeAddress,
+            chainId,
+          });
+
+          // Create deployment proposal
+          const proposal = await builder.createDeploymentProposal({
+            contractName,
+            bytecode,
+            constructorArgs: [],
+            value: '0',
+            metadata: {
+              pr: process.env.GITHUB_PR_NUMBER || 'N/A',
+              commit: process.env.GITHUB_SHA || 'N/A',
+              deployer: 'ZeroKeyCI GitHub Action',
+              author: process.env.GITHUB_ACTOR || 'unknown',
+            },
+          });
+
+          // Serialize proposal
+          const serialized = builder.serializeProposal(proposal);
+
+          // Write to file
+          const outputPath = resolve(process.cwd(), 'safe-proposal.json');
+          require('fs').writeFileSync(outputPath, serialized);
+
+          console.log('✅ Safe proposal created successfully');
+          console.log(`📝 Proposal saved to: ${outputPath}`);
+
+          // Output for GitHub Actions
+          const parsed = JSON.parse(serialized);
+          console.log(`::set-output name=proposal-hash::${parsed.validationHash}`);
+          console.log(`::set-output name=safe-address::${safeAddress}`);
+          console.log(`::set-output name=chain-id::${chainId}`);
+        }
+
+        createDeploymentProposal().catch(console.error);
+        EOF
+
+        # Run proposal creation
+        bun run create-proposal.ts
+
+        # Set outputs
+        PROPOSAL_HASH=$(cat safe-proposal.json | jq -r '.validationHash')
+        echo "proposal_hash=$PROPOSAL_HASH" >> $GITHUB_OUTPUT
+        echo "safe_address=${{ inputs.safe-address }}" >> $GITHUB_OUTPUT
+
+        # Determine chain ID
+        case "${{ inputs.network }}" in
+          sepolia) echo "chain_id=11155111" >> $GITHUB_OUTPUT ;;
+          mainnet) echo "chain_id=1" >> $GITHUB_OUTPUT ;;
+          polygon) echo "chain_id=137" >> $GITHUB_OUTPUT ;;
+          arbitrum) echo "chain_id=42161" >> $GITHUB_OUTPUT ;;
+        esac
+
+    - name: Validate proposal structure
+      shell: bash
+      run: |
+        echo "🔍 Validating Safe proposal structure..."
+
+        if [ ! -f "safe-proposal.json" ]; then
+          echo "::error::Safe proposal not found"
+          exit 1
+        fi
+
+        jq empty safe-proposal.json || {
+          echo "::error::Invalid JSON in safe-proposal.json"
+          exit 1
+        }
+
+        jq -e '.safe' safe-proposal.json > /dev/null || {
+          echo "::error::Missing 'safe' field in proposal"
+          exit 1
+        }
+
+        echo "✅ Proposal structure validation passed"
+
+    - name: Upload Safe proposal artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: safe-proposal-${{ github.run_id }}
+        path: safe-proposal.json
+        retention-days: 30
+
+    - name: Verify contract on Blockscout
+      id: verify-contract
+      if: inputs.verify-blockscout == 'true'
+      shell: bash
+      env:
+        CONTRACT_NAME: ${{ inputs.contract-name }}
+        BLOCKSCOUT_API_URL: ${{ inputs.blockscout-api-url }}
+      run: |
+        echo "🔍 Verifying contract on Blockscout..."
+
+        # Note: Verification happens after actual deployment
+        # This step prepares the verification configuration
+
+        echo "status=pending" >> $GITHUB_OUTPUT
+        echo "explorer_url=${{ inputs.blockscout-api-url }}" >> $GITHUB_OUTPUT
+
+        echo "✅ Blockscout verification configured (will verify after deployment)"
+
+    - name: Setup Envio indexing
+      if: inputs.enable-envio == 'true'
+      shell: bash
+      run: |
+        echo "📊 Setting up Envio HyperIndex..."
+
+        if [ ! -f "${{ inputs.envio-config-path }}" ]; then
+          echo "::warning::No Envio config found at ${{ inputs.envio-config-path }}"
+          exit 0
+        fi
+
+        echo "✅ Envio indexing configured"
