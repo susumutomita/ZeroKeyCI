@@ -67,28 +67,6 @@ jobs:
       - name: Run validation checks
         id: validation
         run: |
-          echo "🔍 Running validation checks..."
-          echo "================================"
-
-          # Run each check individually to see which ones fail
-          echo "📝 Checking markdown..."
-          bun run lint_text || true
-
-          echo "🔧 Checking code lint..."
-          bun run lint || true
-
-          echo "🎯 Checking TypeScript..."
-          bun run typecheck || true
-
-          echo "✨ Checking format..."
-          bun run format_check || true
-
-          echo "🏗️ Building project..."
-          bun run build || true
-
-          echo "🧪 Running tests with coverage..."
-          bun run test:coverage || true
-
           echo "================================"
           echo "🎯 Running full validation..."
           make before_commit
