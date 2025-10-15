@@ -5,17 +5,18 @@ import Home from '../page';
 describe('Landing Page', () => {
   it('should render the hero section', () => {
     render(<Home />);
-    expect(screen.getByText('ZeroKeyCI')).toBeInTheDocument();
     expect(
-      screen.getByText('Deploy Smart Contracts Without Private Keys in CI/CD')
+      screen.getByText('Secure Smart Contract Deployment')
     ).toBeInTheDocument();
+    expect(screen.getByText(/Deploy Contracts/i)).toBeInTheDocument();
+    expect(screen.getByText(/Without Private Keys/i)).toBeInTheDocument();
   });
 
   it('should render the get started button', () => {
     render(<Home />);
-    const getStartedButton = screen.getByText('Get Started');
+    const getStartedButton = screen.getByText(/Get Started in 3 Minutes/i);
     expect(getStartedButton).toBeInTheDocument();
-    expect(getStartedButton).toHaveAttribute('href', '#getting-started');
+    expect(getStartedButton).toHaveAttribute('href', '#setup');
   });
 
   it('should render the GitHub link', () => {
@@ -28,81 +29,105 @@ describe('Landing Page', () => {
     );
   });
 
-  it('should render the How It Works section', () => {
+  it('should render key benefit cards', () => {
     render(<Home />);
-    expect(screen.getByText('How It Works')).toBeInTheDocument();
-    expect(screen.getByText('Create PR')).toBeInTheDocument();
-    expect(screen.getByText('CI Generates Proposal')).toBeInTheDocument();
-    expect(screen.getByText('Review & Sign')).toBeInTheDocument();
-    expect(screen.getByText('Deploy')).toBeInTheDocument();
+    const multiSigCards = screen.getAllByText('Multi-Signature Security');
+    expect(multiSigCards.length).toBeGreaterThan(0);
+    const auditCards = screen.getAllByText('Complete Audit Trail');
+    expect(auditCards.length).toBeGreaterThan(0);
+    expect(screen.getByText('Policy Enforcement')).toBeInTheDocument();
   });
 
-  it('should render all key features', () => {
+  it('should render the solution section', () => {
     render(<Home />);
-    expect(screen.getByText('Key Features')).toBeInTheDocument();
-    expect(screen.getByText('No Private Keys in CI')).toBeInTheDocument();
-    expect(screen.getByText('Policy Validation')).toBeInTheDocument();
-    expect(screen.getByText('Audit Trail')).toBeInTheDocument();
-    expect(screen.getByText('UUPS Upgradeable')).toBeInTheDocument();
-    expect(screen.getByText('Deterministic Addresses')).toBeInTheDocument();
-    expect(screen.getByText('100% Test Coverage')).toBeInTheDocument();
+    expect(screen.getByText('The Solution')).toBeInTheDocument();
+    const zerokeyElements = screen.getAllByText(/ZeroKeyCI/i);
+    expect(zerokeyElements.length).toBeGreaterThan(0);
+    expect(screen.getByText(/Zero Private Keys in CI/i)).toBeInTheDocument();
   });
 
-  it('should render Getting Started section with tabs', () => {
+  it('should render How It Actually Works section', () => {
     render(<Home />);
-    expect(screen.getByText('Getting Started')).toBeInTheDocument();
+    // "How It Actually Works" text is broken up by spans, so check for parts
+    expect(screen.getByText(/How It/i)).toBeInTheDocument();
+    expect(screen.getByText(/Actually/i)).toBeInTheDocument();
+    expect(screen.getByText(/Developer Creates PR/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/GitHub Actions Compiles & Validates/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Generates Safe Transaction Proposal/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Safe Owners Review & Sign/i)).toBeInTheDocument();
+    expect(screen.getByText(/Deployed to Blockchain/i)).toBeInTheDocument();
+  });
+
+  it('should render Try It Right Now section', () => {
+    render(<Home />);
+    // "Try It" appears multiple times, so use getAllBy
+    const tryItElements = screen.getAllByText(/Try It/i);
+    expect(tryItElements.length).toBeGreaterThan(0);
+    const rightNowElements = screen.getAllByText(/Right Now/i);
+    expect(rightNowElements.length).toBeGreaterThan(0);
+  });
+
+  it('should render Deploy Your First Contract section', () => {
+    render(<Home />);
+    expect(screen.getByText('3-Minute Setup')).toBeInTheDocument();
+    expect(screen.getByText(/Deploy Your First Contract/i)).toBeInTheDocument();
+    const in3MinutesElements = screen.getAllByText(/In 3 Minutes/i);
+    expect(in3MinutesElements.length).toBeGreaterThan(0);
+  });
+
+  it('should render Why This Matters section with tabs', () => {
+    render(<Home />);
+    expect(screen.getByText('Why This Matters')).toBeInTheDocument();
 
     // Check that all tabs are present
-    const overviewButton = screen.getByRole('button', { name: /overview/i });
-    const setupButton = screen.getByRole('button', { name: /setup/i });
-    const deployButton = screen.getByRole('button', { name: /deploy/i });
-    const testButton = screen.getByRole('button', { name: /test/i });
+    const problemButton = screen.getByRole('button', { name: /problem/i });
+    const traditionalButton = screen.getByRole('button', {
+      name: /traditional/i,
+    });
+    const zerokeyButton = screen.getByRole('button', {
+      name: /With ZeroKeyCI/i,
+    });
 
-    expect(overviewButton).toBeInTheDocument();
-    expect(setupButton).toBeInTheDocument();
-    expect(deployButton).toBeInTheDocument();
-    expect(testButton).toBeInTheDocument();
+    expect(problemButton).toBeInTheDocument();
+    expect(traditionalButton).toBeInTheDocument();
+    expect(zerokeyButton).toBeInTheDocument();
   });
 
   it('should switch tabs when clicked', () => {
     render(<Home />);
 
-    // Initially overview tab should be active
+    // Initially problem tab should be active
     expect(
-      screen.getByText('Overview', { selector: 'h3' })
+      screen.getByText('Traditional Approach: Challenges')
     ).toBeInTheDocument();
 
-    // Click setup tab
-    const setupButton = screen.getByRole('button', { name: /setup/i });
-    fireEvent.click(setupButton);
-    expect(screen.getByText('Initial Setup')).toBeInTheDocument();
+    // Click traditional tab
+    const traditionalButton = screen.getByRole('button', {
+      name: /traditional/i,
+    });
+    fireEvent.click(traditionalButton);
+    expect(
+      screen.getByText('Traditional Solution: Manual Deployments')
+    ).toBeInTheDocument();
 
-    // Click deploy tab
-    const deployButton = screen.getByRole('button', { name: /deploy/i });
-    fireEvent.click(deployButton);
-    expect(screen.getByText('Deployment Process')).toBeInTheDocument();
-
-    // Click test tab
-    const testButton = screen.getByRole('button', { name: /test/i });
-    fireEvent.click(testButton);
-    expect(screen.getByText('Local Testing')).toBeInTheDocument();
+    // Click zerokey tab
+    const zerokeyButton = screen.getByRole('button', {
+      name: /With ZeroKeyCI/i,
+    });
+    fireEvent.click(zerokeyButton);
+    expect(
+      screen.getByText('ZeroKeyCI: Security + Automation')
+    ).toBeInTheDocument();
   });
 
-  it('should render the system architecture section', () => {
-    render(<Home />);
-    expect(screen.getByText('System Architecture')).toBeInTheDocument();
-
-    // Architecture diagram contains these terms
-    const architectureDiagram = screen.getByText(/Developer.*GitHub.*CI\/CD/s);
-    expect(architectureDiagram).toBeInTheDocument();
-    expect(architectureDiagram.textContent).toContain('SafeProposal');
-    expect(architectureDiagram.textContent).toContain('Gnosis Safe');
-  });
-
-  it('should render the footer with links', () => {
+  it('should render the footer with correct text', () => {
     render(<Home />);
     const footerText = screen.getByText(
-      'Built with security and simplicity in mind'
+      'Built with security and developer experience in mind'
     );
     expect(footerText).toBeInTheDocument();
 
@@ -112,7 +137,10 @@ describe('Landing Page', () => {
 
     const docsLink = screen.getByText('Documentation');
     expect(docsLink).toBeInTheDocument();
-    expect(docsLink).toHaveAttribute('href', '/docs');
+    expect(docsLink).toHaveAttribute(
+      'href',
+      'https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PRODUCTION-SETUP.md'
+    );
 
     const issuesLink = screen.getByText('Issues');
     expect(issuesLink).toBeInTheDocument();
@@ -122,44 +150,30 @@ describe('Landing Page', () => {
     );
   });
 
-  it('should show code examples in setup tab', () => {
-    render(<Home />);
-    const setupButton = screen.getByRole('button', { name: /setup/i });
-    fireEvent.click(setupButton);
+  it('should have modern color scheme with cyan/blue gradients', () => {
+    const { container } = render(<Home />);
 
-    // Check for configuration examples
+    // Check for cyan/blue gradient classes instead of purple
+    const gradientElements = container.querySelectorAll(
+      '[class*="from-cyan"], [class*="to-blue"], [class*="to-emerald"]'
+    );
+    expect(gradientElements.length).toBeGreaterThan(0);
+  });
+
+  it('should show educational tone in problem tab', () => {
+    render(<Home />);
+
+    // The problem tab should use educational language
+    expect(
+      screen.getByText('Traditional Approach: Challenges')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Common patterns in Web3 CI\/CD/i)
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /SAFE_ADDRESS=0x742D35CC6634c0532925A3b844BC9E7595F0BEb0/
+        /Industry best practice: Multi-signature wallets provide enhanced security/i
       )
     ).toBeInTheDocument();
-    expect(screen.getByText(/network: sepolia/)).toBeInTheDocument();
-    expect(screen.getByText(/package deployment/)).toBeInTheDocument();
-  });
-
-  it('should show deployment instructions in deploy tab', () => {
-    render(<Home />);
-    const deployButton = screen.getByRole('button', { name: /deploy/i });
-    fireEvent.click(deployButton);
-
-    // Check for deployment instructions
-    expect(screen.getByText(/pragma solidity/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/git checkout -b feat\/deploy-contract/)
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Compile your contracts/)).toBeInTheDocument();
-  });
-
-  it('should show test commands in test tab', () => {
-    render(<Home />);
-    const testButton = screen.getByRole('button', { name: /test/i });
-    fireEvent.click(testButton);
-
-    // Check for test commands
-    expect(
-      screen.getByText(/bun run scripts\/test-local-deployment.ts/)
-    ).toBeInTheDocument();
-    expect(screen.getByText(/bun run test:coverage/)).toBeInTheDocument();
-    expect(screen.getByText(/make before_commit/)).toBeInTheDocument();
   });
 });
