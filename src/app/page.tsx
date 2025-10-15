@@ -24,38 +24,38 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('problem');
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-3xl animate-float-slow" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-full blur-3xl animate-float-slow" />
 
       {/* Hero Section - The Problem */}
       <section className="relative min-h-screen flex items-center">
         <div className="container mx-auto px-6 lg:px-12 py-24">
           <div className="max-w-6xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-full px-6 py-3 mb-8 animate-fade-in-up">
-              <AlertTriangle className="w-5 h-5 text-red-400" />
-              <span className="text-red-300 font-semibold">
-                Your CI/CD has a massive security hole
+            <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-6 py-3 mb-8 animate-fade-in-up">
+              <Shield className="w-5 h-5 text-blue-400" />
+              <span className="text-blue-300 font-semibold">
+                Secure Smart Contract Deployment
               </span>
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-black mb-8 animate-scale-in bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-              Stop Storing Private Keys
+            <h1 className="text-6xl md:text-8xl font-black mb-8 animate-scale-in bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400">
+              Deploy Contracts
               <br />
-              in Your CI/CD
+              Without Private Keys
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-              One leaked key = your entire treasury drained. One compromised
-              action = game over. There&apos;s a better way.
+              Secure CI/CD deployment using Gnosis Safe multisig. No private
+              keys in your pipeline, full audit trail, multi-signature approval.
             </p>
 
             <div className="flex gap-6 justify-center flex-wrap mb-16">
               <a
                 href="#setup"
-                className="group px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                className="group px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
                 <Rocket className="w-6 h-6" />
                 Get Started in 3 Minutes
@@ -69,26 +69,26 @@ export default function Home() {
               </a>
             </div>
 
-            {/* Horror Stories */}
+            {/* Key Benefits */}
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
                 {
-                  icon: Lock,
-                  title: '$100M+ Lost Annually',
-                  desc: 'From leaked private keys in CI/CD pipelines',
-                  color: 'red',
-                },
-                {
-                  icon: AlertTriangle,
-                  title: 'Every Developer = Risk',
-                  desc: 'One compromised account compromises everything',
-                  color: 'orange',
-                },
-                {
                   icon: Shield,
-                  title: 'Zero Audit Trail',
-                  desc: 'Who deployed what? When? Why? Nobody knows.',
-                  color: 'yellow',
+                  title: 'Multi-Signature Security',
+                  desc: 'Require multiple approvals for every deployment',
+                  color: 'blue',
+                },
+                {
+                  icon: FileText,
+                  title: 'Complete Audit Trail',
+                  desc: 'Every action tracked on-chain with full transparency',
+                  color: 'purple',
+                },
+                {
+                  icon: CheckCircle2,
+                  title: 'Policy Enforcement',
+                  desc: 'OPA policies ensure compliance and security standards',
+                  color: 'green',
                 },
               ].map((item, idx) => (
                 <div
@@ -124,7 +124,7 @@ export default function Home() {
                 </span>
               </div>
               <h2 className="text-5xl md:text-7xl font-black mb-6 text-white">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
                   ZeroKeyCI
                 </span>
               </h2>
@@ -192,7 +192,7 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-5xl md:text-6xl font-black text-center mb-20 text-white">
               How It{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
                 Actually
               </span>{' '}
               Works
@@ -200,7 +200,7 @@ export default function Home() {
 
             <div className="relative">
               {/* Vertical connecting line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500 hidden md:block" />
+              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-500 to-emerald-500 hidden md:block" />
 
               {[
                 {
@@ -251,7 +251,7 @@ export default function Home() {
                   }`}
                 >
                   {/* Number badge on the line */}
-                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full items-center justify-center text-white font-black text-xl shadow-2xl z-10">
+                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full items-center justify-center text-white font-black text-xl shadow-2xl z-10">
                     {step.num}
                   </div>
 
@@ -285,14 +285,14 @@ export default function Home() {
       {/* Interactive Demo Section */}
       <section
         id="demo"
-        className="relative py-32 bg-gradient-to-br from-blue-900/20 to-purple-900/20"
+        className="relative py-32 bg-gradient-to-br from-cyan-900/20 to-blue-900/20"
       >
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
                 Try It{' '}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
                   Right Now
                 </span>
               </h2>
@@ -321,7 +321,7 @@ export default function Home() {
               <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
                 Deploy Your First Contract
                 <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
                   In 3 Minutes
                 </span>
               </h2>
@@ -352,7 +352,7 @@ export default function Home() {
                     onClick={() => setActiveTab(tab)}
                     className={`px-8 py-4 rounded-xl capitalize font-semibold transition-all duration-300 ${
                       activeTab === tab
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-2xl'
+                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-2xl'
                         : 'text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                   >
@@ -365,36 +365,36 @@ export default function Home() {
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12">
               {activeTab === 'problem' && (
                 <div className="space-y-6">
-                  <h3 className="text-3xl font-bold text-red-400 mb-6">
-                    The Problem: Private Keys Everywhere
+                  <h3 className="text-3xl font-bold text-blue-400 mb-6">
+                    Traditional Approach: Challenges
                   </h3>
                   <div className="space-y-4 text-gray-300">
                     <p className="text-lg leading-relaxed">
                       <strong className="text-white">
-                        Current state of Web3 CI/CD:
+                        Common patterns in Web3 CI/CD:
                       </strong>{' '}
-                      Private keys stored as GitHub secrets, accessible to every
-                      developer with repository access.
+                      Private keys stored as GitHub secrets, accessible to
+                      developers with repository access.
                     </p>
                     <ul className="space-y-3 list-none">
                       {[
-                        'One compromised GitHub account = treasury drained',
-                        'Malicious insider can deploy anything',
-                        'No way to revoke access without rotating keys (and redeploying everything)',
-                        'Zero audit trail of who actually deployed what',
-                        "If GitHub is compromised, you're done",
+                        'Shared secret access across team members',
+                        'Access control requires key rotation',
+                        'Limited visibility into deployment actions',
+                        'Operational challenges with credential management',
+                        'Dependencies on infrastructure security',
                       ].map((item, idx) => (
                         <li key={idx} className="flex items-start gap-3">
-                          <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-1" />
+                          <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
                           <span>{item}</span>
                         </li>
                       ))}
                     </ul>
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 mt-8">
-                      <p className="text-red-300 font-semibold">
-                        Real story: A DeFi protocol lost $31M because a former
-                        developer&apos;s GitHub access wasn&apos;t revoked. They
-                        used the CI private key to drain the treasury.
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6 mt-8">
+                      <p className="text-blue-300 font-semibold">
+                        Industry best practice: Multi-signature wallets provide
+                        enhanced security through distributed key management and
+                        approval workflows.
                       </p>
                     </div>
                   </div>
@@ -487,17 +487,18 @@ export default function Home() {
             <h2 className="text-5xl md:text-6xl font-black mb-8 text-white">
               Ready to Deploy
               <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
                 Without Fear?
               </span>
             </h2>
             <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-              Join the teams securing billions in smart contracts with ZeroKeyCI
+              Start deploying with multi-signature security and full audit
+              trails
             </p>
             <div className="flex gap-6 justify-center flex-wrap">
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI"
-                className="group px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                className="group px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
                 <GitBranch className="w-6 h-6" />
                 View on GitHub
@@ -516,8 +517,8 @@ export default function Home() {
                   className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 animate-fade-in-up"
                   style={{ animationDelay: `${idx * 0.1}s` }}
                 >
-                  <stat.icon className="w-10 h-10 text-blue-400 mx-auto mb-4" />
-                  <div className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-2">
+                  <stat.icon className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
+                  <div className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400 mb-2">
                     {stat.num}
                   </div>
                   <div className="text-gray-400 font-semibold">

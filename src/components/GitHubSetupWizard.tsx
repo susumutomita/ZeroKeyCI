@@ -142,7 +142,7 @@ NODE_ENV=production
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 ${
                   step >= s.num
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white scale-110'
+                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white scale-110'
                     : 'bg-white/10 text-gray-500'
                 }`}
               >
@@ -160,7 +160,7 @@ NODE_ENV=production
               <div
                 className={`h-1 flex-1 mx-4 transition-all duration-300 ${
                   step > s.num
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600'
+                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600'
                     : 'bg-white/10'
                 }`}
               />
@@ -218,7 +218,7 @@ NODE_ENV=production
           <button
             onClick={() => setStep(2)}
             disabled={!safeAddress}
-            className="w-full mt-8 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-xl font-bold text-lg text-white transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group"
+            className="w-full mt-8 px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-xl font-bold text-lg text-white transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group"
           >
             Next: Download Files
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -242,7 +242,7 @@ NODE_ENV=production
           <div className="bg-black/30 rounded-xl p-6 border border-white/10">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center">
                   <FileCode className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -273,7 +273,7 @@ NODE_ENV=production
                 </button>
                 <button
                   onClick={() => handleDownload(workflowYaml, 'deploy.yml')}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg text-white transition-all duration-300 flex items-center gap-2"
+                  className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg text-white transition-all duration-300 flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
                   Download
@@ -339,7 +339,7 @@ NODE_ENV=production
             </button>
             <button
               onClick={() => setStep(3)}
-              className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold text-lg text-white transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group"
+              className="flex-1 px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-lg text-white transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group"
             >
               Next: Setup GitHub
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -415,7 +415,7 @@ git push origin feat/my-contract
                 className="bg-black/30 rounded-xl p-6 border border-white/10"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                  <div className="w-8 h-8 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                     {step.num}
                   </div>
                   <div className="flex-1">
@@ -494,7 +494,7 @@ git push origin feat/my-contract
               href="https://github.com/susumutomita/ZeroKeyCI"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold text-lg text-white transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group"
+              className="flex-1 px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-lg text-white transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group"
             >
               <GitBranch className="w-5 h-5" />
               View Full Documentation
