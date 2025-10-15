@@ -1,0 +1,526 @@
+/**
+ * Envio HyperIndex Event Handlers
+ *
+ * Processes Gnosis Safe events for ZeroKeyCI deployment tracking
+ * Indexes proposals, approvals, executions, and failures
+ */
+
+import {
+  GnosisSafe_SafeMultiSigTransaction_loader,
+  GnosisSafe_SafeMultiSigTransaction_handler,
+  GnosisSafe_ExecutionSuccess_loader,
+  GnosisSafe_ExecutionSuccess_handler,
+  GnosisSafe_ExecutionFailure_loader,
+  GnosisSafe_ExecutionFailure_handler,
+  GnosisSafe_ApproveHash_loader,
+  GnosisSafe_ApproveHash_handler,
+  GnosisSafe_SafeSetup_loader,
+  GnosisSafe_SafeSetup_handler,
+  SafeProxyFactory_ProxyCreation_loader,
+  SafeProxyFactory_ProxyCreation_handler,
+} from '../generated/src/Handlers.gen';
+
+import {
+  SafeTransactionEntity,
+  SafeConfirmationEntity,
+  ExecutionSuccessEntity,
+  ExecutionFailureEntity,
+  HashApprovalEntity,
+  SafeSetupEntity,
+  ProxyCreationEntity,
+  SafeStatsEntity,
+  ZeroKeyDeploymentEntity,
+  OwnerActivityEntity,
+} from '../generated/src/Types.gen';
+
+// ============================================================================
+// SafeMultiSigTransaction - Proposal Creation
+// ============================================================================
+
+GnosisSafe_SafeMultiSigTransaction_loader(({ event, context }) => {
+  context.SafeTransaction.load(event.transactionHash);
+  context.SafeStats.load(event.srcAddress);
+});
+
+GnosisSafe_SafeMultiSigTransaction_handler(({ event, context }) => {
+  const {
+    to,
+    value,
+    data,
+    operation,
+    safeTxGas,
+    baseGas,
+    gasPrice,
+    gasToken,
+    refundReceiver,
+    nonce,
+  } = event.params;
+
+  // Create SafeTransaction entity
+  const transactionId = event.transactionHash;
+  const safeAddress = event.srcAddress;
+
+  const transaction: SafeTransactionEntity = {
+    id: transactionId,
+    safe: safeAddress,
+    to: to,
+    value: value,
+    data: data,
+    operation: operation,
+    safeTxGas: safeTxGas,
+    baseGas: baseGas,
+    gasPrice: gasPrice,
+    gasToken: gasToken,
+    refundReceiver: refundReceiver,
+    nonce: nonce,
+    executionDate: undefined,
+    submissionDate: event.block.timestamp,
+    isExecuted: false,
+    isSuccessful: undefined,
+    transactionHash: event.transactionHash,
+    blockNumber: event.block.number,
+    timestamp: event.block.timestamp,
+    // ZeroKeyCI metadata (extracted from transaction data if present)
+    prNumber: extractPRNumber(data),
+    commitHash: extractCommitHash(data),
+    contractName: extractContractName(data),
+    deploymentType: extractDeploymentType(data),
+  };
+
+  context.SafeTransaction.set(transaction);
+
+  // Update SafeStats
+  updateSafeStats(context, safeAddress, event.block.timestamp, 'proposal');
+
+  // Create ZeroKeyDeployment if this is a deployment transaction
+  if (isDeploymentTransaction(data)) {
+    createZeroKeyDeployment(context, transaction, event);
+  }
+});
+
+// ============================================================================
+// ExecutionSuccess - Successful Deployment
+// ============================================================================
+
+GnosisSafe_ExecutionSuccess_loader(({ event, context }) => {
+  context.ExecutionSuccess.load(event.transactionHash);
+  context.SafeTransaction.load(event.params.txHash);
+  context.SafeStats.load(event.srcAddress);
+});
+
+GnosisSafe_ExecutionSuccess_handler(({ event, context }) => {
+  const { txHash, payment } = event.params;
+  const safeAddress = event.srcAddress;
+
+  // Create ExecutionSuccess entity
+  const executionSuccess: ExecutionSuccessEntity = {
+    id: event.transactionHash,
+    txHash: txHash,
+    payment: payment,
+    timestamp: event.block.timestamp,
+    blockNumber: event.block.number,
+    safe: safeAddress,
+  };
+
+  context.ExecutionSuccess.set(executionSuccess);
+
+  // Update corresponding SafeTransaction
+  const transaction = context.SafeTransaction.get(txHash);
+  if (transaction) {
+    const updatedTransaction: SafeTransactionEntity = {
+      ...transaction,
+      isExecuted: true,
+      isSuccessful: true,
+      executionDate: event.block.timestamp,
+    };
+    context.SafeTransaction.set(updatedTransaction);
+
+    // Update ZeroKeyDeployment
+    updateZeroKeyDeployment(context, transaction, event, 'executed');
+  }
+
+  // Update SafeStats
+  updateSafeStats(context, safeAddress, event.block.timestamp, 'execution');
+});
+
+// ============================================================================
+// ExecutionFailure - Failed Deployment
+// ============================================================================
+
+GnosisSafe_ExecutionFailure_loader(({ event, context }) => {
+  context.ExecutionFailure.load(event.transactionHash);
+  context.SafeTransaction.load(event.params.txHash);
+  context.SafeStats.load(event.srcAddress);
+});
+
+GnosisSafe_ExecutionFailure_handler(({ event, context }) => {
+  const { txHash, payment } = event.params;
+  const safeAddress = event.srcAddress;
+
+  // Create ExecutionFailure entity
+  const executionFailure: ExecutionFailureEntity = {
+    id: event.transactionHash,
+    txHash: txHash,
+    payment: payment,
+    timestamp: event.block.timestamp,
+    blockNumber: event.block.number,
+    safe: safeAddress,
+    errorReason: undefined, // TODO: Extract from transaction receipt
+  };
+
+  context.ExecutionFailure.set(executionFailure);
+
+  // Update corresponding SafeTransaction
+  const transaction = context.SafeTransaction.get(txHash);
+  if (transaction) {
+    const updatedTransaction: SafeTransactionEntity = {
+      ...transaction,
+      isExecuted: true,
+      isSuccessful: false,
+      executionDate: event.block.timestamp,
+    };
+    context.SafeTransaction.set(updatedTransaction);
+
+    // Update ZeroKeyDeployment
+    updateZeroKeyDeployment(context, transaction, event, 'failed');
+  }
+
+  // Update SafeStats
+  updateSafeStats(context, safeAddress, event.block.timestamp, 'failure');
+});
+
+// ============================================================================
+// ApproveHash - Owner Approval
+// ============================================================================
+
+GnosisSafe_ApproveHash_loader(({ event, context }) => {
+  context.HashApproval.load(event.transactionHash);
+  const ownerId = `${event.params.owner}-${event.srcAddress}`;
+  context.OwnerActivity.load(ownerId);
+});
+
+GnosisSafe_ApproveHash_handler(({ event, context }) => {
+  const { approvedHash, owner } = event.params;
+  const safeAddress = event.srcAddress;
+
+  // Create HashApproval entity
+  const hashApproval: HashApprovalEntity = {
+    id: event.transactionHash,
+    approvedHash: approvedHash,
+    owner: owner,
+    timestamp: event.block.timestamp,
+    blockNumber: event.block.number,
+    safe: safeAddress,
+  };
+
+  context.HashApproval.set(hashApproval);
+
+  // Create SafeConfirmation (linked to SafeTransaction)
+  const confirmation: SafeConfirmationEntity = {
+    id: `${event.transactionHash}-${owner}`,
+    owner: owner,
+    submissionDate: event.block.timestamp,
+    signature: approvedHash, // Hash as signature identifier
+    signatureType: 'APPROVED_HASH',
+    transactionHash: event.transactionHash,
+    blockNumber: event.block.number,
+  };
+
+  context.SafeConfirmation.set(confirmation);
+
+  // Update OwnerActivity
+  updateOwnerActivity(context, owner, safeAddress, event.block.timestamp);
+
+  // Update ZeroKeyDeployment with first confirmation time
+  const transaction = context.SafeTransaction.get(approvedHash);
+  if (transaction && transaction.prNumber) {
+    const deploymentId = `${safeAddress}-${transaction.prNumber}`;
+    const deployment = context.ZeroKeyDeployment.get(deploymentId);
+
+    if (deployment && !deployment.timeToFirstConfirmation) {
+      const timeToFirst = event.block.timestamp - transaction.submissionDate;
+      const updatedDeployment: ZeroKeyDeploymentEntity = {
+        ...deployment,
+        timeToFirstConfirmation: timeToFirst,
+      };
+      context.ZeroKeyDeployment.set(updatedDeployment);
+    }
+  }
+});
+
+// ============================================================================
+// SafeSetup - Safe Initialization
+// ============================================================================
+
+GnosisSafe_SafeSetup_loader(({ event, context }) => {
+  context.SafeSetup.load(event.transactionHash);
+  context.SafeStats.load(event.srcAddress);
+});
+
+GnosisSafe_SafeSetup_handler(({ event, context }) => {
+  const { initiator, owners, threshold, initializer, fallbackHandler } =
+    event.params;
+  const safeAddress = event.srcAddress;
+
+  // Create SafeSetup entity
+  const safeSetup: SafeSetupEntity = {
+    id: event.transactionHash,
+    safe: safeAddress,
+    initiator: initiator,
+    owners: owners,
+    threshold: threshold,
+    initializer: initializer,
+    fallbackHandler: fallbackHandler,
+    timestamp: event.block.timestamp,
+    blockNumber: event.block.number,
+  };
+
+  context.SafeSetup.set(safeSetup);
+
+  // Initialize SafeStats
+  const safeStats: SafeStatsEntity = {
+    id: safeAddress,
+    safe: safeAddress,
+    totalProposals: BigInt(0),
+    executedProposals: BigInt(0),
+    failedProposals: BigInt(0),
+    pendingProposals: BigInt(0),
+    totalConfirmations: BigInt(0),
+    averageTimeToExecution: BigInt(0),
+    lastActivity: event.block.timestamp,
+    totalDeployments: BigInt(0),
+    totalUpgrades: BigInt(0),
+    lastDeployment: undefined,
+  };
+
+  context.SafeStats.set(safeStats);
+});
+
+// ============================================================================
+// ProxyCreation - Safe Proxy Deployment
+// ============================================================================
+
+SafeProxyFactory_ProxyCreation_loader(({ event, context }) => {
+  context.ProxyCreation.load(event.transactionHash);
+});
+
+SafeProxyFactory_ProxyCreation_handler(({ event, context }) => {
+  const { proxy, singleton } = event.params;
+
+  const proxyCreation: ProxyCreationEntity = {
+    id: event.transactionHash,
+    proxy: proxy,
+    singleton: singleton,
+    timestamp: event.block.timestamp,
+    blockNumber: event.block.number,
+  };
+
+  context.ProxyCreation.set(proxyCreation);
+});
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+function updateSafeStats(
+  context: any,
+  safeAddress: string,
+  timestamp: bigint,
+  eventType: 'proposal' | 'execution' | 'failure'
+): void {
+  let stats = context.SafeStats.get(safeAddress);
+
+  if (!stats) {
+    // Initialize if doesn't exist
+    stats = {
+      id: safeAddress,
+      safe: safeAddress,
+      totalProposals: BigInt(0),
+      executedProposals: BigInt(0),
+      failedProposals: BigInt(0),
+      pendingProposals: BigInt(0),
+      totalConfirmations: BigInt(0),
+      averageTimeToExecution: BigInt(0),
+      lastActivity: timestamp,
+      totalDeployments: BigInt(0),
+      totalUpgrades: BigInt(0),
+      lastDeployment: undefined,
+    };
+  }
+
+  switch (eventType) {
+    case 'proposal':
+      stats.totalProposals = stats.totalProposals + BigInt(1);
+      stats.pendingProposals = stats.pendingProposals + BigInt(1);
+      break;
+    case 'execution':
+      stats.executedProposals = stats.executedProposals + BigInt(1);
+      stats.pendingProposals = stats.pendingProposals - BigInt(1);
+      break;
+    case 'failure':
+      stats.failedProposals = stats.failedProposals + BigInt(1);
+      stats.pendingProposals = stats.pendingProposals - BigInt(1);
+      break;
+  }
+
+  stats.lastActivity = timestamp;
+
+  context.SafeStats.set(stats);
+}
+
+function updateOwnerActivity(
+  context: any,
+  owner: string,
+  safeAddress: string,
+  timestamp: bigint
+): void {
+  const ownerId = `${owner}-${safeAddress}`;
+  let activity = context.OwnerActivity.get(ownerId);
+
+  if (!activity) {
+    activity = {
+      id: ownerId,
+      owner: owner,
+      safe: safeAddress,
+      totalConfirmations: BigInt(0),
+      lastConfirmation: undefined,
+      averageResponseTime: undefined,
+    };
+  }
+
+  activity.totalConfirmations = activity.totalConfirmations + BigInt(1);
+  activity.lastConfirmation = timestamp;
+
+  // TODO: Calculate average response time
+
+  context.OwnerActivity.set(activity);
+}
+
+function createZeroKeyDeployment(
+  context: any,
+  transaction: SafeTransactionEntity,
+  event: any
+): void {
+  if (!transaction.prNumber) return;
+
+  const deploymentId = `${transaction.safe}-${transaction.prNumber}`;
+
+  const deployment: ZeroKeyDeploymentEntity = {
+    id: deploymentId,
+    safe: transaction.safe,
+    contractName: transaction.contractName || 'Unknown',
+    contractAddress: undefined,
+    deploymentType: transaction.deploymentType || 'deployment',
+    prNumber: transaction.prNumber,
+    commitHash: transaction.commitHash || '',
+    proposalDate: transaction.submissionDate,
+    executionDate: undefined,
+    status: 'pending',
+    timeToFirstConfirmation: undefined,
+    timeToExecution: undefined,
+    gasUsed: undefined,
+    blockscoutUrl: undefined,
+  };
+
+  context.ZeroKeyDeployment.set(deployment);
+}
+
+function updateZeroKeyDeployment(
+  context: any,
+  transaction: SafeTransactionEntity,
+  event: any,
+  status: 'executed' | 'failed'
+): void {
+  if (!transaction.prNumber) return;
+
+  const deploymentId = `${transaction.safe}-${transaction.prNumber}`;
+  const deployment = context.ZeroKeyDeployment.get(deploymentId);
+
+  if (deployment) {
+    const timeToExecution = event.block.timestamp - deployment.proposalDate;
+
+    const updatedDeployment: ZeroKeyDeploymentEntity = {
+      ...deployment,
+      executionDate: event.block.timestamp,
+      status: status,
+      timeToExecution: timeToExecution,
+      contractAddress: status === 'executed' ? transaction.to : undefined,
+      blockscoutUrl:
+        status === 'executed'
+          ? `https://eth-sepolia.blockscout.com/address/${transaction.to}`
+          : undefined,
+    };
+
+    context.ZeroKeyDeployment.set(updatedDeployment);
+
+    // Update SafeStats
+    const stats = context.SafeStats.get(transaction.safe);
+    if (stats) {
+      if (deployment.deploymentType === 'deployment') {
+        stats.totalDeployments = stats.totalDeployments + BigInt(1);
+      } else if (deployment.deploymentType === 'upgrade') {
+        stats.totalUpgrades = stats.totalUpgrades + BigInt(1);
+      }
+      stats.lastDeployment = event.block.timestamp;
+      context.SafeStats.set(stats);
+    }
+  }
+}
+
+// ============================================================================
+// Metadata Extraction Functions
+// ============================================================================
+
+function extractPRNumber(data: string): string | undefined {
+  // Extract PR number from transaction data
+  // Format: embedded in contract constructor or calldata
+  // Example: 0x...PR#123...
+  try {
+    const match = data.match(/PR#(\d+)/);
+    return match ? match[1] : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function extractCommitHash(data: string): string | undefined {
+  // Extract commit hash from transaction data
+  // Format: embedded as bytes32
+  try {
+    const match = data.match(/commit:([a-f0-9]{40})/i);
+    return match ? match[1] : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function extractContractName(data: string): string | undefined {
+  // Extract contract name from transaction data
+  try {
+    const match = data.match(/contract:([A-Za-z0-9_]+)/);
+    return match ? match[1] : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function extractDeploymentType(data: string): string | undefined {
+  // Determine if this is a deployment or upgrade
+  // Deployment: CREATE2 or contract creation (to = 0x0)
+  // Upgrade: upgradeTo() call
+  try {
+    if (data.includes('upgradeTo')) return 'upgrade';
+    return 'deployment';
+  } catch {
+    return 'deployment';
+  }
+}
+
+function isDeploymentTransaction(data: string): boolean {
+  // Check if transaction data indicates deployment
+  // Look for contract creation bytecode or upgrade function
+  return (
+    data.length > 100 && // Minimum bytecode length
+    (data.includes('upgradeTo') || data.startsWith('0x60806040')) // UUPS upgrade or contract creation
+  );
+}
