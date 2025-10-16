@@ -37,7 +37,8 @@ export const translations = {
     solution: {
       badge: 'The Solution',
       title: 'ZeroKeyCI',
-      subtitle: 'Deploy smart contracts without ever exposing private keys in CI/CD',
+      subtitle:
+        'Deploy smart contracts without ever exposing private keys in CI/CD',
       features: {
         zeroKeys: {
           title: 'Zero Private Keys in CI',
@@ -88,7 +89,8 @@ export const translations = {
     // Demo section
     demo: {
       title: 'Try It Right Now',
-      subtitle: 'Generate a real Safe transaction proposal in your browser. No wallet required.',
+      subtitle:
+        'Generate a real Safe transaction proposal in your browser. No wallet required.',
     },
 
     // Setup section
@@ -112,7 +114,8 @@ export const translations = {
     // CTA
     cta: {
       title: 'Ready to Deploy\nWithout Fear?',
-      subtitle: 'Start deploying with multi-signature security and full audit trails',
+      subtitle:
+        'Start deploying with multi-signature security and full audit trails',
       github: 'View on GitHub',
       stats: {
         privateKeys: 'Private Keys in CI',
@@ -214,7 +217,8 @@ export const translations = {
     // デモセクション
     demo: {
       title: '今すぐ試す',
-      subtitle: 'ブラウザで実際のSafeトランザクションプロポーザルを生成。ウォレット不要。',
+      subtitle:
+        'ブラウザで実際のSafeトランザクションプロポーザルを生成。ウォレット不要。',
     },
 
     // セットアップセクション

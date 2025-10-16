@@ -225,52 +225,54 @@ export default function Home() {
               {/* Vertical connecting line */}
               <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-500 to-emerald-500 hidden md:block" />
 
-              {t.howItWorks.steps.map((step, idx) => {
-                const icons = [Code, Activity, FileText, Users, Zap];
-                const colors = ['blue', 'purple', 'pink', 'green', 'orange'];
-                const sides = ['left', 'right', 'left', 'right', 'left'];
-                return {
-                  num: `0${idx + 1}`,
-                  title: step.title,
-                  desc: step.desc,
-                  icon: icons[idx],
-                  color: colors[idx],
-                  side: sides[idx],
-                };
-              }).map((step, idx) => (
-                <div
-                  key={step.num}
-                  className={`relative mb-16 md:mb-24 ${
-                    step.side === 'left' ? 'md:pr-[55%]' : 'md:pl-[55%]'
-                  }`}
-                >
-                  {/* Number badge on the line */}
-                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full items-center justify-center text-white font-black text-xl shadow-2xl z-10">
-                    {step.num}
-                  </div>
-
+              {t.howItWorks.steps
+                .map((step, idx) => {
+                  const icons = [Code, Activity, FileText, Users, Zap];
+                  const colors = ['blue', 'purple', 'pink', 'green', 'orange'];
+                  const sides = ['left', 'right', 'left', 'right', 'left'];
+                  return {
+                    num: `0${idx + 1}`,
+                    title: step.title,
+                    desc: step.desc,
+                    icon: icons[idx],
+                    color: colors[idx],
+                    side: sides[idx],
+                  };
+                })
+                .map((step, idx) => (
                   <div
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
-                    style={{ animationDelay: `${idx * 0.15}s` }}
+                    key={step.num}
+                    className={`relative mb-16 md:mb-24 ${
+                      step.side === 'left' ? 'md:pr-[55%]' : 'md:pl-[55%]'
+                    }`}
                   >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`w-14 h-14 bg-gradient-to-br from-${step.color}-500 to-${step.color}-600 rounded-xl flex items-center justify-center flex-shrink-0`}
-                      >
-                        <step.icon className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-white mb-3">
-                          {step.title}
-                        </h3>
-                        <p className="text-gray-400 leading-relaxed">
-                          {step.desc}
-                        </p>
+                    {/* Number badge on the line */}
+                    <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full items-center justify-center text-white font-black text-xl shadow-2xl z-10">
+                      {step.num}
+                    </div>
+
+                    <div
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                      style={{ animationDelay: `${idx * 0.15}s` }}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`w-14 h-14 bg-gradient-to-br from-${step.color}-500 to-${step.color}-600 rounded-xl flex items-center justify-center flex-shrink-0`}
+                        >
+                          <step.icon className="w-7 h-7 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-bold text-white mb-3">
+                            {step.title}
+                          </h3>
+                          <p className="text-gray-400 leading-relaxed">
+                            {step.desc}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
@@ -341,7 +343,11 @@ export default function Home() {
                         : 'text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                   >
-                    {tab === 'problem' ? t.whyMatters.tabs.problem : tab === 'traditional' ? t.whyMatters.tabs.traditional : t.whyMatters.tabs.zerokey}
+                    {tab === 'problem'
+                      ? t.whyMatters.tabs.problem
+                      : tab === 'traditional'
+                        ? t.whyMatters.tabs.traditional
+                        : t.whyMatters.tabs.zerokey}
                   </button>
                 ))}
               </div>
@@ -515,9 +521,7 @@ export default function Home() {
       <footer className="relative py-16 border-t border-white/10">
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto text-center">
-            <p className="text-gray-400 mb-8">
-              {t.footer.tagline}
-            </p>
+            <p className="text-gray-400 mb-8">{t.footer.tagline}</p>
             <div className="flex justify-center gap-8 flex-wrap">
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI"
