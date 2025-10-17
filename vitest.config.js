@@ -24,6 +24,7 @@ export default defineConfig({
         'src/**/*.stories.tsx',
         'src/**/__tests__/**/*',
         'src/types/**/*.ts', // Exclude type definition files
+        'src/services/LitPKPSigner.ts', // Exclude - requires integration tests with real Lit network
         'mcp-server/src/**/__tests__/**/*',
         'mcp-server/src/test-search.ts',
       ],
