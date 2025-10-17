@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import SafeProposalSandbox from '@/components/SafeProposalSandbox';
 import GitHubSetupWizard from '@/components/GitHubSetupWizard';
+import { useTranslations, type Language } from '@/lib/i18n';
 import {
   Lock,
   CheckCircle2,
@@ -18,10 +19,13 @@ import {
   Code,
   Activity,
   Rocket,
+  Globe,
 } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('problem');
+  const [language, setLanguage] = useState<Language>('en');
+  const t = useTranslations(language);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
@@ -30,6 +34,34 @@ export default function Home() {
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-full blur-3xl animate-float-slow" />
 
+      {/* Language Switcher */}
+      <div className="fixed top-6 right-6 z-50">
+        <div className="flex gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-1">
+          <button
+            onClick={() => setLanguage('en')}
+            className={`px-4 py-2 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+              language === 'en'
+                ? 'bg-white text-slate-900'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            <Globe className="w-4 h-4" />
+            EN
+          </button>
+          <button
+            onClick={() => setLanguage('ja')}
+            className={`px-4 py-2 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+              language === 'ja'
+                ? 'bg-white text-slate-900'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            <Globe className="w-4 h-4" />
+            日本語
+          </button>
+        </div>
+      </div>
+
       {/* Hero Section - The Problem */}
       <section className="relative min-h-screen flex items-center">
         <div className="container mx-auto px-6 lg:px-12 py-24">
@@ -37,19 +69,16 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-6 py-3 mb-8 animate-fade-in-up">
               <Shield className="w-5 h-5 text-blue-400" />
               <span className="text-blue-300 font-semibold">
-                Secure Smart Contract Deployment
+                {t.hero.badge}
               </span>
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-black mb-8 animate-scale-in bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400">
-              Deploy Contracts
-              <br />
-              Without Private Keys
+            <h1 className="text-6xl md:text-8xl font-black mb-8 animate-scale-in bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400 whitespace-pre-line">
+              {t.hero.title}
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Secure CI/CD deployment using Gnosis Safe multisig. No private
-              keys in your pipeline, full audit trail, multi-signature approval.
+              {t.hero.subtitle}
             </p>
 
             <div className="flex gap-6 justify-center flex-wrap mb-16">
@@ -58,14 +87,14 @@ export default function Home() {
                 className="group px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
                 <Rocket className="w-6 h-6" />
-                Get Started in 3 Minutes
+                {t.hero.getStarted}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </a>
               <a
                 href="#demo"
                 className="px-10 py-5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl font-bold text-xl text-white transition-all duration-300 hover:scale-105"
               >
-                Try Demo
+                {t.hero.tryDemo}
               </a>
             </div>
 
@@ -74,20 +103,20 @@ export default function Home() {
               {[
                 {
                   icon: Shield,
-                  title: 'Multi-Signature Security',
-                  desc: 'Require multiple approvals for every deployment',
+                  title: t.benefits.multiSig.title,
+                  desc: t.benefits.multiSig.desc,
                   color: 'blue',
                 },
                 {
                   icon: FileText,
-                  title: 'Complete Audit Trail',
-                  desc: 'Every action tracked on-chain with full transparency',
+                  title: t.benefits.auditTrail.title,
+                  desc: t.benefits.auditTrail.desc,
                   color: 'purple',
                 },
                 {
                   icon: CheckCircle2,
-                  title: 'Policy Enforcement',
-                  desc: 'OPA policies ensure compliance and security standards',
+                  title: t.benefits.policy.title,
+                  desc: t.benefits.policy.desc,
                   color: 'green',
                 },
               ].map((item, idx) => (
@@ -120,18 +149,16 @@ export default function Home() {
               <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-6 py-3 mb-8">
                 <CheckCircle2 className="w-5 h-5 text-green-400" />
                 <span className="text-green-300 font-semibold">
-                  The Solution
+                  {t.solution.badge}
                 </span>
               </div>
               <h2 className="text-5xl md:text-7xl font-black mb-6 text-white">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
-                  ZeroKeyCI
+                  {t.solution.title}
                 </span>
               </h2>
               <p className="text-2xl text-gray-300 max-w-3xl mx-auto">
-                Deploy smart contracts without{' '}
-                <span className="text-white font-bold">ever</span> exposing
-                private keys in CI/CD
+                {t.solution.subtitle}
               </p>
             </div>
 
@@ -140,26 +167,26 @@ export default function Home() {
               {[
                 {
                   icon: Shield,
-                  title: 'Zero Private Keys in CI',
-                  desc: 'Private keys never touch your GitHub Actions. All signing happens through Gnosis Safe multisig - the gold standard for treasury management.',
+                  title: t.solution.features.zeroKeys.title,
+                  desc: t.solution.features.zeroKeys.desc,
                   gradient: 'from-blue-500 to-cyan-500',
                 },
                 {
                   icon: Users,
-                  title: 'Multi-Signature Security',
-                  desc: 'Require 2-of-3, 3-of-5, or any threshold. One compromised account cannot deploy malicious code.',
+                  title: t.solution.features.multiSig.title,
+                  desc: t.solution.features.multiSig.desc,
                   gradient: 'from-purple-500 to-pink-500',
                 },
                 {
                   icon: FileText,
-                  title: 'Complete Audit Trail',
-                  desc: 'Every deployment tracked from PR to blockchain. Know exactly who approved what, when, and why.',
+                  title: t.solution.features.auditTrail.title,
+                  desc: t.solution.features.auditTrail.desc,
                   gradient: 'from-green-500 to-emerald-500',
                 },
                 {
                   icon: Zap,
-                  title: 'Seamless GitHub Integration',
-                  desc: 'Add a label to your PR. CI generates the proposal. Safe owners approve. Done. No complex setup.',
+                  title: t.solution.features.github.title,
+                  desc: t.solution.features.github.desc,
                   gradient: 'from-orange-500 to-red-500',
                 },
               ].map((feature, idx) => (
@@ -191,92 +218,61 @@ export default function Home() {
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-5xl md:text-6xl font-black text-center mb-20 text-white">
-              How It{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
-                Actually
-              </span>{' '}
-              Works
+              {t.howItWorks.title}
             </h2>
 
             <div className="relative">
               {/* Vertical connecting line */}
               <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-500 to-emerald-500 hidden md:block" />
 
-              {[
-                {
-                  num: '01',
-                  title: 'Developer Creates PR',
-                  desc: 'Write your smart contract, create a PR, add the "deploy" label. That\'s it.',
-                  icon: Code,
-                  color: 'blue',
-                  side: 'left',
-                },
-                {
-                  num: '02',
-                  title: 'GitHub Actions Compiles & Validates',
-                  desc: 'CI compiles your contract, runs tests, validates with OPA policies. All without any private keys.',
-                  icon: Activity,
-                  color: 'purple',
-                  side: 'right',
-                },
-                {
-                  num: '03',
-                  title: 'Generates Safe Transaction Proposal',
-                  desc: 'Creates unsigned transaction proposal with your deployment parameters. Posted as PR comment.',
-                  icon: FileText,
-                  color: 'pink',
-                  side: 'left',
-                },
-                {
-                  num: '04',
-                  title: 'Safe Owners Review & Sign',
-                  desc: 'Multiple signers review the exact bytecode, constructor args, and deployment config. Sign when confident.',
-                  icon: Users,
-                  color: 'green',
-                  side: 'right',
-                },
-                {
-                  num: '05',
-                  title: 'Deployed to Blockchain',
-                  desc: 'Once threshold is met, contract is deployed. Full audit trail from code to chain.',
-                  icon: Zap,
-                  color: 'orange',
-                  side: 'left',
-                },
-              ].map((step, idx) => (
-                <div
-                  key={step.num}
-                  className={`relative mb-16 md:mb-24 ${
-                    step.side === 'left' ? 'md:pr-[55%]' : 'md:pl-[55%]'
-                  }`}
-                >
-                  {/* Number badge on the line */}
-                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full items-center justify-center text-white font-black text-xl shadow-2xl z-10">
-                    {step.num}
-                  </div>
-
+              {t.howItWorks.steps
+                .map((step, idx) => {
+                  const icons = [Code, Activity, FileText, Users, Zap];
+                  const colors = ['blue', 'purple', 'pink', 'green', 'orange'];
+                  const sides = ['left', 'right', 'left', 'right', 'left'];
+                  return {
+                    num: `0${idx + 1}`,
+                    title: step.title,
+                    desc: step.desc,
+                    icon: icons[idx],
+                    color: colors[idx],
+                    side: sides[idx],
+                  };
+                })
+                .map((step, idx) => (
                   <div
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
-                    style={{ animationDelay: `${idx * 0.15}s` }}
+                    key={step.num}
+                    className={`relative mb-16 md:mb-24 ${
+                      step.side === 'left' ? 'md:pr-[55%]' : 'md:pl-[55%]'
+                    }`}
                   >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`w-14 h-14 bg-gradient-to-br from-${step.color}-500 to-${step.color}-600 rounded-xl flex items-center justify-center flex-shrink-0`}
-                      >
-                        <step.icon className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-white mb-3">
-                          {step.title}
-                        </h3>
-                        <p className="text-gray-400 leading-relaxed">
-                          {step.desc}
-                        </p>
+                    {/* Number badge on the line */}
+                    <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full items-center justify-center text-white font-black text-xl shadow-2xl z-10">
+                      {step.num}
+                    </div>
+
+                    <div
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                      style={{ animationDelay: `${idx * 0.15}s` }}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`w-14 h-14 bg-gradient-to-br from-${step.color}-500 to-${step.color}-600 rounded-xl flex items-center justify-center flex-shrink-0`}
+                        >
+                          <step.icon className="w-7 h-7 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-bold text-white mb-3">
+                            {step.title}
+                          </h3>
+                          <p className="text-gray-400 leading-relaxed">
+                            {step.desc}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
@@ -291,14 +287,10 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
-                Try It{' '}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
-                  Right Now
-                </span>
+                {t.demo.title}
               </h2>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                Generate a real Safe transaction proposal in your browser. No
-                wallet required.
+                {t.demo.subtitle}
               </p>
             </div>
 
@@ -315,19 +307,14 @@ export default function Home() {
               <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-6 py-3 mb-8">
                 <Rocket className="w-5 h-5 text-green-400" />
                 <span className="text-green-300 font-semibold">
-                  3-Minute Setup
+                  {t.setup.badge}
                 </span>
               </div>
-              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
-                Deploy Your First Contract
-                <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
-                  In 3 Minutes
-                </span>
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white whitespace-pre-line">
+                {t.setup.title}
               </h2>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-                Configure your Safe address, download the files, and start
-                deploying with enterprise-grade security.
+                {t.setup.subtitle}
               </p>
             </div>
 
@@ -341,7 +328,7 @@ export default function Home() {
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-5xl font-black text-center mb-12 text-white">
-              Why This Matters
+              {t.whyMatters.title}
             </h2>
 
             <div className="flex justify-center mb-12">
@@ -356,7 +343,11 @@ export default function Home() {
                         : 'text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                   >
-                    {tab === 'zerokey' ? 'With ZeroKeyCI' : tab}
+                    {tab === 'problem'
+                      ? t.whyMatters.tabs.problem
+                      : tab === 'traditional'
+                        ? t.whyMatters.tabs.traditional
+                        : t.whyMatters.tabs.zerokey}
                   </button>
                 ))}
               </div>
@@ -484,16 +475,11 @@ export default function Home() {
       <section className="relative py-32">
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-5xl md:text-6xl font-black mb-8 text-white">
-              Ready to Deploy
-              <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
-                Without Fear?
-              </span>
+            <h2 className="text-5xl md:text-6xl font-black mb-8 text-white whitespace-pre-line">
+              {t.cta.title}
             </h2>
             <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-              Start deploying with multi-signature security and full audit
-              trails
+              {t.cta.subtitle}
             </p>
             <div className="flex gap-6 justify-center flex-wrap">
               <a
@@ -501,16 +487,16 @@ export default function Home() {
                 className="group px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl font-bold text-xl text-white shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
                 <GitBranch className="w-6 h-6" />
-                View on GitHub
+                {t.cta.github}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
 
             <div className="mt-16 grid md:grid-cols-3 gap-8">
               {[
-                { num: '0', label: 'Private Keys in CI', icon: Lock },
-                { num: '100%', label: 'Open Source', icon: Code },
-                { num: '∞', label: 'Peace of Mind', icon: Shield },
+                { num: '0', label: t.cta.stats.privateKeys, icon: Lock },
+                { num: '100%', label: t.cta.stats.openSource, icon: Code },
+                { num: '∞', label: t.cta.stats.peace, icon: Shield },
               ].map((stat, idx) => (
                 <div
                   key={stat.label}
@@ -535,27 +521,25 @@ export default function Home() {
       <footer className="relative py-16 border-t border-white/10">
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto text-center">
-            <p className="text-gray-400 mb-8">
-              Built with security and developer experience in mind
-            </p>
+            <p className="text-gray-400 mb-8">{t.footer.tagline}</p>
             <div className="flex justify-center gap-8 flex-wrap">
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI"
                 className="text-lg font-semibold text-gray-400 hover:text-white transition-colors"
               >
-                GitHub
+                {t.footer.links.github}
               </a>
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PRODUCTION-SETUP.md"
                 className="text-lg font-semibold text-gray-400 hover:text-white transition-colors"
               >
-                Documentation
+                {t.footer.links.docs}
               </a>
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI/issues"
                 className="text-lg font-semibold text-gray-400 hover:text-white transition-colors"
               >
-                Issues
+                {t.footer.links.issues}
               </a>
             </div>
           </div>
