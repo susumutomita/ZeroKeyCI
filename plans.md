@@ -129,6 +129,148 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 ## Active Exec Plans
 
+### Exec Plan: Lit Protocol PKP Integration for Automated Signing
+Created: 2025-10-17 (現在時刻)
+Status: 🟡 In Progress
+
+#### Objective
+Integrate Lit Protocol's Programmable Key Pairs (PKPs) to enable fully automated, keyless smart contract deployment. The PKP will act as a Safe multisig owner, signing deployment proposals automatically when predefined conditions are met - without any private keys stored in CI/CD.
+
+**Success criteria:**
+- PKP can be minted and configured as Safe owner
+- Lit Actions execute conditional signing logic (OPA pass, tests pass, PR merged)
+- CI/CD triggers PKP signing via Lit SDK
+- Full audit trail maintained (PR → Lit Action execution → Safe transaction)
+- Zero private keys in any environment
+- 100% test coverage for all new code
+
+#### Guardrails (Non-negotiable constraints)
+- **ZERO private keys** in GitHub Actions, code, or configuration
+- Must maintain 100% test coverage
+- All Safe proposals must still pass OPA validation before PKP signs
+- PKP signing must be conditional (not automatic for all proposals)
+- Complete audit trail from PR → Lit Action → Safe → on-chain
+- Test-driven development (write tests first)
+- Lit Protocol dependencies already in package.json - use existing versions
+- Must work with existing SafeProposalBuilder infrastructure
+
+#### TODO
+- [ ] Phase 1: Lit SDK Service Layer
+  - [ ] Create `LitPKPSigner` service class
+  - [ ] Write tests for LitPKPSigner (TDD approach)
+  - [ ] Implement PKP authentication methods
+  - [ ] Add session signature handling
+  - [ ] Implement ECDSA signing via PKP
+- [ ] Phase 2: Lit Action Development
+  - [ ] Create Lit Action JavaScript code for conditional signing
+  - [ ] Implement validation logic (OPA, tests, PR status)
+  - [ ] Add GitHub API integration for PR verification
+  - [ ] Add error handling and logging
+  - [ ] Store Lit Action on IPFS
+- [ ] Phase 3: CI/CD Integration
+  - [ ] Update deploy.yml workflow to trigger Lit PKP signing
+  - [ ] Add environment variables for Lit configuration
+  - [ ] Implement Safe transaction submission after PKP signature
+  - [ ] Add status reporting back to GitHub PR
+- [ ] Phase 4: PKP Setup Scripts
+  - [ ] Create script to mint PKP NFT
+  - [ ] Create script to grant Lit Action permission to PKP
+  - [ ] Create script to add PKP as Safe owner
+  - [ ] Document PKP setup process
+- [ ] Phase 5: Testing & Documentation
+  - [ ] Write integration tests (mock Lit Protocol)
+  - [ ] Write end-to-end tests
+  - [ ] Update DEPLOYMENT.md with Lit Protocol setup
+  - [ ] Update README with automated signing flow
+  - [ ] Create troubleshooting guide
+
+#### Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] Coverage at 100% (`bun run test:coverage`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`, `bun run lint_text`)
+- [ ] Build succeeds (`bun run build`)
+- [ ] LitPKPSigner can authenticate with Lit network
+- [ ] Lit Action executes successfully in test environment
+- [ ] PKP can sign Safe transactions
+- [ ] Full flow works: PR → CI → Lit Action → PKP signature → Safe execution
+
+#### Progress Log
+
+##### Iteration 1 (現在時刻)
+**What was done:**
+- Researched Lit Protocol PKP architecture and capabilities
+- Analyzed ZeroKey CI current architecture (SafeProposalBuilder, GitHub Actions)
+- Designed integration approach:
+  - PKP as Safe owner (2-of-3 multisig with human owners)
+  - Lit Actions for conditional signing logic
+  - CI triggers Lit SDK to execute signing
+- Created comprehensive exec plan
+- Confirmed existing Lit Protocol dependencies in package.json:
+  - @lit-protocol/lit-node-client@^7.3.1
+  - @lit-protocol/auth-helpers@^8.0.2
+  - @lit-protocol/constants@^8.0.2
+
+**Test status:**
+- Planning phase - no tests yet
+- All existing tests passing (174/174)
+
+**Decisions made:**
+- Decision: Use PKP as one of multiple Safe owners (2-of-3 or similar threshold)
+- Reasoning: Maintains security even if PKP is compromised; humans still required
+- Alternatives: PKP as sole owner - rejected as too risky
+
+- Decision: Implement Lit Actions for signing logic (not smart contracts)
+- Reasoning: More flexible, can integrate external APIs (GitHub, OPA), cheaper
+- Alternatives: On-chain validation - rejected due to gas costs and inflexibility
+
+- Decision: Use existing Lit Protocol SDK versions in package.json
+- Reasoning: Already tested and compatible with project
+- Impact: No new dependencies to install
+
+- Decision: TDD approach - write tests before implementation
+- Reasoning: Ensures code quality, maintains 100% coverage requirement
+- Implementation: Create test files first, then implement to pass tests
+
+**Blockers/Issues:**
+- None yet - proceeding with Phase 1
+
+#### Open Questions
+- **Q**: Should PKP be able to sign all proposals or only specific types?
+  - **A**: TBD - initially implement for upgrade proposals only, extend later
+
+- **Q**: What threshold for Safe multisig (PKP + human owners)?
+  - **A**: TBD - recommend 2-of-3 (1 PKP + 2 humans, threshold=2)
+
+- **Q**: How to handle Lit Action failures?
+  - **A**: TBD - fail safe (don't sign), log to GitHub Actions, notify in PR comments
+
+- **Q**: Should we support multiple PKPs for different environments (dev/staging/prod)?
+  - **A**: TBD - evaluate during implementation, likely yes
+
+#### References
+- Lit Protocol Developer Docs: https://developer.litprotocol.com/
+- Lit Protocol PKPs: https://developer.litprotocol.com/integrations/aa/overview
+- Safe SDK: https://docs.safe.global/sdk/protocol-kit
+- Existing exec plan: Keyless CI/CD Smart Contract Deployment
+- package.json:30-32 (Lit Protocol dependencies)
+- src/services/SafeProposalBuilder.ts (existing proposal infrastructure)
+
+#### Handoff Notes
+**Final Summary:**
+- _In progress_
+
+**Outstanding Risks:**
+- Lit Protocol network availability (external dependency)
+- PKP private key security (must remain distributed, never exportable)
+- Gas costs for minting PKPs and executing Lit Actions
+
+**Follow-up Tasks:**
+- Test Lit Protocol integration on testnet before mainnet
+- Monitor Lit Action execution costs
+- Create runbook for PKP key rotation/recovery
+- Consider adding circuit breaker for automated signing limits
+
 ### Exec Plan: Production Readiness
 Created: 2025-10-15 06:09
 Status: 🟡 In Progress
