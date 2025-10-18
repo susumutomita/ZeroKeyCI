@@ -14,7 +14,12 @@ export default defineConfig({
     globals: true,
     setupFiles: './vitest.setup.ts',
     include: ['**/__tests__/**/*.(ts|tsx|js)', '**/*.(test|spec).(ts|tsx|js)'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/test/contracts/**'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/test/contracts/**',
+      'src/lit-actions/**/__tests__/**/*', // Exclude Lit Action tests - require integration with real Lit network
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -25,6 +30,7 @@ export default defineConfig({
         'src/**/__tests__/**/*',
         'src/types/**/*.ts', // Exclude type definition files
         'src/services/LitPKPSigner.ts', // Exclude - requires integration tests with real Lit network
+        'src/lit-actions/**/*.{ts,js}', // Exclude Lit Action code - requires integration tests with real Lit network
         'mcp-server/src/**/__tests__/**/*',
         'mcp-server/src/test-search.ts',
       ],

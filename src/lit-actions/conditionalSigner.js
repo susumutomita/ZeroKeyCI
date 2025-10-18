@@ -39,7 +39,9 @@
         allConditionsMet = false;
       } else {
         try {
-          console.log(`[Lit Action] Verifying OPA policy: ${params.opa.policyEndpoint}`);
+          console.log(
+            `[Lit Action] Verifying OPA policy: ${params.opa.policyEndpoint}`
+          );
           const response = await fetch(params.opa.policyEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -52,10 +54,15 @@
           } else {
             const data = await response.json();
             const allowed = data.result?.allow === true;
-            console.log(`[Lit Action] OPA policy result: ${allowed ? 'PASS' : 'FAIL'}`);
+            console.log(
+              `[Lit Action] OPA policy result: ${allowed ? 'PASS' : 'FAIL'}`
+            );
             verificationResults.opaPolicyPassed = allowed;
             if (!allowed) {
-              console.error('[Lit Action] OPA violations:', data.result?.violations);
+              console.error(
+                '[Lit Action] OPA violations:',
+                data.result?.violations
+              );
               allConditionsMet = false;
             }
           }
@@ -76,16 +83,22 @@
         allConditionsMet = false;
       } else {
         try {
-          console.log(`[Lit Action] Verifying tests: ${params.tests.testResultsUrl}`);
+          console.log(
+            `[Lit Action] Verifying tests: ${params.tests.testResultsUrl}`
+          );
           const response = await fetch(params.tests.testResultsUrl);
 
           if (!response.ok) {
-            console.error(`[Lit Action] Test results API error: ${response.status}`);
+            console.error(
+              `[Lit Action] Test results API error: ${response.status}`
+            );
             allConditionsMet = false;
           } else {
             const data = await response.json();
             const testsPassed = data.conclusion === 'success';
-            console.log(`[Lit Action] Tests result: ${testsPassed ? 'PASS' : 'FAIL'}`);
+            console.log(
+              `[Lit Action] Tests result: ${testsPassed ? 'PASS' : 'FAIL'}`
+            );
             verificationResults.testsPassed = testsPassed;
             if (!testsPassed) {
               console.error('[Lit Action] Test failures:', data.details);
@@ -126,7 +139,9 @@
           } else {
             const data = await response.json();
             const isMerged = data.merged === true;
-            console.log(`[Lit Action] PR #${params.github.prNumber} merged: ${isMerged}`);
+            console.log(
+              `[Lit Action] PR #${params.github.prNumber} merged: ${isMerged}`
+            );
             verificationResults.prMerged = isMerged;
             if (!isMerged) {
               allConditionsMet = false;
@@ -175,7 +190,8 @@
       }),
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('[Lit Action] Fatal error:', errorMessage);
     LitActions.setResponse({
       response: JSON.stringify({

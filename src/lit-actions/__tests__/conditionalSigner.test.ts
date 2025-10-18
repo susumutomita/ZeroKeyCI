@@ -201,7 +201,8 @@ describe('Lit Action: Conditional Signer', () => {
           prMerged: false,
         },
         tests: {
-          testResultsUrl: 'https://api.github.com/repos/owner/repo/actions/runs/123',
+          testResultsUrl:
+            'https://api.github.com/repos/owner/repo/actions/runs/123',
         },
       };
 
@@ -297,7 +298,8 @@ describe('Lit Action: Conditional Signer', () => {
           deploymentConfig: { network: 'sepolia' },
         },
         tests: {
-          testResultsUrl: 'https://api.github.com/repos/owner/repo/actions/runs/123',
+          testResultsUrl:
+            'https://api.github.com/repos/owner/repo/actions/runs/123',
         },
         github: {
           repoOwner: 'susumutomita',

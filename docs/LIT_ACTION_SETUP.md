@@ -213,21 +213,21 @@ Test coverage:
 2. **Conditional Signing**: Signing only happens if all validation checks pass
 3. **Audit Trail**: Complete logging of all verification steps
 4. **Immutable Code**: Lit Action stored on IPFS (content-addressed, tamper-proof)
-5. **Session-based Auth**: Uses session signatures for Lit Protocol authentication
+5. **セッション-based Auth**: Uses セッション signatures for Lit Protocol authentication
 
 ### ⚠️ What to Protect
 
 1. **GitHub Token**: Ensure `GITHUB_TOKEN` has minimal permissions (read-only for PR status)
 2. **OPA Endpoint**: OPA server should be secured with authentication
 3. **PKP Permissions**: Only grant Lit Action permission to specific PKP (using `pkpPermit`)
-4. **Session Signatures**: Generate fresh session signatures for each signing operation
+4. **セッション Signatures**: Generate fresh セッション signatures for each signing operation
 
 ### 🚨 What NOT to Do
 
-1. ❌ **Don't** hardcode PKP private key (it doesn't exist in full anyway)
-2. ❌ **Don't** skip validation checks (defeats the purpose)
-3. ❌ **Don't** expose OPA policy endpoint publicly without authentication
-4. ❌ **Don't** use the same session signatures across multiple operations
+1. ❌ Don't hardcode PKP private key (it doesn't exist in full anyway)
+2. ❌ Don't skip validation checks (defeats the purpose)
+3. ❌ Don't expose OPA policy endpoint publicly without authentication
+4. ❌ Don't use the same セッション signatures across multiple operations
 
 ## Troubleshooting
 
@@ -268,10 +268,10 @@ Test coverage:
 
 ## Next Steps
 
-1. ✅ **Phase 2 Complete**: Lit Action Development
-2. 🔄 **Phase 3**: CI/CD Integration (update `deploy.yml` workflow)
-3. 🔄 **Phase 4**: PKP Setup Scripts (mint PKP, grant permissions, add to Safe)
-4. 🔄 **Phase 5**: Testing & Documentation (E2E tests, troubleshooting guide)
+1. ✅ Phase 2 Complete: Lit Action Development
+2. 🔄 Phase 3: CI/CD Integration (update `deploy.yml` workflow)
+3. 🔄 Phase 4: PKP Setup Scripts (mint PKP, grant permissions, add to Safe)
+4. 🔄 Phase 5: Testing & Documentation (E2E tests, troubleshooting guide)
 
 ## References
 

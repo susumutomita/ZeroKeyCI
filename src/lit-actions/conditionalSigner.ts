@@ -174,9 +174,7 @@ async function verifyTestsPassed(tests: TestResultsParams): Promise<boolean> {
     // Expected format: { conclusion: "success" | "failure", ... }
     const testsPassed = data.conclusion === 'success';
 
-    console.log(
-      `[Lit Action] Tests result: ${testsPassed ? 'PASS' : 'FAIL'}`
-    );
+    console.log(`[Lit Action] Tests result: ${testsPassed ? 'PASS' : 'FAIL'}`);
 
     if (!testsPassed && data.details) {
       console.error('[Lit Action] Test failures:', data.details);
@@ -311,7 +309,8 @@ async function verifyTestsPassed(tests: TestResultsParams): Promise<boolean> {
       }),
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('[Lit Action] Fatal error:', errorMessage);
 
     LitActions.setResponse({
