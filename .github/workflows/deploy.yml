@@ -283,6 +283,32 @@ jobs:
           echo "✅ MCP integration configured"
           cat .zerokey/mcp-config.json
 
+      - name: Trigger PKP signing (if configured)
+        id: pkp-signing
+        if: env.PKP_PUBLIC_KEY != '' && env.LIT_ACTION_IPFS_CID != ''
+        env:
+          PKP_PUBLIC_KEY: ${{ secrets.PKP_PUBLIC_KEY }}
+          LIT_ACTION_IPFS_CID: ${{ secrets.LIT_ACTION_IPFS_CID }}
+          LIT_NETWORK: ${{ secrets.LIT_NETWORK || 'datil-dev' }}
+          SAFE_ADDRESS: ${{ secrets.SAFE_ADDRESS }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "🔐 Triggering Lit Protocol PKP signing..."
+
+          # Run PKP signing script
+          bun run scripts/trigger-pkp-signing.ts safe-proposal.json
+
+          # Check if signing succeeded
+          if [ $? -eq 0 ]; then
+            echo "✅ PKP signing completed successfully"
+            echo "pkp_signed=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  PKP signing failed, manual signing required"
+            echo "pkp_signed=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Comment on PR with proposal details
         uses: actions/github-script@v7
         with:
@@ -291,8 +317,9 @@ jobs:
             const safeAddress = process.env.SAFE_ADDRESS;
             const network = '${{ steps.deploy-config.outputs.network }}';
             const contract = '${{ steps.deploy-config.outputs.contract }}';
+            const pkpSigned = '${{ steps.pkp-signing.outputs.pkp_signed }}' === 'true';
 
-            const comment = `## 🚀 Deployment Proposal Created
+            let comment = `## 🚀 Deployment Proposal Created
 
             A Safe transaction proposal has been generated for this deployment.
 
@@ -300,12 +327,30 @@ jobs:
             - **Contract**: \`${contract}\`
             - **Network**: \`${network}\`
             - **Safe Address**: \`${safeAddress}\`
-            - **Proposal Hash**: \`${proposalHash}\`
+            - **Proposal Hash**: \`${proposalHash}\``;
+
+            if (pkpSigned) {
+              comment += `
+
+            ### 🔐 PKP Signing Status
+            ✅ **Lit Protocol PKP has signed this proposal**
+
+            The PKP has verified:
+            - OPA policy validation passed
+            - All tests passed
+            - PR was properly merged
+
+            Additional Safe owners can review and sign, or execute directly if threshold is met.`;
+            } else {
+              comment += `
 
             ### 🔐 Next Steps
             1. Safe owners can review and sign the proposal
             2. Once threshold is reached, execute the transaction
-            3. Contract will be deployed at deterministic address
+            3. Contract will be deployed at deterministic address`;
+            }
+
+            comment += `
 
             ### 📦 Artifacts
             - [Download Proposal](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
