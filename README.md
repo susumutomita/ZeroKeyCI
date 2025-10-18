@@ -136,6 +136,67 @@ ZeroKey CI makes smart-contract deployment:
 In the hackathon build we used a lightweight **SoftKMS** signer that can be swapped for any free or cloud-hosted key service (AWS, GCP, HashiCorp Vault).
 Keys are non-exportable and use short-lived tokens, so ZeroKey CI can run **without any paid cloud dependency**.
 
+### 🤖 Automated Signing with Lit Protocol PKP (Advanced)
+
+For teams that want **fully automated deployments** while maintaining security, ZeroKeyCI supports **Lit Protocol Programmable Key Pairs (PKPs)**:
+
+**What is a PKP?**
+- An NFT-controlled ECDSA key pair with distributed private key shares across Lit Protocol nodes
+- Private key **never reconstructed** - threshold cryptography ensures no single point of failure
+- Executes JavaScript "Lit Actions" with conditional signing logic
+
+**How automated signing works**:
+
+```
+PR Merged → CI Creates Proposal → Lit Action Validates Conditions → PKP Signs → Safe Executes
+```
+
+**Conditional signing example** (Lit Action logic):
+```javascript
+if (allTestsPass &&
+    opaPolicyValid &&
+    prApproved &&
+    from === 'github-actions') {
+  sign(transaction);  // PKP signs automatically
+} else {
+  reject('Validation failed');
+}
+```
+
+**Security guarantees**:
+- ✅ NO private keys in GitHub Actions (PKP key is distributed)
+- ✅ Conditional logic enforced on-chain (Lit Protocol nodes)
+- ✅ Full audit trail (PR → Lit Action → PKP → Safe → On-chain)
+- ✅ Human override (Safe owners can still reject)
+
+**When to use automated signing**:
+- High-frequency deployments (multiple times per day)
+- Well-tested contracts with comprehensive CI coverage
+- Teams comfortable with threshold cryptography
+- Advanced security requirements
+
+**Setup**:
+1. **Mint PKP NFT** - Creates distributed key pair
+2. **Deploy Lit Action** - Upload conditional signing logic to IPFS
+3. **Grant permissions** - Authorize Lit Action to use PKP
+4. **Add PKP to Safe** - PKP becomes one of N Safe owners
+5. **Configure CI** - Trigger PKP signing after proposal creation
+
+**→ [Complete PKP Setup Guide](docs/PKP_SETUP.md)**
+**→ [Production Deployment](DEPLOYMENT.md#option-b-lit-protocol-pkp-automated-signing)**
+
+**Manual vs Automated Comparison**:
+
+| Feature | Manual Safe Signing | Lit Protocol PKP Automated |
+|---------|---------------------|---------------------------|
+| **Security** | ✅ Highest (human review every time) | ✅ High (conditional logic + human override) |
+| **Speed** | ⏱️ Minutes to hours | ⚡ Seconds |
+| **Setup complexity** | ✅ Simple | ⚙️ Advanced |
+| **Best for** | Starting teams, critical contracts | High-frequency, well-tested deployments |
+| **Private keys in CI** | ❌ Never | ❌ Never (distributed key) |
+
+**Both options maintain the core principle: NO private keys in CI/CD.**
+
 ## 📝 Specs & Editor Integration
 
 ZeroKey CI supports a *spec-first* workflow. If you use the companion editor extension (VS Code / Cursor), you can generate, edit, and validate the following spec files. The CI will automatically detect them if present.
