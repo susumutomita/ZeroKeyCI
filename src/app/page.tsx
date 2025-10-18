@@ -349,6 +349,147 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Lit Protocol Technical Deep Dive */}
+      <section className="relative py-32 bg-gradient-to-br from-cyan-900/20 to-purple-900/20">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-6 py-3 mb-8">
+                <Zap className="w-5 h-5 text-cyan-400" />
+                <span className="text-cyan-300 font-semibold">
+                  {t.litProtocol.badge}
+                </span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                {t.litProtocol.title}
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+                {t.litProtocol.subtitle}
+              </p>
+              <p className="text-lg text-gray-400 max-w-4xl mx-auto leading-relaxed">
+                {t.litProtocol.intro}
+              </p>
+            </div>
+
+            {/* PKP Architecture Timeline */}
+            <div className="mb-24">
+              <h3 className="text-4xl font-bold text-center mb-16 text-white">
+                {t.litProtocol.architecture.title}
+              </h3>
+
+              <div className="relative">
+                {/* Connecting line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-purple-500 to-pink-500 hidden md:block" />
+
+                {t.litProtocol.architecture.steps.map((step, idx) => (
+                  <div
+                    key={step.num}
+                    className={`relative mb-16 md:mb-20 ${
+                      idx % 2 === 0 ? 'md:pr-[55%]' : 'md:pl-[55%]'
+                    }`}
+                  >
+                    {/* Number badge */}
+                    <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-br from-cyan-600 to-purple-600 rounded-full items-center justify-center text-white font-black text-2xl shadow-2xl shadow-cyan-500/50 z-10 border-4 border-slate-900">
+                      {step.num}
+                    </div>
+
+                    <div
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                      style={{ animationDelay: `${idx * 0.15}s` }}
+                    >
+                      <h4 className="text-2xl font-bold text-white mb-4">
+                        {step.title}
+                      </h4>
+                      <p className="text-gray-400 leading-relaxed text-lg">
+                        {step.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Flow Diagram */}
+            <div className="mb-24">
+              <h3 className="text-4xl font-bold text-center mb-16 text-white">
+                {t.litProtocol.flow.title}
+              </h3>
+
+              <div className="grid md:grid-cols-5 gap-4">
+                {t.litProtocol.flow.steps.map((step, idx) => {
+                  const icons = {
+                    GitBranch,
+                    Activity,
+                    Zap,
+                    RefreshCw,
+                    Shield,
+                  };
+                  const IconComponent = icons[step.icon as keyof typeof icons];
+
+                  return (
+                    <div key={idx} className="relative">
+                      <div
+                        className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-500 hover:scale-105 h-full flex flex-col animate-fade-in-up"
+                        style={{ animationDelay: `${idx * 0.1}s` }}
+                      >
+                        <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 mx-auto shadow-xl">
+                          {IconComponent && (
+                            <IconComponent className="w-7 h-7 text-white" />
+                          )}
+                        </div>
+                        <h4 className="text-lg font-bold text-white mb-3 text-center">
+                          {step.title}
+                        </h4>
+                        <p className="text-gray-400 text-sm leading-relaxed text-center flex-grow">
+                          {step.desc}
+                        </p>
+                      </div>
+                      {/* Arrow between steps */}
+                      {idx < t.litProtocol.flow.steps.length - 1 && (
+                        <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-4 text-cyan-400 z-20">
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Security Guarantees */}
+            <div>
+              <h3 className="text-4xl font-bold text-center mb-16 text-white">
+                {t.litProtocol.security.title}
+              </h3>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {t.litProtocol.security.points.map((point, idx) => (
+                  <div
+                    key={point.title}
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                    style={{ animationDelay: `${idx * 0.1}s` }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xl">
+                        <CheckCircle2 className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-white mb-3">
+                          {point.title}
+                        </h4>
+                        <p className="text-gray-400 leading-relaxed">
+                          {point.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Current Limitations Section */}
       <section className="relative py-32">
         <div className="container mx-auto px-6 lg:px-12">

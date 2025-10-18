@@ -8,8 +8,10 @@ describe('Landing Page', () => {
     expect(
       screen.getByText('Secure Smart Contract Deployment')
     ).toBeInTheDocument();
-    expect(screen.getByText(/Deploy Contracts/i)).toBeInTheDocument();
-    expect(screen.getByText(/Without Private Keys/i)).toBeInTheDocument();
+    // Check for the full hero heading instead of partial text
+    expect(
+      screen.getByRole('heading', { level: 1, name: /Deploy Contracts/i })
+    ).toBeInTheDocument();
   });
 
   it('should render the get started button', () => {
@@ -48,9 +50,7 @@ describe('Landing Page', () => {
 
   it('should render How It Actually Works section', () => {
     render(<Home />);
-    // "How It Actually Works" text is broken up by spans, so check for parts
-    expect(screen.getByText(/How It/i)).toBeInTheDocument();
-    expect(screen.getByText(/Actually/i)).toBeInTheDocument();
+    // Check for specific step content in the workflow instead of the title
     expect(screen.getByText(/Developer Creates PR/i)).toBeInTheDocument();
     expect(
       screen.getByText(/GitHub Actions Compiles & Validates/i)
@@ -64,11 +64,12 @@ describe('Landing Page', () => {
 
   it('should render Try It Right Now section', () => {
     render(<Home />);
-    // "Try It" appears multiple times, so use getAllBy
-    const tryItElements = screen.getAllByText(/Try It/i);
-    expect(tryItElements.length).toBeGreaterThan(0);
-    const rightNowElements = screen.getAllByText(/Right Now/i);
-    expect(rightNowElements.length).toBeGreaterThan(0);
+    // Check for the demo sandbox content
+    expect(
+      screen.getByText(
+        /Generate a real Safe transaction proposal in your browser/i
+      )
+    ).toBeInTheDocument();
   });
 
   it('should render Deploy Your First Contract section', () => {
@@ -175,5 +176,28 @@ describe('Landing Page', () => {
         /Industry best practice: Multi-signature wallets provide enhanced security/i
       )
     ).toBeInTheDocument();
+  });
+
+  it('should render Lit Protocol Technical Deep Dive section', () => {
+    render(<Home />);
+
+    // Check for Lit Protocol section headings using getAllByText for duplicate content
+    const litProtocolHeadings = screen.getAllByText(
+      /How Lit Protocol Powers Keyless CI\/CD/i
+    );
+    expect(litProtocolHeadings.length).toBeGreaterThan(0);
+
+    const pkpArchHeadings = screen.getAllByText(/PKP Architecture/i);
+    expect(pkpArchHeadings.length).toBeGreaterThan(0);
+
+    // Check for unique content within the section
+    expect(
+      screen.getByText(
+        /threshold cryptography across its decentralized network/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Security Guarantees/i)).toBeInTheDocument();
+    expect(screen.getByText(/No Private Key Exposure/i)).toBeInTheDocument();
+    expect(screen.getByText(/Conditional Signing Only/i)).toBeInTheDocument();
   });
 });
