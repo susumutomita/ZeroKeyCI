@@ -769,6 +769,286 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Lit Protocol PKP - Automated Signing */}
+      <section className="relative py-32 bg-gradient-to-br from-purple-900/20 to-blue-900/20">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-6 py-3 mb-8">
+                <Zap className="w-5 h-5 text-purple-400" />
+                <span className="text-purple-300 font-semibold">
+                  Automated Signing (Optional)
+                </span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
+                  Lit Protocol PKP Integration
+                </span>
+              </h2>
+              <p className="text-2xl text-gray-300 max-w-3xl mx-auto">
+                Take automation to the next level with Programmable Key Pairs
+                for conditional, trustless signing
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                  <Lock className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  No Exportable Private Keys
+                </h3>
+                <p className="text-gray-400 leading-relaxed mb-4">
+                  PKPs are non-custodial key pairs that execute signing logic
+                  without ever exposing private keys. The keys literally cannot
+                  be exported.
+                </p>
+                <ul className="space-y-2 text-gray-400">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>Distributed key generation across Lit nodes</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>Threshold signature scheme (MPC)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>No single point of compromise</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6">
+                  <FileText className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Conditional Signing Logic
+                </h3>
+                <p className="text-gray-400 leading-relaxed mb-4">
+                  Lit Actions define the exact conditions for signing.
+                  Deployments only proceed if all criteria are met.
+                </p>
+                <ul className="space-y-2 text-gray-400">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>OPA policy validation required</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>All tests must pass</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span>PR approval checks enforced</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-2xl p-8">
+              <div className="flex items-start gap-4">
+                <AlertTriangle className="w-8 h-8 text-purple-400 flex-shrink-0" />
+                <div>
+                  <h4 className="text-xl font-bold text-white mb-2">
+                    100% Optional - Manual Signing Still Works
+                  </h4>
+                  <p className="text-gray-300">
+                    PKP integration is completely optional. ZeroKeyCI works
+                    perfectly with manual Safe multisig approval. PKPs simply
+                    add an automation layer for teams that want it.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Roadmap - Future Features */}
+      <section className="relative py-32">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-6 py-3 mb-8">
+                <Rocket className="w-5 h-5 text-cyan-400" />
+                <span className="text-cyan-300 font-semibold">Coming Soon</span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400">
+                  Roadmap
+                </span>
+              </h2>
+              <p className="text-2xl text-gray-300 max-w-3xl mx-auto">
+                We&apos;re continuously improving ZeroKeyCI with
+                production-grade features
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
+                    <Zap className="w-8 h-8 text-white" />
+                  </div>
+                  <span className="px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full text-sm font-semibold">
+                    Q1 2026
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Gas Optimization
+                </h3>
+                <p className="text-gray-400 leading-relaxed mb-4">
+                  Automatic gas optimization for contract deployments with cost
+                  estimation and network-specific tuning.
+                </p>
+                <ul className="space-y-2 text-gray-400 text-sm">
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Pre-deployment gas cost analysis</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Bytecode optimization recommendations</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Network fee comparison (L1 vs L2)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Gas price monitoring and alerts</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                    <RefreshCw className="w-8 h-8 text-white" />
+                  </div>
+                  <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm font-semibold">
+                    Q2 2026
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Upgradeable Contracts
+                </h3>
+                <p className="text-gray-400 leading-relaxed mb-4">
+                  Full support for proxy patterns and upgradeable contract
+                  deployments with version management.
+                </p>
+                <ul className="space-y-2 text-gray-400 text-sm">
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Transparent, UUPS, and Beacon proxy support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Storage layout collision detection</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Upgrade proposal workflows</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Version history and rollback support</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+                    <Activity className="w-8 h-8 text-white" />
+                  </div>
+                  <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm font-semibold">
+                    Q1 2026
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Advanced Monitoring
+                </h3>
+                <p className="text-gray-400 leading-relaxed mb-4">
+                  Real-time deployment dashboards and comprehensive analytics
+                  for your Safe operations.
+                </p>
+                <ul className="space-y-2 text-gray-400 text-sm">
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Deployment success/failure metrics</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Safe transaction timeline visualization</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Policy violation insights</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Team performance analytics</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                    <Globe className="w-8 h-8 text-white" />
+                  </div>
+                  <span className="px-3 py-1 bg-pink-500/20 text-pink-300 rounded-full text-sm font-semibold">
+                    Q3 2026
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Multi-Chain Support
+                </h3>
+                <p className="text-gray-400 leading-relaxed mb-4">
+                  Deploy across 20+ EVM chains with unified management and
+                  cross-chain coordination.
+                </p>
+                <ul className="space-y-2 text-gray-400 text-sm">
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-pink-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>All major L1s and L2s supported</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-pink-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Cross-chain deployment coordination</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-pink-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Network-specific configuration profiles</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-pink-400 rounded-full mt-2 flex-shrink-0" />
+                    <span>Unified Safe management interface</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center">
+              <p className="text-gray-400 text-lg mb-6">
+                Have a feature request? We&apos;d love to hear from you.
+              </p>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/issues/new"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105"
+              >
+                <Target className="w-5 h-5" />
+                Request a Feature
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="relative py-32">
         <div className="container mx-auto px-6 lg:px-12">
