@@ -60,9 +60,11 @@ export interface DeploymentTracking {
  */
 export class DeploymentTracker {
   private deployments: Map<string, DeploymentTracking>;
+  private logger: typeof logger;
 
-  constructor() {
+  constructor(customLogger = logger) {
     this.deployments = new Map();
+    this.logger = customLogger;
   }
 
   /**
@@ -79,7 +81,7 @@ export class DeploymentTracker {
 
     this.deployments.set(id, deployment);
 
-    logger.info('Deployment started', {
+    this.logger.info('Deployment started', {
       deploymentId: id,
       ...metadata,
     });
@@ -107,7 +109,7 @@ export class DeploymentTracker {
     deployment.events.push(event);
     deployment.currentPhase = phase;
 
-    logger.info(event.message, {
+    this.logger.info(event.message, {
       deploymentId: id,
       phase,
       ...metadata,
@@ -135,7 +137,7 @@ export class DeploymentTracker {
 
     deployment.events.push(event);
 
-    logger.info(event.message, {
+    this.logger.info(event.message, {
       deploymentId: id,
       phase,
       ...metadata,
@@ -167,7 +169,7 @@ export class DeploymentTracker {
     deployment.status = 'failed';
     deployment.endTime = new Date();
 
-    logger.error(event.message, error, {
+    this.logger.error(event.message, error, {
       deploymentId: id,
       phase,
       ...metadata,
@@ -187,7 +189,7 @@ export class DeploymentTracker {
       deployment.metadata = { ...deployment.metadata, ...metadata };
     }
 
-    logger.info('Deployment completed', {
+    this.logger.info('Deployment completed', {
       deploymentId: id,
       duration: this.getDuration(id),
       ...metadata,
@@ -207,7 +209,7 @@ export class DeploymentTracker {
       deployment.metadata = { ...deployment.metadata, ...metadata };
     }
 
-    logger.error('Deployment failed', error, {
+    this.logger.error('Deployment failed', error, {
       deploymentId: id,
       duration: this.getDuration(id),
       ...metadata,
@@ -223,7 +225,7 @@ export class DeploymentTracker {
     deployment.status = 'cancelled';
     deployment.endTime = new Date();
 
-    logger.warn('Deployment cancelled', {
+    this.logger.warn('Deployment cancelled', {
       deploymentId: id,
       reason,
       duration: this.getDuration(id),

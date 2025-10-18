@@ -31,6 +31,33 @@ interface DeployConfig {
   };
 }
 
+/**
+ * Send notification with timeout to prevent deployment delays
+ * @param notifier - Notifier instance
+ * @param payload - Notification payload
+ * @param timeoutMs - Timeout in milliseconds (default: 5000)
+ */
+async function notifyWithTimeout(
+  notifier: Notifier,
+  payload: Parameters<Notifier['notify']>[0],
+  timeoutMs = 5000
+): Promise<void> {
+  try {
+    await Promise.race([
+      notifier.notify(payload),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Notification timeout')), timeoutMs)
+      ),
+    ]);
+  } catch (error) {
+    logger.warn('Notification failed or timed out', {
+      error: (error as Error).message,
+      deploymentId: payload.deploymentId,
+      status: payload.status,
+    });
+  }
+}
+
 async function main() {
   // Initialize monitoring
   const deploymentId = `deploy-${Date.now()}`;
@@ -263,8 +290,8 @@ async function main() {
       outputPath,
     });
 
-    // Send success notification
-    await notifier.notify({
+    // Send success notification (with timeout to prevent deployment delays)
+    await notifyWithTimeout(notifier, {
       deploymentId,
       status: 'completed',
       message: `Safe proposal created for ${config.contract} on ${config.network}`,
@@ -291,8 +318,8 @@ async function main() {
       step: tracker.getProgress(deploymentId).currentPhase || 'unknown',
     });
 
-    // Send failure notification
-    await notifier.notify({
+    // Send failure notification (with timeout to prevent deployment delays)
+    await notifyWithTimeout(notifier, {
       deploymentId,
       status: 'failed',
       message: `Failed to create Safe proposal: ${err.message}`,
