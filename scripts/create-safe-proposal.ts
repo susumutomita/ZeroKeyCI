@@ -9,6 +9,14 @@ import { SafeProposalBuilder } from '../src/services/SafeProposalBuilder';
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import * as yaml from 'js-yaml';
+import { logger } from '../src/lib/logger';
+import {
+  ConfigurationError,
+  DeploymentError,
+  ValidationError,
+} from '../src/lib/errors';
+import { DeploymentTracker } from '../src/lib/deployment-tracker';
+import { Notifier } from '../src/lib/notifier';
 
 interface DeployConfig {
   network: string;
@@ -24,16 +32,55 @@ interface DeployConfig {
 }
 
 async function main() {
+  // Initialize monitoring
+  const deploymentId = `deploy-${Date.now()}`;
+  const tracker = new DeploymentTracker(logger);
+  const notifier = new Notifier({
+    github: process.env.GITHUB_TOKEN
+      ? {
+          enabled: true,
+          token: process.env.GITHUB_TOKEN,
+          repo: process.env.GITHUB_REPOSITORY || '',
+        }
+      : { enabled: false },
+  });
+
   try {
+    logger.info('Starting Safe proposal creation', { deploymentId });
+    tracker.start(deploymentId, {
+      workflow: process.env.GITHUB_WORKFLOW || 'local',
+      runId: process.env.GITHUB_RUN_ID || 'local',
+    });
+
     // Read deployment configuration
+    tracker.startPhase(
+      deploymentId,
+      'validation',
+      'Reading deployment configuration'
+    );
+
     const configPath = resolve(process.cwd(), '.zerokey', 'deploy.yaml');
+
+    if (!require('fs').existsSync(configPath)) {
+      throw new ConfigurationError('Deployment configuration not found', {
+        configKey: 'deployConfig',
+        expectedFormat: 'YAML file at .zerokey/deploy.yaml',
+        context: { configPath },
+      });
+    }
+
     const configContent = readFileSync(configPath, 'utf-8');
     const config = yaml.load(configContent) as DeployConfig;
+
+    logger.debug('Deployment configuration loaded', { config });
 
     // Validate environment variables
     const safeAddress = process.env.SAFE_ADDRESS;
     if (!safeAddress) {
-      throw new Error('SAFE_ADDRESS environment variable is required');
+      throw new ConfigurationError('Safe address not configured', {
+        configKey: 'SAFE_ADDRESS',
+        expectedFormat: '0x-prefixed Ethereum address',
+      });
     }
 
     // Network to chainId mapping
@@ -48,10 +95,30 @@ async function main() {
 
     const chainId = chainIds[config.network];
     if (!chainId) {
-      throw new Error(`Unsupported network: ${config.network}`);
+      throw new ValidationError(`Unsupported network: ${config.network}`, {
+        field: 'network',
+        value: config.network,
+        context: { supportedNetworks: Object.keys(chainIds) },
+      });
     }
 
+    tracker.completePhase(
+      deploymentId,
+      'validation',
+      'Configuration validated'
+    );
+    logger.info('Configuration validated', {
+      network: config.network,
+      chainId,
+    });
+
     // Read compiled contract artifact
+    tracker.startPhase(
+      deploymentId,
+      'proposal_creation',
+      'Reading contract artifact'
+    );
+
     const artifactPath = resolve(
       process.cwd(),
       'artifacts',
@@ -61,15 +128,28 @@ async function main() {
     );
 
     if (!require('fs').existsSync(artifactPath)) {
-      throw new Error(`Contract artifact not found: ${artifactPath}`);
+      throw new ConfigurationError(`Contract artifact not found`, {
+        configKey: 'contractArtifact',
+        expectedFormat: 'Hardhat compilation artifact JSON',
+        context: { artifactPath, contract: config.contract },
+      });
     }
 
     const artifact = JSON.parse(readFileSync(artifactPath, 'utf-8'));
 
     // Validate contract has bytecode
     if (!artifact.bytecode || artifact.bytecode === '0x') {
-      throw new Error(`No bytecode found for contract ${config.contract}`);
+      throw new ValidationError(`No bytecode found for contract`, {
+        field: 'bytecode',
+        value: artifact.bytecode,
+        context: { contract: config.contract, artifactPath },
+      });
     }
+
+    logger.debug('Contract artifact loaded', {
+      contract: config.contract,
+      bytecodeLength: artifact.bytecode.length,
+    });
 
     // Initialize Safe proposal builder
     const builder = new SafeProposalBuilder({
@@ -84,10 +164,12 @@ async function main() {
     });
 
     // Create deployment proposal
-    console.log('🔐 Creating Safe deployment proposal...');
-    console.log(`  Network: ${config.network} (chainId: ${chainId})`);
-    console.log(`  Contract: ${config.contract}`);
-    console.log(`  Safe: ${safeAddress}`);
+    logger.info('Creating Safe deployment proposal', {
+      network: config.network,
+      chainId,
+      contract: config.contract,
+      safeAddress,
+    });
 
     const proposal = await builder.createDeploymentProposal({
       contractName: config.contract,
@@ -104,10 +186,17 @@ async function main() {
       },
     });
 
+    logger.debug('Proposal created', { proposalHash: proposal.validationHash });
+
     // Validate the proposal
     if (!builder.validateProposal(proposal)) {
-      throw new Error('Generated proposal failed validation');
+      throw new ValidationError('Generated proposal failed validation', {
+        field: 'proposal',
+        value: proposal,
+      });
     }
+
+    logger.debug('Proposal validated successfully');
 
     // Calculate deployment address (for logging)
     const salt = '0x' + '0'.repeat(64); // Default salt
@@ -116,7 +205,7 @@ async function main() {
       salt
     );
 
-    console.log(`  Deployment Address: ${deploymentAddress}`);
+    logger.info('Deployment address calculated', { deploymentAddress });
 
     // Serialize proposal
     const serialized = builder.serializeProposal(proposal);
@@ -143,9 +232,17 @@ async function main() {
     const outputPath = resolve(process.cwd(), 'safe-proposal.json');
     writeFileSync(outputPath, JSON.stringify(enrichedProposal, null, 2));
 
-    console.log('✅ Safe proposal created successfully');
-    console.log(`📝 Proposal saved to: ${outputPath}`);
-    console.log(`🔑 Validation Hash: ${parsed.validationHash}`);
+    tracker.completePhase(
+      deploymentId,
+      'proposal_creation',
+      'Proposal saved to file'
+    );
+
+    logger.info('✅ Safe proposal created successfully', {
+      outputPath,
+      validationHash: parsed.validationHash,
+      deploymentAddress,
+    });
 
     // Output for GitHub Actions
     if (process.env.GITHUB_OUTPUT) {
@@ -159,9 +256,52 @@ async function main() {
       require('fs').appendFileSync(process.env.GITHUB_OUTPUT, output);
     }
 
+    // Mark deployment as complete
+    tracker.complete(deploymentId, {
+      proposalHash: parsed.validationHash,
+      deploymentAddress,
+      outputPath,
+    });
+
+    // Send success notification
+    await notifier.notify({
+      deploymentId,
+      status: 'completed',
+      message: `Safe proposal created for ${config.contract} on ${config.network}`,
+      prNumber: process.env.GITHUB_PR_NUMBER
+        ? parseInt(process.env.GITHUB_PR_NUMBER)
+        : undefined,
+      metadata: {
+        contract: config.contract,
+        network: config.network,
+        proposalHash: parsed.validationHash,
+        deploymentAddress,
+      },
+    });
+
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error creating Safe proposal:', error);
+    const err = error as Error;
+    logger.error('❌ Error creating Safe proposal', err, {
+      deploymentId,
+    });
+
+    // Mark deployment as failed
+    tracker.fail(deploymentId, err, {
+      step: tracker.getProgress(deploymentId).currentPhase || 'unknown',
+    });
+
+    // Send failure notification
+    await notifier.notify({
+      deploymentId,
+      status: 'failed',
+      message: `Failed to create Safe proposal: ${err.message}`,
+      prNumber: process.env.GITHUB_PR_NUMBER
+        ? parseInt(process.env.GITHUB_PR_NUMBER)
+        : undefined,
+      error: err,
+    });
+
     process.exit(1);
   }
 }

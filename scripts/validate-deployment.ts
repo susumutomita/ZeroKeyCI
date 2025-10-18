@@ -6,6 +6,12 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { logger } from '../src/lib/logger';
+import {
+  ValidationError,
+  ConfigurationError,
+  PolicyValidationError,
+} from '../src/lib/errors';
 
 interface PolicyViolation {
   rule: string;
@@ -28,7 +34,24 @@ export class PolicyValidator {
   private policy: any;
 
   constructor(proposalPath: string, policyPath: string) {
-    this.proposal = JSON.parse(readFileSync(proposalPath, 'utf-8'));
+    logger.debug('Initializing PolicyValidator', {
+      proposalPath,
+      policyPath,
+    });
+
+    try {
+      this.proposal = JSON.parse(readFileSync(proposalPath, 'utf-8'));
+      logger.debug('Proposal loaded successfully', {
+        safeAddress: this.proposal.safeAddress,
+        chainId: this.proposal.chainId,
+      });
+    } catch (error) {
+      throw new ConfigurationError('Failed to load proposal', {
+        configKey: 'proposalPath',
+        cause: error as Error,
+        context: { proposalPath },
+      });
+    }
 
     // For now, we'll do simple rule-based validation
     // In production, this would use OPA's Rego language
@@ -36,8 +59,21 @@ export class PolicyValidator {
   }
 
   private loadPolicy(policyPath: string): any {
-    // Parse the .rego file for basic rules
-    const regoContent = readFileSync(policyPath, 'utf-8');
+    logger.debug('Loading policy file', { policyPath });
+
+    let regoContent: string;
+    try {
+      // Parse the .rego file for basic rules
+      regoContent = readFileSync(policyPath, 'utf-8');
+    } catch (error) {
+      logger.warn('Policy file not found, using default rules', { policyPath });
+      return {
+        deployment: {},
+        signers: {},
+        network: {},
+        security: {},
+      };
+    }
 
     // Extract rules from Rego (simplified)
     const rules: any = {
@@ -69,10 +105,15 @@ export class PolicyValidator {
       rules.network.maxGasLimit = parseInt(gasLimitMatch[1]);
     }
 
+    logger.debug('Policy rules extracted', { rules });
     return rules;
   }
 
   validate(): ValidationResult {
+    logger.info('Starting policy validation', {
+      safeAddress: this.proposal.safeAddress,
+      chainId: this.proposal.chainId,
+    });
     const violations: PolicyViolation[] = [];
     const warnings: string[] = [];
 
@@ -179,27 +220,40 @@ export class PolicyValidator {
       }
     }
 
-    return {
+    const result = {
       valid: violations.length === 0,
       violations,
       warnings,
     };
+
+    logger.info('Policy validation completed', {
+      valid: result.valid,
+      violationCount: violations.length,
+      warningCount: warnings.length,
+    });
+
+    return result;
   }
 }
 
 export async function main() {
+  logger.info('Starting deployment validation');
+
   try {
     const proposalPath = resolve(process.cwd(), 'safe-proposal.json');
     const policyPath = resolve(process.cwd(), '.zerokey', 'policy.rego');
 
     // Check files exist
     if (!require('fs').existsSync(proposalPath)) {
-      throw new Error(`Proposal not found: ${proposalPath}`);
+      throw new ConfigurationError('Proposal file not found', {
+        configKey: 'proposalPath',
+        expectedFormat: 'JSON file at project root',
+        context: { proposalPath },
+      });
     }
 
     if (!require('fs').existsSync(policyPath)) {
-      console.warn(`⚠️  Policy file not found: ${policyPath}`);
-      console.log('Using default validation rules...');
+      logger.warn('Policy file not found, using default rules', { policyPath });
     }
 
     // Validate proposal
@@ -207,36 +261,42 @@ export async function main() {
     const result = validator.validate();
 
     // Output results
-    console.log('🔍 Policy Validation Results:');
-    console.log('================================');
+    logger.info('Policy Validation Results');
 
     if (result.warnings.length > 0) {
-      console.log('\n⚠️  Warnings:');
       result.warnings.forEach((warning) => {
-        console.log(`   - ${warning}`);
+        logger.warn(warning);
       });
     }
 
     if (result.violations.length > 0) {
-      console.log('\n❌ Policy Violations:');
       result.violations.forEach((violation) => {
-        console.log(
-          `   [${violation.severity.toUpperCase()}] ${violation.rule}: ${
-            violation.message
-          }`
-        );
+        logger.error(`Policy violation: ${violation.rule}`, undefined, {
+          rule: violation.rule,
+          message: violation.message,
+          severity: violation.severity,
+        });
       });
     }
 
     if (result.valid) {
-      console.log('\n✅ Proposal passed all policy checks');
+      logger.info('✅ Proposal passed all policy checks');
       process.exit(0);
     } else {
-      console.log('\n❌ Proposal failed policy validation');
-      process.exit(1);
+      const error = new PolicyValidationError('Policy validation failed', {
+        violations: result.violations.map((v) => v.message),
+        proposalData: {
+          safeAddress: validator['proposal'].safeAddress,
+          chainId: validator['proposal'].chainId,
+        },
+      });
+      logger.error('❌ Proposal failed policy validation', error);
+      throw error;
     }
   } catch (error) {
-    console.error('❌ Validation error:', error);
+    logger.error('Validation error', error as Error, {
+      step: 'policy_validation',
+    });
     process.exit(1);
   }
 }
