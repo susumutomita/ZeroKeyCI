@@ -23,7 +23,7 @@ interface ValidationResult {
  * Simple OPA policy validator
  * In production, this would use actual OPA engine
  */
-class PolicyValidator {
+export class PolicyValidator {
   private proposal: any;
   private policy: any;
 
@@ -187,7 +187,7 @@ class PolicyValidator {
   }
 }
 
-async function main() {
+export async function main() {
   try {
     const proposalPath = resolve(process.cwd(), 'safe-proposal.json');
     const policyPath = resolve(process.cwd(), '.zerokey', 'policy.rego');
