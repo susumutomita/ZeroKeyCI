@@ -210,9 +210,9 @@ export const translations = {
       subtitle: "What's implemented, what's in progress, and what's planned",
       items: {
         pkpIntegration: {
-          status: 'In Progress',
+          status: 'Available (Optional)',
           title: 'Lit Protocol PKP Integration',
-          desc: 'PR #28 implements PKP-based signing. Currently under review. Until merged, Safe signatures are manual.',
+          desc: 'PKP-based automated signing is fully implemented and available. See docs/PKP_SETUP.md for setup instructions. Defaults to manual Safe multisig approval.',
         },
         networkSupport: {
           status: 'Implemented',
@@ -482,9 +482,9 @@ export const translations = {
       subtitle: '実装済み、進行中、計画中の機能',
       items: {
         pkpIntegration: {
-          status: '進行中',
+          status: '利用可能（オプション）',
           title: 'Lit Protocol PKP統合',
-          desc: 'PR #28がPKPベースの署名を実装。現在レビュー中。マージまでSafe署名は手動です。',
+          desc: 'PKPベースの自動署名は完全実装済みで利用可能です。セットアップ手順はdocs/PKP_SETUP.mdを参照してください。デフォルトは手動Safeマルチシグ承認です。',
         },
         networkSupport: {
           status: '実装済み',
