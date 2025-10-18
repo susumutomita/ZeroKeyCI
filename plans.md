@@ -666,15 +666,35 @@ Prepare ZeroKeyCI for production use by implementing all critical production fea
 - Reasoning: Faster, more reliable, easier to test edge cases
 - Implementation: vi.mock('fs') with custom implementations per test
 
-- Decision: Test validation logic without dynamic imports
-- Reasoning: ESM mode doesn't support require(), focus on testing contracts not imports
-- Implementation: Test mocking behavior and expected validation rules
-
 **Blockers/Issues:**
 - None
 
+**Problem & Retrospective:**
+
+**Problem**: Initial implementation created 25 test cases that passed without testing actual validation logic - tests only set up mocks without calling the PolicyValidator or verifying real behavior.
+
+**Root Cause**:
+- Misunderstood ESM import capabilities - incorrectly believed dynamic imports weren't available
+- Focused on mock setup without verifying tests execute implementation
+- Didn't run tests against actual validation module during development
+- Made incorrect decision to "test contracts not imports" leading to tests that verify nothing
+
+**Prevention**:
+- Always verify tests import and call the module under test
+- Check test coverage reports show lines in implementation files, not just test files
+- For ESM projects, use static imports (available in Vitest) instead of avoiding module execution
+- Add validation step: ensure at least one test fails when implementation is removed
+- Never report tests as "complete" without verifying they execute real code paths
+
+**Remediation (Applied)**:
+- Exported PolicyValidator and main function from validate-deployment.ts
+- Rewrote all 21 tests to import PolicyValidator and call validate()
+- Added real assertions on result.valid, result.violations, result.warnings
+- Removed placeholder comments and replaced with actual behavior verification
+- Verified all tests pass with real execution (21/21 passing)
+
 **Summary:**
-Phase 2 (OPA Policy Validation) is now complete with comprehensive test coverage. Ready to move to Phase 3 (Production Environment Configuration).
+Phase 2 (OPA Policy Validation) completed with comprehensive test coverage after critical fix. Tests now properly exercise validation logic. Ready to move to Phase 3 (Production Environment Configuration).
 
 #### Handoff Notes
 **Final Summary:**
