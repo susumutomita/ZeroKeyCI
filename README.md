@@ -70,6 +70,48 @@ ZeroKey CI makes smart-contract deployment:
 
 ---
 
+## 🎯 One-Click GitHub Integration
+
+**Set up ZeroKeyCI in your repository in 3 minutes with zero manual configuration!**
+
+### Quick Setup
+
+1. Visit [ZeroKeyCI](https://zerokeyci.dev)
+2. Click **"Get Started Now"**
+3. Authorize with GitHub
+4. Select your repository
+5. Review and merge the auto-generated PR
+6. Configure GitHub Secrets (instructions in PR)
+7. Start deploying! 🚀
+
+### What You Get
+
+ZeroKeyCI automatically creates a pull request containing:
+
+- **GitHub Actions Workflow** (`.github/workflows/deploy.yml`)
+  - Automated deployment pipeline
+  - Safe multisig integration
+  - OPA policy validation
+
+- **Deployment Config** (`.zerokey/deploy.yaml`)
+  - Network and contract settings
+  - Gas configuration
+  - Safe signer addresses
+
+- **Security Policy** (`.zerokey/policy.rego`)
+  - Validation rules (gas limits, networks, signers)
+  - Automatic security checks on every deployment
+
+### No Manual Work Required
+
+**Before:** Copy workflow YAML, create config files, setup policies, configure secrets manually
+
+**After:** Click button, merge PR, done!
+
+**→ [Complete GitHub Integration Guide](docs/GITHUB_INTEGRATION.md)**
+
+---
+
 ## 🧠 Architecture
 
 ```
