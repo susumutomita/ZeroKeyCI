@@ -167,11 +167,11 @@ Integrate Lit Protocol's Programmable Key Pairs (PKPs) to enable fully automated
   - [x] Add GitHub API integration for PR verification
   - [x] Add error handling and logging
   - [x] Store Lit Action on IPFS (documented with 3 deployment methods)
-- [ ] Phase 3: CI/CD Integration
-  - [ ] Update deploy.yml workflow to trigger Lit PKP signing
-  - [ ] Add environment variables for Lit configuration
-  - [ ] Implement Safe transaction submission after PKP signature
-  - [ ] Add status reporting back to GitHub PR
+- [x] Phase 3: CI/CD Integration (✅ Completed in PR #34)
+  - [x] Update deploy.yml workflow to trigger Lit PKP signing
+  - [x] Add environment variables for Lit configuration
+  - [x] Implement Safe transaction submission after PKP signature
+  - [x] Add status reporting back to GitHub PR
 - [ ] Phase 4: PKP Setup Scripts
   - [ ] Create script to mint PKP NFT
   - [ ] Create script to grant Lit Action permission to PKP
@@ -326,6 +326,41 @@ Integrate Lit Protocol's Programmable Key Pairs (PKPs) to enable fully automated
 
 **Blockers/Issues:**
 - None - ready to implement Phase 3
+
+##### Iteration 5 (2025-10-18 07:35)
+**What was done:**
+- Completed Phase 3: CI/CD Integration (PR #34 merged)
+- Created PKP signing trigger script (scripts/trigger-pkp-signing.ts)
+- Integrated PKP signing into deploy.yml workflow
+- Added comprehensive tests (14/14 passing)
+- All 215 tests passing, 100% coverage maintained
+- Starting Phase 4: PKP Setup Scripts
+- Created new branch: feat/lit-pkp-setup-scripts
+- Planning Phase 4 implementation:
+  - scripts/setup/mint-pkp.ts for PKP NFT minting
+  - scripts/setup/grant-lit-action-permission.ts for Lit Action permissions
+  - scripts/setup/add-pkp-to-safe.ts for Safe owner configuration
+  - docs/PKP_SETUP.md for complete setup documentation
+
+**Test status:**
+- All 215 tests passing ✓
+- Phase 3 complete, Phase 4 planning
+
+**Decisions made:**
+- Decision: Create dedicated scripts/ subdirectory for setup scripts
+- Reasoning: Separates setup tooling from runtime scripts, clearer organization
+- Alternatives: Put in root scripts/ - rejected for clarity
+
+- Decision: Interactive CLI for setup scripts with prompts
+- Reasoning: Better UX for first-time setup, validates inputs
+- Implementation: Use process.stdin for interactive prompts
+
+- Decision: Store PKP info in .zerokey/pkp-config.json after minting
+- Reasoning: Provides reference for later scripts, not sensitive (public key only)
+- Security: Only store public PKP address and IPFS CID, never private key material
+
+**Blockers/Issues:**
+- None - ready to implement Phase 4
 
 #### Open Questions
 - **Q**: Should PKP be able to sign all proposals or only specific types?
