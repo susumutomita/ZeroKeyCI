@@ -291,6 +291,42 @@ Integrate Lit Protocol's Programmable Key Pairs (PKPs) to enable fully automated
 **Blockers/Issues:**
 - None - Phase 2 complete, ready for validation and PR
 
+##### Iteration 4 (2025-10-18 01:30)
+**What was done:**
+- Started Phase 3: CI/CD Integration implementation
+- Created new branch: feat/lit-pkp-cicd-integration
+- Analyzed current deploy.yml workflow (Safe proposal creation only, no PKP signing yet)
+- Planned Phase 3 implementation:
+  - scripts/trigger-pkp-signing.ts for Lit Protocol PKP signing
+  - deploy.yml updates to add PKP signing step
+  - Environment variables for Lit configuration
+  - Safe transaction submission after PKP signature
+  - GitHub PR status reporting
+
+**Test status:**
+- Planning phase for Phase 3
+- All existing tests passing (201/201) ✓
+
+**Decisions made:**
+- Decision: Create dedicated script for PKP signing trigger (trigger-pkp-signing.ts)
+- Reasoning: Separates PKP signing logic from proposal creation, easier to test
+- Alternatives: Inline in deploy.yml - rejected for maintainability
+
+- Decision: Use environment secrets for PKP configuration
+- Reasoning: PKP public key and Lit Action IPFS CID are not secrets but should be configurable
+- Environment variables needed:
+  - PKP_PUBLIC_KEY (PKP's Ethereum address)
+  - LIT_ACTION_IPFS_CID (IPFS hash of Lit Action code)
+  - LIT_NETWORK (datil-dev, datil-test, or datil)
+  - Optional: LIT_RELAY_API_KEY for production
+
+- Decision: PKP signs only after OPA validation passes
+- Reasoning: Maintains security guarantees - PKP signing is conditional
+- Implementation: PKP signing step comes AFTER OPA validation step in workflow
+
+**Blockers/Issues:**
+- None - ready to implement Phase 3
+
 #### Open Questions
 - **Q**: Should PKP be able to sign all proposals or only specific types?
   - **A**: TBD - initially implement for upgrade proposals only, extend later
