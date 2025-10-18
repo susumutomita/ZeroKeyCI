@@ -2,11 +2,20 @@
  * Environment variable validation and configuration
  */
 
+import type { SupportedNetwork } from './network-config';
+import {
+  getNetworkConfig,
+  isSupportedChainId,
+  getRpcUrl as getNetworkRpcUrl,
+} from './network-config';
+
 export interface EnvConfig {
   safeAddress: string;
   storageType: 'file' | 'memory';
   storageDir?: string;
   nodeEnv: 'development' | 'production' | 'test';
+  network: SupportedNetwork;
+  chainId?: number;
 }
 
 /**
@@ -17,6 +26,31 @@ export function getEnvConfig(): EnvConfig {
     | 'development'
     | 'production'
     | 'test';
+
+  // Network configuration
+  const network = (process.env.NETWORK || 'sepolia') as SupportedNetwork;
+  let chainId = process.env.CHAIN_ID
+    ? parseInt(process.env.CHAIN_ID)
+    : undefined;
+
+  // Auto-detect chainId from network if not specified
+  if (!chainId) {
+    try {
+      const networkConfig = getNetworkConfig(network);
+      chainId = networkConfig.chainId;
+    } catch (error) {
+      throw new Error(
+        `Invalid NETWORK: ${network}. Supported networks: mainnet, sepolia, polygon, arbitrum, optimism, base`
+      );
+    }
+  }
+
+  // Validate chainId is supported
+  if (chainId && !isSupportedChainId(chainId)) {
+    throw new Error(
+      `Unsupported CHAIN_ID: ${chainId}. Supported chain IDs: 1 (mainnet), 11155111 (sepolia), 137 (polygon), 42161 (arbitrum), 10 (optimism), 8453 (base)`
+    );
+  }
 
   // In production, SAFE_ADDRESS must be set
   let safeAddress = process.env.SAFE_ADDRESS;
@@ -51,6 +85,8 @@ export function getEnvConfig(): EnvConfig {
     storageType,
     storageDir,
     nodeEnv,
+    network,
+    chainId,
   };
 }
 
@@ -81,4 +117,52 @@ export function isDevelopment(): boolean {
  */
 export function isTest(): boolean {
   return getEnvConfig().nodeEnv === 'test';
+}
+
+/**
+ * Get current network
+ */
+export function getNetwork(): SupportedNetwork {
+  return getEnvConfig().network;
+}
+
+/**
+ * Get current chain ID
+ */
+export function getChainId(): number {
+  const config = getEnvConfig();
+  // chainId is always set via auto-detection in getEnvConfig
+  return config.chainId!;
+}
+
+/**
+ * Get RPC URL for current network
+ */
+export function getRpcUrl(network?: SupportedNetwork): string | undefined {
+  const targetNetwork = network || getNetwork();
+  return getNetworkRpcUrl(targetNetwork);
+}
+
+/**
+ * Validate that required environment variables are set for deployment
+ */
+export function validateDeploymentEnv(): void {
+  const config = getEnvConfig();
+
+  // Validate Safe address is set
+  if (!process.env.SAFE_ADDRESS) {
+    throw new Error('SAFE_ADDRESS must be set for deployments');
+  }
+
+  // Validate RPC URL is set for the network
+  const rpcUrl = getRpcUrl(config.network);
+  if (!rpcUrl) {
+    const envVar = `${config.network.toUpperCase()}_RPC_URL`;
+    console.warn(
+      `Warning: ${envVar} not set. Some features may not work without an RPC URL.`
+    );
+  }
+
+  // Network configuration is already validated in getEnvConfig
+  // No additional validation needed here
 }
