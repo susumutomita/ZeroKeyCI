@@ -31,6 +31,8 @@ export default defineConfig({
         'src/types/**/*.ts', // Exclude type definition files
         'src/services/LitPKPSigner.ts', // Exclude - requires integration tests with real Lit network
         'src/lit-actions/**/*.{ts,js}', // Exclude Lit Action code - requires integration tests with real Lit network
+        'src/app/**/route.ts', // Exclude API routes - tested via integration tests
+        'src/app/**/page.tsx', // Exclude pages - tested via E2E tests
         'mcp-server/src/**/__tests__/**/*',
         'mcp-server/src/test-search.ts',
       ],

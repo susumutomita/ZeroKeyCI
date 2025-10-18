@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import SafeProposalSandbox from '@/components/SafeProposalSandbox';
-import GitHubSetupWizard from '@/components/GitHubSetupWizard';
+import Link from 'next/link';
 import { useTranslations, type Language } from '@/lib/i18n';
 import {
   Lock,
@@ -616,7 +616,41 @@ export default function Home() {
               </p>
             </div>
 
-            <GitHubSetupWizard />
+            {/* Get Started Button - Links to Real GitHub Integration */}
+            <div className="flex justify-center">
+              <Link
+                href="/setup"
+                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-12 py-6 rounded-2xl font-bold text-xl hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-500/20"
+              >
+                <Rocket className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                Get Started Now
+                <span className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                  FREE
+                </span>
+              </Link>
+            </div>
+
+            {/* Quick stats */}
+            <div className="mt-16 grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+              <div className="text-center">
+                <div className="text-4xl font-black text-green-400 mb-2">
+                  3 min
+                </div>
+                <div className="text-gray-400">Setup Time</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-black text-green-400 mb-2">
+                  0 keys
+                </div>
+                <div className="text-gray-400">Private Keys Needed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-black text-green-400 mb-2">
+                  1 click
+                </div>
+                <div className="text-gray-400">GitHub Integration</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
