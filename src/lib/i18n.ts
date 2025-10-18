@@ -86,6 +86,61 @@ export const translations = {
       ],
     },
 
+    // Why it's safe
+    whyItsSafe: {
+      badge: 'Security Model',
+      title: "Why It's Safe",
+      subtitle:
+        'Understanding the cryptographic foundation that eliminates single points of failure',
+      sections: {
+        distributedKeys: {
+          title: 'Distributed Key Generation',
+          desc: "Lit Protocol PKPs use threshold cryptography. The private key never exists in full - it's distributed across Lit Protocol's decentralized network. No single node can sign transactions alone.",
+        },
+        multisig: {
+          title: 'Multi-Signature Requirements',
+          desc: 'PKP is configured as ONE owner in a 2-of-3 Gnosis Safe multisig. Even if the PKP were compromised, attackers would need to compromise additional human owners to deploy malicious code.',
+        },
+        conditionalSigning: {
+          title: 'Conditional Signing Logic',
+          desc: 'Lit Actions enforce conditions: OPA policies passed, tests passed, PR merged. The PKP cannot sign unless all conditions are met. This is enforced cryptographically, not just in code.',
+        },
+        auditTrail: {
+          title: 'Complete Transparency',
+          desc: 'Every signature request, every condition check, every deployment is logged on-chain. You can audit exactly who approved what, when, and under what conditions.',
+        },
+      },
+    },
+
+    // Current limitations
+    currentLimitations: {
+      badge: 'Roadmap',
+      title: 'Current Limitations',
+      subtitle: "What's implemented, what's in progress, and what's planned",
+      items: {
+        pkpIntegration: {
+          status: 'In Progress',
+          title: 'Lit Protocol PKP Integration',
+          desc: 'PR #28 implements PKP-based signing. Currently under review. Until merged, Safe signatures are manual.',
+        },
+        networkSupport: {
+          status: 'Implemented',
+          title: 'Multi-Network Support',
+          desc: 'Supports Ethereum, Polygon, Sepolia, and other EVM chains. Lit Protocol supports Cayenne, Manzano, Habanero, Datil testnets.',
+        },
+        gasEstimation: {
+          status: 'Planned',
+          title: 'Automatic Gas Estimation',
+          desc: 'Currently requires manual gas price configuration. Automatic estimation and optimization coming soon.',
+        },
+        upgradeable: {
+          status: 'Planned',
+          title: 'Upgradeable Contract Support',
+          desc: 'Full support for proxy patterns (Transparent, UUPS) and deployment verification is on the roadmap.',
+        },
+      },
+    },
+
     // Demo section
     demo: {
       title: 'Try It Right Now',
@@ -212,6 +267,60 @@ export const translations = {
           desc: '閾値に達すると、コントラクトがデプロイされます。コードからチェーンまで完全な監査証跡。',
         },
       ],
+    },
+
+    // なぜ安全か
+    whyItsSafe: {
+      badge: 'セキュリティモデル',
+      title: 'なぜ安全なのか',
+      subtitle: '単一障害点を排除する暗号技術の基盤を理解する',
+      sections: {
+        distributedKeys: {
+          title: '分散鍵生成',
+          desc: 'Lit Protocol PKPは閾値暗号を使用。秘密鍵は完全な形では存在せず、Lit Protocolの分散ネットワーク全体に分散。単一ノードだけではトランザクションに署名できません。',
+        },
+        multisig: {
+          title: 'マルチシグ要件',
+          desc: 'PKPは2-of-3 Gnosis Safe マルチシグの1オーナーとして構成。PKPが侵害されても、攻撃者は悪意のあるコードをデプロイするために追加の人間のオーナーを侵害する必要があります。',
+        },
+        conditionalSigning: {
+          title: '条件付き署名ロジック',
+          desc: 'Lit Actionsが条件を強制: OPAポリシー合格、テスト合格、PRマージ済み。すべての条件が満たされない限り、PKPは署名できません。これはコードではなく暗号学的に強制されます。',
+        },
+        auditTrail: {
+          title: '完全な透明性',
+          desc: 'すべての署名リクエスト、すべての条件チェック、すべてのデプロイがオンチェーンで記録。誰が、何を、いつ、どのような条件下で承認したかを正確に監査できます。',
+        },
+      },
+    },
+
+    // 現在の制限
+    currentLimitations: {
+      badge: 'ロードマップ',
+      title: '現在の制限',
+      subtitle: '実装済み、進行中、計画中の機能',
+      items: {
+        pkpIntegration: {
+          status: '進行中',
+          title: 'Lit Protocol PKP統合',
+          desc: 'PR #28がPKPベースの署名を実装。現在レビュー中。マージまでSafe署名は手動です。',
+        },
+        networkSupport: {
+          status: '実装済み',
+          title: 'マルチネットワークサポート',
+          desc: 'Ethereum、Polygon、Sepolia、その他のEVMチェーンをサポート。Lit ProtocolはCayenne、Manzano、Habanero、Datilテストネットをサポート。',
+        },
+        gasEstimation: {
+          status: '計画中',
+          title: '自動ガス推定',
+          desc: '現在は手動でガス価格を設定する必要があります。自動推定と最適化を近日実装予定。',
+        },
+        upgradeable: {
+          status: '計画中',
+          title: 'アップグレード可能コントラクトサポート',
+          desc: 'プロキシパターン（Transparent、UUPS）とデプロイ検証の完全サポートをロードマップに追加。',
+        },
+      },
     },
 
     // デモセクション

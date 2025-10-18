@@ -278,6 +278,163 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Why It's Safe Section */}
+      <section className="relative py-32 bg-gradient-to-br from-purple-900/20 to-blue-900/20">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-6 py-3 mb-8">
+                <Shield className="w-5 h-5 text-purple-400" />
+                <span className="text-purple-300 font-semibold">
+                  {t.whyItsSafe.badge}
+                </span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                {t.whyItsSafe.title}
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                {t.whyItsSafe.subtitle}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {[
+                {
+                  key: 'distributedKeys',
+                  icon: RefreshCw,
+                  gradient: 'from-blue-500 to-cyan-500',
+                },
+                {
+                  key: 'multisig',
+                  icon: Users,
+                  gradient: 'from-purple-500 to-pink-500',
+                },
+                {
+                  key: 'conditionalSigning',
+                  icon: CheckCircle2,
+                  gradient: 'from-green-500 to-emerald-500',
+                },
+                {
+                  key: 'auditTrail',
+                  icon: FileText,
+                  gradient: 'from-orange-500 to-red-500',
+                },
+              ].map((item, idx) => {
+                const section =
+                  t.whyItsSafe.sections[
+                    item.key as keyof typeof t.whyItsSafe.sections
+                  ];
+                return (
+                  <div
+                    key={item.key}
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                    style={{ animationDelay: `${idx * 0.1}s` }}
+                  >
+                    <div
+                      className={`w-16 h-16 bg-gradient-to-br ${item.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-xl`}
+                    >
+                      <item.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">
+                      {section.title}
+                    </h3>
+                    <p className="text-gray-400 leading-relaxed">
+                      {section.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Current Limitations Section */}
+      <section className="relative py-32">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-6 py-3 mb-8">
+                <Target className="w-5 h-5 text-cyan-400" />
+                <span className="text-cyan-300 font-semibold">
+                  {t.currentLimitations.badge}
+                </span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                {t.currentLimitations.title}
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                {t.currentLimitations.subtitle}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {[
+                { key: 'pkpIntegration', color: 'yellow' },
+                { key: 'networkSupport', color: 'green' },
+                { key: 'gasEstimation', color: 'blue' },
+                { key: 'upgradeable', color: 'purple' },
+              ].map((item, idx) => {
+                const limitation =
+                  t.currentLimitations.items[
+                    item.key as keyof typeof t.currentLimitations.items
+                  ];
+                const statusColors = {
+                  yellow: {
+                    bg: 'bg-yellow-500/10',
+                    border: 'border-yellow-500/20',
+                    text: 'text-yellow-400',
+                    badge: 'bg-yellow-500/20',
+                  },
+                  green: {
+                    bg: 'bg-green-500/10',
+                    border: 'border-green-500/20',
+                    text: 'text-green-400',
+                    badge: 'bg-green-500/20',
+                  },
+                  blue: {
+                    bg: 'bg-blue-500/10',
+                    border: 'border-blue-500/20',
+                    text: 'text-blue-400',
+                    badge: 'bg-blue-500/20',
+                  },
+                  purple: {
+                    bg: 'bg-purple-500/10',
+                    border: 'border-purple-500/20',
+                    text: 'text-purple-400',
+                    badge: 'bg-purple-500/20',
+                  },
+                };
+                const colors =
+                  statusColors[item.color as keyof typeof statusColors];
+
+                return (
+                  <div
+                    key={item.key}
+                    className={`${colors.bg} backdrop-blur-sm border ${colors.border} rounded-2xl p-8 hover:scale-105 transition-all duration-300 animate-fade-in-up`}
+                    style={{ animationDelay: `${idx * 0.1}s` }}
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <h3 className="text-2xl font-bold text-white">
+                        {limitation.title}
+                      </h3>
+                      <span
+                        className={`${colors.badge} ${colors.text} px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap`}
+                      >
+                        {limitation.status}
+                      </span>
+                    </div>
+                    <p className="text-gray-400 leading-relaxed">
+                      {limitation.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Interactive Demo Section */}
       <section
         id="demo"

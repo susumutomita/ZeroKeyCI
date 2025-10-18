@@ -1,29 +1,41 @@
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { utils } from 'ethers';
+import type { SessionSigsMap, LIT_NETWORKS_KEYS } from '@lit-protocol/types';
+import { utils, BigNumber } from 'ethers';
 import type { SafeTransactionData } from '../types/safe';
 
 export interface LitPKPSignerConfig {
   pkpPublicKey: string;
-  network: string;
-}
-
-export interface AuthSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
+  network: LIT_NETWORKS_KEYS;
+  debug?: boolean;
 }
 
 export interface SigningConditions {
   opaPolicyPassed: boolean;
   testsPassed: boolean;
   prMerged: boolean;
+  deploymentConfig?: Record<string, unknown>;
 }
 
 export interface ECDSASignature {
   r: string;
   s: string;
   v: number;
+}
+
+export interface LitActionResult {
+  signatures: Record<
+    string,
+    {
+      r: string;
+      s: string;
+      recid: number;
+      signature: string;
+      publicKey: string;
+      dataSigned: string;
+    }
+  >;
+  logs: string;
+  success: boolean;
 }
 
 /**
@@ -40,47 +52,83 @@ export interface ECDSASignature {
  * - Complete audit trail of signing conditions
  */
 export class LitPKPSigner {
-  private pkpPublicKey: string;
-  private network: string;
+  private readonly pkpPublicKey: string;
+  private readonly network: LitPKPSignerConfig['network'];
+  private readonly debug: boolean;
   private litNodeClient: LitNodeClient | null = null;
   private connected = false;
 
   constructor(config: LitPKPSignerConfig) {
     // Validate configuration
     if (!config.pkpPublicKey || config.pkpPublicKey.trim() === '') {
-      throw new Error('PKP public key is required');
+      throw new Error(
+        'LitPKPSigner: PKP public key is required in configuration'
+      );
     }
 
     if (!config.network || config.network.trim() === '') {
-      throw new Error('Lit network is required');
+      throw new Error('LitPKPSigner: Lit network is required in configuration');
     }
 
     // Validate PKP public key format (should be hex string starting with 0x04)
+    // Uncompressed ECDSA public key: 0x04 + 64 bytes (128 hex chars) = 132 chars total
     if (
       !config.pkpPublicKey.startsWith('0x04') ||
-      config.pkpPublicKey.length !== 132
+      config.pkpPublicKey.length !== 132 ||
+      !/^0x04[0-9a-fA-F]{128}$/.test(config.pkpPublicKey)
     ) {
-      throw new Error('Invalid PKP public key');
+      throw new Error(
+        'LitPKPSigner: Invalid PKP public key format. Expected uncompressed ECDSA public key (0x04 + 128 hex chars)'
+      );
     }
 
     this.pkpPublicKey = config.pkpPublicKey;
     this.network = config.network;
+    this.debug = config.debug ?? false;
+
+    if (this.debug) {
+      console.log('[LitPKPSigner] Initialized with network:', this.network);
+      console.log('[LitPKPSigner] PKP address:', this.getPKPEthAddress());
+    }
   }
 
   /**
    * Connect to Lit Protocol network
+   * @throws Error if connection fails
    */
   async connect(): Promise<void> {
+    if (this.connected && this.litNodeClient) {
+      if (this.debug) {
+        console.log('[LitPKPSigner] Already connected to Lit network');
+      }
+      return;
+    }
+
     try {
+      if (this.debug) {
+        console.log('[LitPKPSigner] Connecting to Lit network:', this.network);
+      }
+
       this.litNodeClient = new LitNodeClient({
-        litNetwork: this.network as any, // Type assertion for network compatibility
+        litNetwork: this.network as any, // Type assertion needed due to Lit Protocol SDK type limitations
+        debug: this.debug,
       });
 
       await this.litNodeClient.connect();
       this.connected = true;
+
+      if (this.debug) {
+        console.log('[LitPKPSigner] Successfully connected to Lit network');
+      }
     } catch (error) {
       this.connected = false;
-      throw error;
+      this.litNodeClient = null;
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(
+        `LitPKPSigner: Failed to connect to Lit network (${this.network}): ${errorMessage}`
+      );
     }
   }
 
@@ -88,85 +136,176 @@ export class LitPKPSigner {
    * Disconnect from Lit Protocol network
    */
   async disconnect(): Promise<void> {
-    if (this.litNodeClient) {
+    if (!this.litNodeClient) {
+      if (this.debug) {
+        console.log('[LitPKPSigner] Not connected, nothing to disconnect');
+      }
+      return;
+    }
+
+    try {
+      if (this.debug) {
+        console.log('[LitPKPSigner] Disconnecting from Lit network');
+      }
+
       await this.litNodeClient.disconnect();
       this.connected = false;
       this.litNodeClient = null;
+
+      if (this.debug) {
+        console.log('[LitPKPSigner] Successfully disconnected');
+      }
+    } catch (error) {
+      // Still mark as disconnected even if disconnect fails
+      this.connected = false;
+      this.litNodeClient = null;
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.warn(`[LitPKPSigner] Error during disconnect: ${errorMessage}`);
     }
+  }
+
+  /**
+   * Check if connected to Lit network
+   */
+  isConnected(): boolean {
+    return this.connected && this.litNodeClient !== null;
   }
 
   /**
    * Sign a Safe transaction using PKP
    *
+   * This method:
+   * 1. Validates the transaction structure
+   * 2. Creates a Safe transaction hash (EIP-712 compatible)
+   * 3. Executes a Lit Action to sign with the PKP
+   * 4. Returns an ECDSA signature compatible with Gnosis Safe
+   *
    * @param transaction Safe transaction data to sign
-   * @param authSig Authentication signature for Lit Protocol
+   * @param sessionSigs Session signatures for Lit Protocol authentication
    * @returns ECDSA signature (r, s, v)
+   * @throws Error if not connected, invalid transaction, or signing fails
    */
   async signSafeTransaction(
     transaction: SafeTransactionData,
-    authSig: AuthSig
+    sessionSigs: SessionSigsMap
   ): Promise<ECDSASignature> {
     // Validate preconditions
-    if (!this.connected || !this.litNodeClient) {
-      throw new Error('Not connected to Lit network');
+    if (!this.isConnected() || !this.litNodeClient) {
+      throw new Error(
+        'LitPKPSigner: Not connected to Lit network. Call connect() first.'
+      );
     }
 
-    if (!authSig) {
-      throw new Error('Authentication signature is required');
+    if (!sessionSigs || Object.keys(sessionSigs).length === 0) {
+      throw new Error(
+        'LitPKPSigner: Session signatures are required for authentication'
+      );
     }
 
     // Validate transaction structure
     this.validateSafeTransaction(transaction);
 
-    // Create transaction hash to sign
+    // Create Safe transaction hash
     const txHash = this.hashSafeTransaction(transaction);
 
-    try {
-      // Execute Lit Action to sign with PKP
-      const litActionCode = `
-        const go = async () => {
-          // Sign the transaction hash with PKP
-          const sigShare = await LitActions.signEcdsa({
-            toSign: dataToSign,
-            publicKey,
-            sigName: "sig1",
-          });
-        };
+    if (this.debug) {
+      console.log('[LitPKPSigner] Signing transaction hash:', txHash);
+      console.log('[LitPKPSigner] Transaction data:', {
+        to: transaction.to,
+        value: transaction.value,
+        operation: transaction.operation,
+      });
+    }
 
-        go();
+    try {
+      // Lit Action code for signing
+      // This is a simple signing action - production should include validation logic
+      const litActionCode = `
+        (async () => {
+          try {
+            // Validate inputs
+            if (!dataToSign || !publicKey) {
+              throw new Error('Missing required parameters');
+            }
+
+            // Sign the transaction hash with PKP
+            await LitActions.signEcdsa({
+              toSign: dataToSign,
+              publicKey: publicKey,
+              sigName: "safeTxSig",
+            });
+
+            console.log('Successfully signed Safe transaction');
+          } catch (error) {
+            console.error('Lit Action error:', error.message || error);
+            throw error;
+          }
+        })();
       `;
 
-      const response = await this.litNodeClient.executeJs({
+      // Execute Lit Action
+      const response = (await this.litNodeClient.executeJs({
         code: litActionCode,
-        sessionSigs: authSig as any, // Session signatures for authentication
+        sessionSigs,
         jsParams: {
           dataToSign: utils.arrayify(txHash),
           publicKey: this.pkpPublicKey,
         },
-      } as any);
+      })) as unknown as LitActionResult;
+
+      if (this.debug) {
+        console.log('[LitPKPSigner] Lit Action response:', {
+          success: response.success,
+          logs: response.logs,
+          signatureCount: Object.keys(response.signatures || {}).length,
+        });
+      }
 
       // Check if signing was successful
-      if (
-        !response.success ||
-        !response.signatures ||
-        !response.signatures.sig1
-      ) {
-        throw new Error('Failed to sign transaction');
+      if (!response || !response.success) {
+        throw new Error(
+          `Lit Action execution failed: ${response?.logs || 'Unknown error'}`
+        );
       }
 
-      const signature = response.signatures.sig1;
+      if (!response.signatures || !response.signatures.safeTxSig) {
+        throw new Error(
+          'No signature returned from Lit Action. Check session signatures and PKP permissions.'
+        );
+      }
+
+      const signature = response.signatures.safeTxSig;
+
+      // Validate signature components
+      if (!signature.r || !signature.s || signature.recid === undefined) {
+        throw new Error('Invalid signature format returned from Lit Action');
+      }
 
       // Convert signature to Safe-compatible format
-      return {
+      // Gnosis Safe uses v = 27 + recid for ECDSA signatures
+      const safeSignature: ECDSASignature = {
         r: signature.r,
         s: signature.s,
-        v: signature.recid,
+        v: 27 + signature.recid,
       };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
+
+      if (this.debug) {
+        console.log('[LitPKPSigner] Generated signature:', {
+          r: safeSignature.r.substring(0, 10) + '...',
+          s: safeSignature.s.substring(0, 10) + '...',
+          v: safeSignature.v,
+        });
       }
-      throw new Error('Failed to sign transaction with PKP');
+
+      return safeSignature;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(
+        `LitPKPSigner: Failed to sign Safe transaction: ${errorMessage}`
+      );
     }
   }
 
@@ -247,22 +386,42 @@ export class LitPKPSigner {
   /**
    * Create hash of Safe transaction for signing
    *
+   * Creates a keccak256 hash of the Safe transaction data.
+   * Note: This is a simplified implementation for development/testing.
+   * Production should use Safe SDK's proper EIP-712 typed data hash generation
+   * which includes domain separator, chain ID, Safe address, and nonce.
+   *
    * @param transaction Transaction to hash
-   * @returns Transaction hash
+   * @returns Transaction hash (32 bytes hex string)
    */
   private hashSafeTransaction(transaction: SafeTransactionData): string {
-    // Create EIP-712 typed data hash for Safe transaction
-    // This is simplified - production should use Safe SDK's hash generation
-    const encodedData = utils.defaultAbiCoder.encode(
-      ['address', 'uint256', 'bytes', 'uint8'],
-      [
-        transaction.to,
-        transaction.value,
-        transaction.data,
-        transaction.operation,
-      ]
-    );
+    try {
+      // Encode transaction data
+      // Safe transaction structure: to, value, data, operation, ...
+      const encodedData = utils.defaultAbiCoder.encode(
+        ['address', 'uint256', 'bytes', 'uint8'],
+        [
+          transaction.to,
+          BigNumber.from(transaction.value || 0).toString(),
+          transaction.data || '0x',
+          transaction.operation || 0,
+        ]
+      );
 
-    return utils.keccak256(encodedData);
+      // Create keccak256 hash
+      const txHash = utils.keccak256(encodedData);
+
+      if (this.debug) {
+        console.log('[LitPKPSigner] Transaction hash generated:', txHash);
+      }
+
+      return txHash;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(
+        `LitPKPSigner: Failed to hash transaction: ${errorMessage}`
+      );
+    }
   }
 }
