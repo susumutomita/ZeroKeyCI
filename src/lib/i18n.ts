@@ -112,6 +112,97 @@ export const translations = {
       },
     },
 
+    // Lit Protocol Technical Details
+    litProtocol: {
+      badge: 'Technical Deep Dive',
+      title: 'How Lit Protocol Powers Keyless CI/CD',
+      subtitle:
+        'Understanding the cryptographic foundation that makes automated signing possible without private keys',
+      intro:
+        "ZeroKeyCI uses Lit Protocol's Programmable Key Pairs (PKPs) to enable automated transaction signing in CI/CD without ever exposing private keys. Here's how it works:",
+      architecture: {
+        title: 'PKP Architecture',
+        steps: [
+          {
+            num: '01',
+            title: 'Distributed Key Generation',
+            desc: 'When you mint a PKP NFT, Lit Protocol generates an ECDSA key pair using threshold cryptography across its decentralized network. The private key never exists in full - each Lit node holds only a share.',
+          },
+          {
+            num: '02',
+            title: 'NFT Ownership',
+            desc: 'The PKP public key is tied to an NFT you own. This NFT grants permission to execute Lit Actions that can request signatures from the distributed PKP.',
+          },
+          {
+            num: '03',
+            title: 'Lit Actions: Conditional Logic',
+            desc: "You write JavaScript code (Lit Actions) that runs inside Lit Protocol's network. This code verifies conditions (OPA policies, tests, PR status) before requesting a signature.",
+          },
+          {
+            num: '04',
+            title: 'Threshold Signing',
+            desc: 'If conditions pass, Lit nodes execute your Lit Action. Each node uses its key share to create a signature share. These shares are combined to produce the final ECDSA signature.',
+          },
+          {
+            num: '05',
+            title: 'Safe Integration',
+            desc: 'The PKP address is added as one owner in a Gnosis Safe multisig (e.g., 2-of-3). Even with automated PKP signing, you still need human approval to execute transactions.',
+          },
+        ],
+      },
+      flow: {
+        title: 'ZeroKeyCI + Lit Protocol Flow',
+        steps: [
+          {
+            icon: 'GitBranch',
+            title: 'Developer merges PR',
+            desc: 'PR with "deploy" label is merged after code review and tests pass.',
+          },
+          {
+            icon: 'Activity',
+            title: 'CI generates Safe proposal',
+            desc: 'GitHub Actions compiles contract, runs OPA validation, creates unsigned Safe transaction proposal.',
+          },
+          {
+            icon: 'Zap',
+            title: 'Lit Action executes validation',
+            desc: 'CI triggers Lit Protocol. Lit Action verifies: OPA policy passed, all tests green, PR merged. If any check fails, signature is refused.',
+          },
+          {
+            icon: 'RefreshCw',
+            title: 'Distributed signing',
+            desc: 'Lit nodes create signature shares using their PKP key shares. Shares are combined into a valid ECDSA signature.',
+          },
+          {
+            icon: 'Shield',
+            title: 'Safe multisig approval',
+            desc: 'PKP signature counts as 1-of-N. Human owners review and approve (threshold must be ≥2). Transaction executes when threshold is met.',
+          },
+        ],
+      },
+      security: {
+        title: 'Security Guarantees',
+        points: [
+          {
+            title: 'No Private Key Exposure',
+            desc: "The PKP private key never exists in full anywhere - not in CI, not in code, not in memory. It's mathematically distributed across Lit Protocol nodes.",
+          },
+          {
+            title: 'Conditional Signing Only',
+            desc: "Lit Actions enforce rules cryptographically. The PKP cannot sign unless all conditions (OPA, tests, PR) pass. This is verified by Lit Protocol's network, not just your code.",
+          },
+          {
+            title: 'Multisig as Safety Net',
+            desc: 'Even if someone compromised the Lit Action code, they cannot deploy malicious contracts alone. Human Safe owners must still approve every transaction.',
+          },
+          {
+            title: 'Complete Audit Trail',
+            desc: 'Every signature request to Lit Protocol is logged. Every Safe transaction is on-chain. You can audit exactly what conditions were met, when, and who approved.',
+          },
+        ],
+      },
+    },
+
     // Current limitations
     currentLimitations: {
       badge: 'Roadmap',
@@ -291,6 +382,96 @@ export const translations = {
           title: '完全な透明性',
           desc: 'すべての署名リクエスト、すべての条件チェック、すべてのデプロイがオンチェーンで記録。誰が、何を、いつ、どのような条件下で承認したかを正確に監査できます。',
         },
+      },
+    },
+
+    // Lit Protocol技術詳細
+    litProtocol: {
+      badge: '技術詳細',
+      title: 'Lit Protocolによる秘密鍵レスCI/CDの実現',
+      subtitle: '秘密鍵なしで自動署名を可能にする暗号技術基盤の理解',
+      intro:
+        'ZeroKeyCIはLit ProtocolのProgrammable Key Pairs (PKPs)を使用して、秘密鍵を公開することなくCI/CDでの自動トランザクション署名を実現します。仕組みを説明します:',
+      architecture: {
+        title: 'PKPアーキテクチャ',
+        steps: [
+          {
+            num: '01',
+            title: '分散鍵生成',
+            desc: 'PKP NFTをミントすると、Lit Protocolは分散ネットワーク全体で閾値暗号を使用してECDSA鍵ペアを生成します。秘密鍵は完全な形では決して存在せず、各Litノードがシェアのみを保持します。',
+          },
+          {
+            num: '02',
+            title: 'NFT所有権',
+            desc: 'PKP公開鍵はあなたが所有するNFTに紐付けられています。このNFTは、分散PKPからの署名をリクエストできるLit Actionsの実行権限を付与します。',
+          },
+          {
+            num: '03',
+            title: 'Lit Actions: 条件付きロジック',
+            desc: 'Lit Protocolのネットワーク内で実行されるJavaScriptコード（Lit Actions）を記述します。このコードは署名をリクエストする前に条件（OPAポリシー、テスト、PRステータス）を検証します。',
+          },
+          {
+            num: '04',
+            title: '閾値署名',
+            desc: '条件が満たされると、LitノードがLit Actionを実行します。各ノードは鍵シェアを使用して署名シェアを作成します。これらのシェアは結合されて最終的なECDSA署名を生成します。',
+          },
+          {
+            num: '05',
+            title: 'Safe統合',
+            desc: 'PKPアドレスはGnosis Safeマルチシグ（例: 2-of-3）の1オーナーとして追加されます。自動PKP署名があっても、トランザクション実行には人間の承認が必要です。',
+          },
+        ],
+      },
+      flow: {
+        title: 'ZeroKeyCI + Lit Protocolフロー',
+        steps: [
+          {
+            icon: 'GitBranch',
+            title: '開発者がPRをマージ',
+            desc: 'コードレビューとテスト合格後、「deploy」ラベル付きPRがマージされます。',
+          },
+          {
+            icon: 'Activity',
+            title: 'CIがSafeプロポーザルを生成',
+            desc: 'GitHub Actionsがコントラクトをコンパイルし、OPA検証を実行し、未署名のSafeトランザクションプロポーザルを作成します。',
+          },
+          {
+            icon: 'Zap',
+            title: 'Lit Actionが検証を実行',
+            desc: 'CIがLit Protocolをトリガー。Lit ActionがOPAポリシー合格、全テスト成功、PRマージ済みを検証。どれか1つでも失敗すると署名を拒否します。',
+          },
+          {
+            icon: 'RefreshCw',
+            title: '分散署名',
+            desc: 'LitノードがPKP鍵シェアを使用して署名シェアを作成。シェアは結合されて有効なECDSA署名になります。',
+          },
+          {
+            icon: 'Shield',
+            title: 'Safeマルチシグ承認',
+            desc: 'PKP署名は1-of-Nとしてカウント。人間のオーナーがレビューして承認（閾値≥2必須）。閾値に達するとトランザクション実行。',
+          },
+        ],
+      },
+      security: {
+        title: 'セキュリティ保証',
+        points: [
+          {
+            title: '秘密鍵の非公開',
+            desc: 'PKP秘密鍵は完全な形でどこにも存在しません - CIにも、コードにも、メモリにも。数学的にLit Protocolノード全体に分散されています。',
+          },
+          {
+            title: '条件付き署名のみ',
+            desc: 'Lit Actionsは暗号学的にルールを強制します。PKPはすべての条件（OPA、テスト、PR）が満たされない限り署名できません。これはLit Protocolのネットワークによって検証され、単なるコードではありません。',
+          },
+          {
+            title: 'マルチシグがセーフティネット',
+            desc: '誰かがLit Actionコードを侵害しても、単独で悪意のあるコントラクトをデプロイできません。人間のSafeオーナーがすべてのトランザクションを承認する必要があります。',
+          },
+          {
+            title: '完全な監査証跡',
+            desc: 'Lit Protocolへのすべての署名リクエストが記録されます。すべてのSafeトランザクションはオンチェーンです。どの条件が満たされたか、いつ、誰が承認したかを正確に監査できます。',
+          },
+        ],
       },
     },
 
