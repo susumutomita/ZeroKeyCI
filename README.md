@@ -67,6 +67,7 @@ ZeroKey CI makes smart-contract deployment:
 **→ [Security Architecture](docs/SECURITY.md)**
 **→ [Production Deployment Guide](docs/DEPLOYMENT.md)**
 **→ [Integration Guide (Use in Your Project)](docs/INTEGRATION_GUIDE.md)**
+**→ [Upgradeable Contracts (UUPS & Transparent Proxies)](docs/UPGRADEABLE_CONTRACTS.md)**
 
 ---
 
