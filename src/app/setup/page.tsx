@@ -155,49 +155,53 @@ export default function SetupPage() {
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
-        <div className="max-w-2xl w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
-          <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-12 h-12 text-green-400" />
-          </div>
-
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Pull Request Created! 🎉
-          </h1>
-
-          <p className="text-xl text-gray-300 mb-8">
-            ZeroKeyCI has been set up in your repository. Review and merge the
-            PR to start deploying.
-          </p>
-
-          <div className="space-y-4">
-            <a
-              href={prUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform"
+        <div className="max-w-2xl w-full">
+          {/* Back to Home Link */}
+          <div className="mb-8">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
             >
-              <ExternalLink className="w-5 h-5" />
-              View Pull Request
-            </a>
-
-            <div className="pt-4">
-              <Link
-                href="/"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                ← Back to Home
-              </Link>
-            </div>
+              <span className="text-2xl">←</span>
+              <span>Back to Home</span>
+            </Link>
           </div>
 
-          <div className="mt-12 p-6 bg-blue-500/10 border border-blue-500/20 rounded-xl text-left">
-            <h3 className="font-semibold text-white mb-2">Next Steps:</h3>
-            <ol className="text-gray-300 space-y-2 list-decimal list-inside">
-              <li>Review the PR to understand the changes</li>
-              <li>Configure GitHub Secrets (see PR description)</li>
-              <li>Merge the PR</li>
-              <li>Start deploying contracts with ZeroKeyCI! 🚀</li>
-            </ol>
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
+            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-12 h-12 text-green-400" />
+            </div>
+
+            <h1 className="text-4xl font-bold text-white mb-4">
+              Pull Request Created! 🎉
+            </h1>
+
+            <p className="text-xl text-gray-300 mb-8">
+              ZeroKeyCI has been set up in your repository. Review and merge the
+              PR to start deploying.
+            </p>
+
+            <div className="space-y-4">
+              <a
+                href={prUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform"
+              >
+                <ExternalLink className="w-5 h-5" />
+                View Pull Request
+              </a>
+            </div>
+
+            <div className="mt-12 p-6 bg-blue-500/10 border border-blue-500/20 rounded-xl text-left">
+              <h3 className="font-semibold text-white mb-2">Next Steps:</h3>
+              <ol className="text-gray-300 space-y-2 list-decimal list-inside">
+                <li>Review the PR to understand the changes</li>
+                <li>Configure GitHub Secrets (see PR description)</li>
+                <li>Merge the PR</li>
+                <li>Start deploying contracts with ZeroKeyCI! 🚀</li>
+              </ol>
+            </div>
           </div>
         </div>
       </div>
@@ -207,6 +211,17 @@ export default function SetupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-20 px-6">
       <div className="max-w-4xl mx-auto">
+        {/* Back to Home Link */}
+        <div className="mb-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          >
+            <span className="text-2xl">←</span>
+            <span>Back to Home</span>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black text-white mb-4">
@@ -241,54 +256,27 @@ export default function SetupPage() {
             </div>
 
             {oauthConfigured === false ? (
-              // Show setup instructions when OAuth is not configured
+              // Show user-friendly message when OAuth is not configured
               <div className="space-y-6">
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-6">
                   <h3 className="font-semibold text-yellow-300 mb-3 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5" />
-                    GitHub OAuth Not Configured
+                    One-Click Setup Not Available
                   </h3>
                   <p className="text-yellow-200 mb-4">
-                    This ZeroKeyCI instance requires GitHub OAuth to be
-                    configured by the administrator.
+                    The one-click GitHub integration is not configured on this
+                    instance. You can still deploy contracts using the manual
+                    setup method below.
                   </p>
 
-                  <div className="bg-white/5 rounded-lg p-4 space-y-3">
-                    <p className="text-sm text-gray-300 font-semibold">
-                      For administrators:
+                  <div className="bg-white/5 rounded-lg p-4">
+                    <p className="text-sm text-gray-300">
+                      <strong>For users:</strong> Use the manual setup guide to
+                      add ZeroKeyCI to your repository without OAuth.
                     </p>
-                    <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
-                      <li>
-                        Create a GitHub OAuth App:{' '}
-                        <a
-                          href="https://github.com/settings/developers"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 underline"
-                        >
-                          github.com/settings/developers
-                        </a>
-                      </li>
-                      <li>
-                        Set Authorization callback URL to:{' '}
-                        <code className="bg-black/30 px-2 py-0.5 rounded text-purple-300">
-                          {callbackUrl || '(loading...)'}
-                        </code>
-                      </li>
-                      <li>
-                        Add environment variables:
-                        <div className="ml-6 mt-2 bg-black/40 p-3 rounded font-mono text-xs">
-                          <div>NEXT_PUBLIC_GITHUB_CLIENT_ID=your_client_id</div>
-                          <div>GITHUB_CLIENT_SECRET=your_client_secret</div>
-                        </div>
-                      </li>
-                      <li>Restart the application</li>
-                    </ol>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-yellow-500/20">
-                    <p className="text-sm text-gray-400">
-                      See{' '}
+                    <p className="text-sm text-gray-400 mt-2">
+                      <strong>For administrators:</strong> This instance
+                      requires GitHub OAuth configuration. See{' '}
                       <a
                         href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/GITHUB_INTEGRATION.md"
                         target="_blank"
@@ -297,24 +285,25 @@ export default function SetupPage() {
                       >
                         GitHub Integration Guide
                       </a>{' '}
-                      for detailed instructions.
+                      for setup instructions.
                     </p>
                   </div>
                 </div>
 
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
                   <h3 className="font-semibold text-blue-300 mb-3">
-                    Alternative: Manual Setup
+                    Manual Setup (Recommended)
                   </h3>
                   <p className="text-gray-300 mb-4">
-                    You can still use ZeroKeyCI without OAuth by manually adding
-                    the workflow files to your repository.
+                    Add ZeroKeyCI to your repository by manually creating the
+                    workflow files. This method works for all projects and does
+                    not require OAuth.
                   </p>
                   <a
                     href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/DEPLOYMENT_GUIDE.md"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold"
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
                   >
                     <ExternalLink className="w-4 h-4" />
                     View Manual Setup Guide
