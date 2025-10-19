@@ -216,8 +216,8 @@ export const translations = {
         },
         networkSupport: {
           status: 'Implemented',
-          title: 'Multi-Network Support',
-          desc: 'Supports Ethereum, Polygon, Sepolia, and other EVM chains. Lit Protocol supports Cayenne, Manzano, Habanero, Datil testnets.',
+          title: 'Multi-Network & Testnet Support',
+          desc: '10 networks supported: 5 mainnets (Ethereum, Polygon, Arbitrum, Optimism, Base) + 5 testnets (Sepolia, Polygon Amoy, Arbitrum Sepolia, Optimism Sepolia, Base Sepolia). Multi-chain deployment with single configuration.',
         },
         gasEstimation: {
           status: 'Implemented',
@@ -488,8 +488,8 @@ export const translations = {
         },
         networkSupport: {
           status: '実装済み',
-          title: 'マルチネットワークサポート',
-          desc: 'Ethereum、Polygon、Sepolia、その他のEVMチェーンをサポート。Lit ProtocolはCayenne、Manzano、Habanero、Datilテストネットをサポート。',
+          title: 'マルチネットワーク・テストネットサポート',
+          desc: '10ネットワーク対応: 5メインネット（Ethereum、Polygon、Arbitrum、Optimism、Base）+ 5テストネット（Sepolia、Polygon Amoy、Arbitrum Sepolia、Optimism Sepolia、Base Sepolia）。単一設定でマルチチェーンデプロイ。',
         },
         gasEstimation: {
           status: '実装済み',
