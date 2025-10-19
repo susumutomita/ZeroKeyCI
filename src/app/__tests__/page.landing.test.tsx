@@ -67,7 +67,7 @@ describe('Landing Page', () => {
     // Check for the demo sandbox content
     expect(
       screen.getByText(
-        /Generate a real Safe transaction proposal in your browser/i
+        /See how ZeroKeyCI creates deployment transactions without private keys/i
       )
     ).toBeInTheDocument();
   });
