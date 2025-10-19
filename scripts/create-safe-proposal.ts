@@ -9,6 +9,7 @@ import { SafeProposalBuilder } from '../src/services/SafeProposalBuilder';
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import * as yaml from 'js-yaml';
+import { utils } from 'ethers';
 import { logger } from '../src/lib/logger';
 import {
   ConfigurationError,
@@ -127,9 +128,13 @@ async function main() {
       sepolia: 11155111,
       mainnet: 1,
       polygon: 137,
+      'polygon-amoy': 80002,
       arbitrum: 42161,
+      'arbitrum-sepolia': 421614,
       optimism: 10,
+      'optimism-sepolia': 11155420,
       base: 8453,
+      'base-sepolia': 84532,
     };
 
     const chainId = chainIds[config.network];
@@ -276,46 +281,247 @@ async function main() {
     });
 
     // Create deployment proposal
-    logger.info('Creating Safe deployment proposal', {
-      network: config.network,
-      chainId,
-      contract: config.contract,
-      safeAddress,
-    });
+    let proposal: any;
+    let deploymentAddress: string;
+    const salt = '0x' + '0'.repeat(64); // Default salt for CREATE2
 
-    const proposal = await builder.createDeploymentProposal({
-      contractName: config.contract,
-      bytecode: artifact.bytecode,
-      constructorArgs: config.constructorArgs || [],
-      value: config.value || '0',
-      metadata: {
-        pr: process.env.GITHUB_PR_NUMBER || 'local',
-        commit: process.env.GITHUB_SHA || 'local',
-        deployer: process.env.GITHUB_ACTOR || 'local',
-        author: process.env.GITHUB_PR_AUTHOR || 'local',
-        timestamp: Date.now(),
+    if (config.proxy) {
+      // Proxy deployment or upgrade
+      if (config.proxy.proxyAddress) {
+        // This is an upgrade
+        logger.info('Creating Safe upgrade proposal', {
+          network: config.network,
+          chainId,
+          contract: config.contract,
+          proxyAddress: config.proxy.proxyAddress,
+          proxyType: config.proxy.type,
+        });
+
+        // Calculate implementation address
+        const implementationAddress = builder.calculateDeploymentAddress(
+          artifact.bytecode,
+          salt
+        );
+
+        // Create batch proposal: deploy new implementation + upgrade proxy
+        const transactions = [];
+
+        // 1. Deploy new implementation
+        const implementationDeployment = await builder.createDeploymentProposal(
+          {
+            contractName: config.contract,
+            bytecode: artifact.bytecode,
+            constructorArgs: config.constructorArgs || [],
+            value: '0',
+            metadata: {
+              pr: process.env.GITHUB_PR_NUMBER || 'local',
+              commit: process.env.GITHUB_SHA || 'local',
+              deployer: process.env.GITHUB_ACTOR || 'local',
+              author: process.env.GITHUB_PR_AUTHOR || 'local',
+              timestamp: Date.now(),
+              network: config.network,
+            },
+          }
+        );
+        transactions.push(implementationDeployment);
+
+        // 2. Upgrade proxy to new implementation
+        if (config.proxy.type === 'uups') {
+          // For UUPS, call upgradeTo or upgradeToAndCall on the proxy
+          const upgradeProposal = await builder.createUpgradeProposal({
+            proxyAddress: config.proxy.proxyAddress,
+            newImplementation: implementationAddress,
+            functionSelector: config.proxy.initializeArgs
+              ? 'upgradeToAndCall(address,bytes)'
+              : 'upgradeTo(address)',
+            upgradeArgs: config.proxy.initializeArgs
+              ? [
+                  new utils.Interface([
+                    'function initialize(' +
+                      config.proxy.initializeArgs
+                        .map(() => 'address')
+                        .join(',') +
+                      ')',
+                  ]).encodeFunctionData(
+                    'initialize',
+                    config.proxy.initializeArgs
+                  ),
+                ]
+              : [],
+          });
+          transactions.push(upgradeProposal);
+        } else {
+          throw new ValidationError(
+            'Transparent proxy upgrades not yet supported',
+            {
+              field: 'proxy.type',
+              value: config.proxy.type,
+            }
+          );
+        }
+
+        proposal = builder.createBatchProposal(transactions);
+        deploymentAddress = config.proxy.proxyAddress; // Proxy address stays the same
+      } else {
+        // This is a new proxy deployment
+        logger.info('Creating Safe proxy deployment proposal', {
+          network: config.network,
+          chainId,
+          contract: config.contract,
+          proxyType: config.proxy.type,
+        });
+
+        // Calculate implementation address
+        const implementationAddress = builder.calculateDeploymentAddress(
+          artifact.bytecode,
+          salt
+        );
+
+        const transactions = [];
+
+        // 1. Deploy implementation
+        const implementationDeployment = await builder.createDeploymentProposal(
+          {
+            contractName: config.contract,
+            bytecode: artifact.bytecode,
+            constructorArgs: config.constructorArgs || [],
+            value: '0',
+            metadata: {
+              pr: process.env.GITHUB_PR_NUMBER || 'local',
+              commit: process.env.GITHUB_SHA || 'local',
+              deployer: process.env.GITHUB_ACTOR || 'local',
+              author: process.env.GITHUB_PR_AUTHOR || 'local',
+              timestamp: Date.now(),
+              network: config.network,
+            },
+          }
+        );
+        transactions.push(implementationDeployment);
+
+        // 2. Deploy proxy
+        // Load proxy artifacts
+        const proxyArtifactName =
+          config.proxy.type === 'uups'
+            ? 'ERC1967Proxy'
+            : 'TransparentUpgradeableProxy';
+        const proxyArtifactPath = resolve(
+          process.cwd(),
+          'artifacts',
+          'contracts',
+          'proxies',
+          `${proxyArtifactName}.sol`,
+          `${proxyArtifactName}.json`
+        );
+
+        if (!require('fs').existsSync(proxyArtifactPath)) {
+          throw new ConfigurationError(`Proxy artifact not found`, {
+            configKey: 'proxyArtifact',
+            expectedFormat: 'OpenZeppelin proxy contract artifact',
+            context: { proxyArtifactPath, proxyType: config.proxy.type },
+          });
+        }
+
+        const proxyArtifact = JSON.parse(
+          readFileSync(proxyArtifactPath, 'utf-8')
+        );
+
+        // Encode initialize call data
+        let initializeData = '0x';
+        if (
+          config.proxy.initializeArgs &&
+          config.proxy.initializeArgs.length > 0
+        ) {
+          // Assume initialize function signature - this should match the implementation contract
+          const initInterface = new utils.Interface([
+            'function initialize(' +
+              config.proxy.initializeArgs.map(() => 'address').join(',') +
+              ')',
+          ]);
+          initializeData = initInterface.encodeFunctionData(
+            'initialize',
+            config.proxy.initializeArgs
+          );
+        }
+
+        // Encode proxy constructor args
+        const proxyConstructorArgs =
+          config.proxy.type === 'uups'
+            ? [implementationAddress, initializeData]
+            : [
+                implementationAddress,
+                config.proxy.admin || safeAddress, // Default admin to Safe
+                initializeData,
+              ];
+
+        const proxyDeployment = await builder.createDeploymentProposal({
+          contractName: proxyArtifactName,
+          bytecode: proxyArtifact.bytecode,
+          constructorArgs: proxyConstructorArgs,
+          value: config.value || '0',
+          metadata: {
+            pr: process.env.GITHUB_PR_NUMBER || 'local',
+            commit: process.env.GITHUB_SHA || 'local',
+            deployer: process.env.GITHUB_ACTOR || 'local',
+            author: process.env.GITHUB_PR_AUTHOR || 'local',
+            timestamp: Date.now(),
+            network: config.network,
+          },
+        });
+        transactions.push(proxyDeployment);
+
+        proposal = builder.createBatchProposal(transactions);
+
+        // For proxy deployments, the deployment address is the proxy address
+        const proxySalt = '0x' + '1'.repeat(64); // Different salt for proxy
+        deploymentAddress = builder.calculateDeploymentAddress(
+          proxyArtifact.bytecode,
+          proxySalt
+        );
+      }
+    } else {
+      // Regular deployment (no proxy)
+      logger.info('Creating Safe deployment proposal', {
         network: config.network,
-      },
-    });
-
-    logger.debug('Proposal created', { proposalHash: proposal.validationHash });
-
-    // Validate the proposal
-    if (!builder.validateProposal(proposal)) {
-      throw new ValidationError('Generated proposal failed validation', {
-        field: 'proposal',
-        value: proposal,
+        chainId,
+        contract: config.contract,
+        safeAddress,
       });
+
+      proposal = await builder.createDeploymentProposal({
+        contractName: config.contract,
+        bytecode: artifact.bytecode,
+        constructorArgs: config.constructorArgs || [],
+        value: config.value || '0',
+        metadata: {
+          pr: process.env.GITHUB_PR_NUMBER || 'local',
+          commit: process.env.GITHUB_SHA || 'local',
+          deployer: process.env.GITHUB_ACTOR || 'local',
+          author: process.env.GITHUB_PR_AUTHOR || 'local',
+          timestamp: Date.now(),
+          network: config.network,
+        },
+      });
+
+      logger.debug('Proposal created', {
+        proposalHash: proposal.validationHash,
+      });
+
+      // Validate the proposal
+      if (!builder.validateProposal(proposal)) {
+        throw new ValidationError('Generated proposal failed validation', {
+          field: 'proposal',
+          value: proposal,
+        });
+      }
+
+      logger.debug('Proposal validated successfully');
+
+      // Calculate deployment address (for logging)
+      deploymentAddress = builder.calculateDeploymentAddress(
+        artifact.bytecode,
+        salt
+      );
     }
-
-    logger.debug('Proposal validated successfully');
-
-    // Calculate deployment address (for logging)
-    const salt = '0x' + '0'.repeat(64); // Default salt
-    const deploymentAddress = builder.calculateDeploymentAddress(
-      artifact.bytecode,
-      salt
-    );
 
     logger.info('Deployment address calculated', { deploymentAddress });
 
