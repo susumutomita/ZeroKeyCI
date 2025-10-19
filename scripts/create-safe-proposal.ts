@@ -17,6 +17,10 @@ import {
 } from '../src/lib/errors';
 import { DeploymentTracker } from '../src/lib/deployment-tracker';
 import { Notifier } from '../src/lib/notifier';
+import { GasPriceFetcher } from '../src/lib/gas-price-fetcher';
+import { GasEstimator } from '../src/lib/gas-estimator';
+import { OptimizationReporter } from '../src/lib/optimization-reporter';
+import type { SupportedNetwork } from '../src/lib/network-config';
 
 interface DeployConfig {
   network: string;
@@ -178,6 +182,79 @@ async function main() {
       bytecodeLength: artifact.bytecode.length,
     });
 
+    // Perform gas analysis
+    tracker.startPhase(
+      deploymentId,
+      'gas_analysis',
+      'Analyzing deployment gas costs'
+    );
+
+    let gasAnalysisReport;
+    try {
+      logger.info('Starting gas analysis', {
+        network: config.network,
+        bytecode: artifact.bytecode.substring(0, 10) + '...',
+      });
+
+      const gasFetcher = new GasPriceFetcher();
+      const gasEstimator = new GasEstimator();
+      const reporter = new OptimizationReporter(gasFetcher, gasEstimator);
+
+      // Generate comprehensive optimization report
+      gasAnalysisReport = await reporter.generateReport(artifact.bytecode, {
+        network: config.network as SupportedNetwork,
+        constructorArgs: config.constructorArgs,
+        compareNetworks: [
+          'sepolia',
+          'mainnet',
+          'polygon',
+          'arbitrum',
+          'optimism',
+          'base',
+        ].filter((n) => n !== config.network) as SupportedNetwork[],
+      });
+
+      logger.info('Gas analysis completed', {
+        estimatedGas: gasAnalysisReport.estimate.deploymentGas,
+        estimatedCost: gasAnalysisReport.estimate.costInUSD,
+        recommendations: gasAnalysisReport.recommendations.length,
+        optimizationScore: gasAnalysisReport.optimizationScore,
+      });
+
+      // Check cost thresholds
+      const costThreshold = process.env.GAS_COST_THRESHOLD
+        ? parseFloat(process.env.GAS_COST_THRESHOLD)
+        : config.network === 'mainnet'
+          ? 100
+          : 10;
+
+      const estimatedCost = parseFloat(
+        gasAnalysisReport.estimate.costInUSD || '0'
+      );
+      if (estimatedCost > costThreshold) {
+        logger.warn('⚠️  Deployment cost exceeds threshold', {
+          estimatedCost: `$${estimatedCost}`,
+          threshold: `$${costThreshold}`,
+          network: config.network,
+        });
+      }
+
+      tracker.completePhase(
+        deploymentId,
+        'gas_analysis',
+        `Gas analysis completed: $${estimatedCost}`
+      );
+    } catch (error) {
+      logger.warn('Gas analysis failed, continuing deployment', {
+        error: (error as Error).message,
+      });
+      tracker.completePhase(
+        deploymentId,
+        'gas_analysis',
+        'Gas analysis failed (non-blocking)'
+      );
+    }
+
     // Initialize Safe proposal builder
     const builder = new SafeProposalBuilder({
       safeAddress,
@@ -253,6 +330,22 @@ async function main() {
         runNumber: process.env.GITHUB_RUN_NUMBER || 'local',
         repository: process.env.GITHUB_REPOSITORY || 'local',
       },
+      gasAnalysis: gasAnalysisReport
+        ? {
+            estimatedGas: gasAnalysisReport.estimate.deploymentGas,
+            estimatedCost: gasAnalysisReport.estimate.costInUSD,
+            bytecodeSize: gasAnalysisReport.estimate.bytecodeSize,
+            optimizationScore: gasAnalysisReport.optimizationScore,
+            recommendations: gasAnalysisReport.recommendations.length,
+            networkComparison: gasAnalysisReport.networkComparison
+              ? {
+                  cheapest:
+                    gasAnalysisReport.networkComparison.cheapest.network,
+                  savings: gasAnalysisReport.networkComparison.savings,
+                }
+              : undefined,
+          }
+        : undefined,
     };
 
     // Write proposal to file
@@ -289,6 +382,46 @@ async function main() {
       deploymentAddress,
       outputPath,
     });
+
+    // Post gas analysis to GitHub PR comment
+    if (
+      gasAnalysisReport &&
+      process.env.GITHUB_TOKEN &&
+      process.env.GITHUB_PR_NUMBER
+    ) {
+      try {
+        logger.info('Posting gas analysis to PR comment');
+
+        const reporter = new OptimizationReporter(
+          new GasPriceFetcher(),
+          new GasEstimator()
+        );
+        const reportMarkdown = reporter.formatReport(gasAnalysisReport, 'ci');
+
+        // Use GitHub CLI to post comment
+        const { execSync } = require('child_process');
+        const commentBody = `## ⛽ Gas Optimization Report
+
+${reportMarkdown}
+
+---
+*Gas analysis provided by ZeroKey CI*`;
+
+        execSync(
+          `gh pr comment ${process.env.GITHUB_PR_NUMBER} --body "${commentBody.replace(/"/g, '\\"')}"`,
+          {
+            encoding: 'utf-8',
+            env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
+          }
+        );
+
+        logger.info('Gas analysis posted to PR comment successfully');
+      } catch (error) {
+        logger.warn('Failed to post gas analysis to PR', {
+          error: (error as Error).message,
+        });
+      }
+    }
 
     // Send success notification (with timeout to prevent deployment delays)
     await notifyWithTimeout(notifier, {

@@ -60,102 +60,40 @@ jobs:
           echo "  Network: $NETWORK"
           echo "  Contract: $CONTRACT"
 
-      - name: Generate Safe proposal
+      - name: Generate Safe proposal with gas analysis
         id: create-proposal
         env:
           SAFE_ADDRESS: ${{ secrets.SAFE_ADDRESS }}
-          NETWORK: ${{ steps.deploy-config.outputs.network }}
-          CONTRACT: ${{ steps.deploy-config.outputs.contract }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_WORKFLOW: ${{ github.workflow }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          GAS_COST_THRESHOLD: ${{ vars.GAS_COST_THRESHOLD || '100' }}
         run: |
-          # Create deployment proposal without private keys
-          echo "🔐 Creating Safe transaction proposal..."
+          # Create deployment proposal with gas analysis
+          echo "🔐 Creating Safe transaction proposal with gas analysis..."
 
-          # Use our SafeProposalBuilder to generate the proposal
-          cat << 'EOF' > create-proposal.ts
-          import { SafeProposalBuilder } from './src/services/SafeProposalBuilder';
-          import { readFileSync } from 'fs';
-          import { resolve } from 'path';
+          # Run the enhanced proposal creation script
+          bun run scripts/create-safe-proposal.ts
 
-          async function createDeploymentProposal() {
-            const safeAddress = process.env.SAFE_ADDRESS;
-            const network = process.env.NETWORK;
-            const contractName = process.env.CONTRACT;
-
-            if (!safeAddress) {
-              throw new Error('SAFE_ADDRESS not configured');
-            }
-
-            // Network to chainId mapping
-            const chainIds: Record<string, number> = {
-              'sepolia': 11155111,
-              'mainnet': 1,
-              'polygon': 137,
-              'arbitrum': 42161,
-            };
-
-            const chainId = chainIds[network || 'sepolia'];
-            if (!chainId) {
-              throw new Error(`Unknown network: ${network}`);
-            }
-
-            // Read compiled contract
-            const artifactPath = resolve(
-              process.cwd(),
-              'artifacts',
-              'contracts',
-              `${contractName}.sol`,
-              `${contractName}.json`
-            );
-
-            const artifact = JSON.parse(readFileSync(artifactPath, 'utf-8'));
-            const bytecode = artifact.bytecode;
-
-            // Initialize builder
-            const builder = new SafeProposalBuilder({
-              safeAddress,
-              chainId,
-            });
-
-            // Create deployment proposal
-            const proposal = await builder.createDeploymentProposal({
-              contractName,
-              bytecode,
-              constructorArgs: [], // TODO: Parse from deploy.yaml
-              value: '0',
-              metadata: {
-                pr: '${{ github.event.pull_request.number }}',
-                commit: '${{ github.sha }}',
-                deployer: 'GitHub Actions',
-                author: '${{ github.event.pull_request.user.login }}',
-              },
-            });
-
-            // Serialize proposal
-            const serialized = builder.serializeProposal(proposal);
-
-            // Write to file for artifact upload
-            const outputPath = resolve(process.cwd(), 'safe-proposal.json');
-            require('fs').writeFileSync(outputPath, serialized);
-
-            console.log('✅ Safe proposal created successfully');
-            console.log(`📝 Proposal saved to: ${outputPath}`);
-
-            // Output proposal hash for PR comment
-            const parsed = JSON.parse(serialized);
-            console.log(`::set-output name=proposal-hash::${parsed.validationHash}`);
-            console.log(`::set-output name=safe-address::${safeAddress}`);
-            console.log(`::set-output name=chain-id::${chainId}`);
-          }
-
-          createDeploymentProposal().catch(console.error);
-          EOF
-
-          # Run the proposal creation script
-          bun run create-proposal.ts
-
-          # Set outputs
+          # Set outputs from generated proposal
           PROPOSAL_HASH=$(cat safe-proposal.json | jq -r '.validationHash')
+          DEPLOYMENT_ADDRESS=$(cat safe-proposal.json | jq -r '.deployment.expectedAddress')
+          ESTIMATED_COST=$(cat safe-proposal.json | jq -r '.gasAnalysis.estimatedCost // "N/A"')
+
           echo "proposal_hash=$PROPOSAL_HASH" >> $GITHUB_OUTPUT
+          echo "deployment_address=$DEPLOYMENT_ADDRESS" >> $GITHUB_OUTPUT
+          echo "estimated_cost=$ESTIMATED_COST" >> $GITHUB_OUTPUT
+
+          echo "✅ Safe proposal created successfully"
+          echo "📝 Proposal hash: $PROPOSAL_HASH"
+          echo "📍 Expected deployment address: $DEPLOYMENT_ADDRESS"
+          echo "⛽ Estimated gas cost: \$$ESTIMATED_COST"
 
       - name: Install OPA
         run: |
