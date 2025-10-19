@@ -2296,12 +2296,12 @@ Implement comprehensive gas optimization features for ZeroKeyCI to minimize depl
   - [x] Add caching layer for gas prices (5-minute TTL)
   - [x] Write comprehensive tests (TDD approach)
   - [x] Handle rate limiting and fallback providers
-- [ ] Phase 2: Gas Estimation Service
-  - [ ] Create GasEstimator service class
-  - [ ] Implement bytecode size analysis
-  - [ ] Estimate deployment gas costs
-  - [ ] Estimate initialization gas costs
-  - [ ] Write tests for estimation accuracy
+- [x] Phase 2: Gas Estimation Service ✅
+  - [x] Create GasEstimator service class
+  - [x] Implement bytecode size analysis
+  - [x] Estimate deployment gas costs
+  - [x] Estimate initialization gas costs
+  - [x] Write tests for estimation accuracy
 - [ ] Phase 3: Deployment Simulation
   - [ ] Create DeploymentSimulator using tenderly/hardhat fork
   - [ ] Simulate deployment on network fork
@@ -2381,6 +2381,88 @@ Implement comprehensive gas optimization features for ZeroKeyCI to minimize depl
 - Implement Phase 1: GasPriceFetcher service
 - Start with test file creation (TDD)
 - Support all 6 networks from the start
+
+#### Iteration 2 (2025-10-19 07:30-07:40)
+**What was done:**
+- Implemented Phase 2: Gas Estimation Service (TDD approach):
+  - **GasEstimator Service Class** (src/lib/gas-estimator.ts - 367 lines)
+    - estimateDeployment(): Calculate gas from bytecode size and constructor args
+    - estimateWithPrice(): Calculate wei/ether/USD costs with gas prices
+    - compareNetworks(): Compare deployment costs across multiple networks
+    - analyzeBytecode(): Analyze bytecode structure and complexity
+    - formatEstimate(): Human-readable output formatting
+  - **Gas Cost Constants** (Ethereum yellow paper):
+    - BASE_TX_COST: 21,000 gas
+    - CONTRACT_CREATION_COST: 32,000 gas
+    - CODE_DEPOSIT_COST: 200 gas per byte
+    - CALLDATA_ZERO_BYTE: 4 gas
+    - CALLDATA_NONZERO_BYTE: 16 gas
+  - **Comprehensive Interfaces**:
+    - GasBreakdown (baseCost, creationCost, codeStorage, constructorData)
+    - GasEstimate (network, bytecodeSize, deploymentGas, breakdown, costs)
+    - GasEstimateWithPrice (extends GasEstimate with gasPrice and tier)
+    - NetworkComparison (bytecode, estimates, cheapest, mostExpensive)
+  - **Key Features**:
+    - BigInt for precise wei calculations (no precision loss)
+    - Support for constructor arguments cost estimation
+    - Network comparison with sorting options (cost/gas/network)
+    - Multiple output formats (wei, ether, USD)
+    - Integration with GasPriceFetcher from Phase 1
+- Wrote comprehensive tests (src/lib/__tests__/gas-estimator.test.ts - 368 lines):
+  - 17 test cases covering all functionality
+  - estimateDeployment tests (6 tests): simple contracts, constructor args, all networks, bytecode size impact
+  - estimateWithPrice tests (4 tests): wei calculation, gas tiers, USD cost, network mismatch
+  - analyzeBytecode tests (3 tests): structure analysis, constructor detection, complexity scoring
+  - formatEstimate tests (2 tests): display formatting, cost information
+  - compareNetworks tests (2 tests): multi-network comparison, cost sorting
+- Fixed test failures:
+  - String vs number comparisons (costInWei, costInUSD are strings)
+  - toLocaleString() comma formatting ('150,000' not '150000')
+  - TypeScript errors with optional costInWei (added non-null assertions)
+
+**Test status:**
+- All 530 tests passing | 6 skipped ✓
+- New GasEstimator tests: 17 tests ✓
+- TypeScript compilation: ✓ No errors
+- ESLint: ✓ No errors
+- Next.js build: ✓ Successful
+- Prettier: ✓ All files formatted
+- Coverage: Expected 99.9%+ (to be verified with test:coverage)
+
+**Validation results:**
+- ✅ typecheck: Passed
+- ✅ lint: Passed
+- ✅ test: 530 passing
+- ✅ build: Successful
+- ✅ prettier: Formatted
+
+**Decisions made:**
+- Decision: Use BigInt for wei calculations
+- Reasoning: JavaScript Number loses precision with large wei values
+- Implementation: Convert to string for storage, BigInt for calculations
+
+- Decision: Separate gas estimation from cost calculation
+- Reasoning: Flexibility - can estimate gas without prices, reuse estimates with different price tiers
+- Implementation: estimateDeployment() returns base estimate, estimateWithPrice() adds costs
+
+- Decision: Provide multiple gas tiers (slow/standard/fast)
+- Reasoning: Users can choose speed vs cost tradeoff
+- Implementation: Pass tier to estimateWithPrice(), uses GasPrice from Phase 1
+
+- Decision: Add network comparison feature
+- Reasoning: Help users find cheapest deployment network
+- Implementation: compareNetworks() with sorting and cheapest/mostExpensive detection
+
+- Decision: Use non-null assertions for costInWei in compareNetworks
+- Reasoning: estimateWithPrice() always sets costInWei, safe to assert non-null
+- Implementation: Added ! operator (a.costInWei!, b.costInWei!)
+
+**Blockers/Issues:**
+- None - Phase 2 complete
+
+**Next steps:**
+- Create PR for Phase 2
+- Then implement Phase 3: Deployment Simulation
 
 ### Open Questions
 - **Q**: Should we support custom gas price overrides via env vars?
