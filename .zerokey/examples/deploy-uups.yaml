@@ -1,0 +1,27 @@
+# Example: UUPS Upgradeable Contract Deployment
+# This configuration deploys an upgradeable contract using the UUPS proxy pattern
+# See: https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable
+
+network: sepolia
+contract: ExampleUUPS
+
+# Proxy configuration
+proxy:
+  # Proxy type: "uups" uses ERC1967Proxy with UUPS upgrade pattern
+  type: uups
+
+  # Initialize function arguments (passed to initialize() after deployment)
+  # For ExampleUUPS, initialize(address initialOwner)
+  initializeArgs:
+    - "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"  # initialOwner address
+
+# Constructor arguments for the implementation contract
+# UUPS upgradeable contracts typically don't use constructor args (use initialize instead)
+constructorArgs: []
+
+# ETH value to send with deployment (usually "0" for proxies)
+value: "0"
+
+# Optional: Gas settings
+# gasLimit: 5000000
+# gasPrice: "20000000000"  # 20 gwei

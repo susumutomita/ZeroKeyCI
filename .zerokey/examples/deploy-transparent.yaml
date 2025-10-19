@@ -1,0 +1,25 @@
+# Example: Transparent Proxy Deployment
+# This configuration deploys an upgradeable contract using the Transparent Proxy pattern
+# See: https://docs.openzeppelin.com/contracts/5.x/api/proxy#TransparentUpgradeableProxy
+
+network: sepolia
+contract: ExampleUUPS  # Implementation contract (can use same contract with different proxy type)
+
+# Proxy configuration
+proxy:
+  # Proxy type: "transparent" uses TransparentUpgradeableProxy
+  type: transparent
+
+  # ProxyAdmin address (owner who can upgrade the proxy)
+  # If not specified, a new ProxyAdmin will be deployed
+  # admin: "0xAdminAddress..."
+
+  # Initialize function arguments
+  initializeArgs:
+    - "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"  # initialOwner
+
+# Constructor arguments (empty for upgradeable contracts)
+constructorArgs: []
+
+# ETH value
+value: "0"

@@ -22,6 +22,13 @@ import { GasEstimator } from '../src/lib/gas-estimator';
 import { OptimizationReporter } from '../src/lib/optimization-reporter';
 import type { SupportedNetwork } from '../src/lib/network-config';
 
+interface ProxyConfig {
+  type: 'uups' | 'transparent';
+  initializeArgs?: any[];
+  proxyAddress?: string; // For upgrades
+  admin?: string; // For transparent proxy admin address
+}
+
 interface DeployConfig {
   network: string;
   contract: string;
@@ -29,6 +36,7 @@ interface DeployConfig {
   value?: string;
   gasLimit?: number;
   gasPrice?: string;
+  proxy?: ProxyConfig;
   signers?: {
     threshold: number;
     addresses: string[];

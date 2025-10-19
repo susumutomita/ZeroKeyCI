@@ -1,0 +1,25 @@
+# Example: UUPS Contract Upgrade
+# This configuration upgrades an existing UUPS proxy to a new implementation
+# See: https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable
+
+network: sepolia
+contract: ExampleUUPSV2  # New implementation contract
+
+# Proxy configuration for upgrade
+proxy:
+  type: uups
+
+  # Address of the existing proxy contract to upgrade
+  proxyAddress: "0x1234567890123456789012345678901234567890"
+
+  # Optional: Call data to execute after upgrade (upgradeToAndCall)
+  # If specified, uses upgradeToAndCall() instead of upgradeTo()
+  # initializeArgs:
+  #   - "arg1"
+  #   - "arg2"
+
+# Constructor arguments for new implementation (usually empty for upgradeable contracts)
+constructorArgs: []
+
+# ETH value (usually "0" for upgrades)
+value: "0"
