@@ -236,7 +236,7 @@ export const translations = {
     demo: {
       title: 'Try It Right Now',
       subtitle:
-        'Generate a real Safe transaction proposal in your browser. No wallet required.',
+        'See how ZeroKeyCI creates deployment transactions without private keys. Edit contract settings and instantly preview the Safe multisig transaction that will deploy your contract.',
     },
 
     // Setup section
@@ -508,7 +508,7 @@ export const translations = {
     demo: {
       title: '今すぐ試す',
       subtitle:
-        'ブラウザで実際のSafeトランザクションプロポーザルを生成。ウォレット不要。',
+        'ZeroKeyCIが秘密鍵なしでデプロイメントトランザクションを作成する仕組みを体験。コントラクト設定を編集すると、デプロイに使用されるSafeマルチシグトランザクションのプレビューが表示されます。',
     },
 
     // セットアップセクション

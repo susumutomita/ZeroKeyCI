@@ -123,9 +123,16 @@ contract MyContract is UUPSUpgradeable {
           <span className="text-gradient-vibrant">Try It Live</span> - Safe
           Proposal Sandbox
         </h2>
-        <p className="text-body text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          Generate a Safe transaction proposal without any keys. Edit the
-          configuration and see the results instantly.
+        <p className="text-body text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-4">
+          Experience keyless contract deployment: Edit the contract
+          configuration below and click &quot;Generate Proposal&quot; to see how
+          ZeroKeyCI creates a Safe multisig transaction for deploying your
+          contract.
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+          <strong>What you&apos;ll see:</strong> (1) Contract settings you can
+          customize, (2) Sample Solidity code, (3) The generated Safe
+          transaction JSON with deployment address and validation hash
         </p>
       </div>
 
