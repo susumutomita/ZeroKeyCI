@@ -225,9 +225,9 @@ export const translations = {
           desc: 'Real-time gas price fetching, deployment cost estimation, network comparison, and optimization recommendations integrated into CI/CD workflow.',
         },
         upgradeable: {
-          status: 'Planned',
+          status: 'Implemented',
           title: 'Upgradeable Contract Support',
-          desc: 'Full support for proxy patterns (Transparent, UUPS) and deployment verification is on the roadmap.',
+          desc: 'Full support for UUPS and Transparent proxy deployments with batch proposals. UUPS proxy upgrades supported. See docs/UPGRADEABLE_CONTRACTS.md for details.',
         },
       },
     },
@@ -497,9 +497,9 @@ export const translations = {
           desc: 'リアルタイムガス価格取得、デプロイコスト推定、ネットワーク比較、最適化推奨をCI/CDワークフローに統合済み。',
         },
         upgradeable: {
-          status: '計画中',
+          status: '実装済み',
           title: 'アップグレード可能コントラクトサポート',
-          desc: 'プロキシパターン（Transparent、UUPS）とデプロイ検証の完全サポートをロードマップに追加。',
+          desc: 'UUPSとTransparentプロキシデプロイメントをバッチプロポーザルで完全サポート。UUPSプロキシのアップグレードに対応。詳細はdocs/UPGRADEABLE_CONTRACTS.mdを参照。',
         },
       },
     },
