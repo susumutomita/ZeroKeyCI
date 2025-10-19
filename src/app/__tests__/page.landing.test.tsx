@@ -151,14 +151,20 @@ describe('Landing Page', () => {
     );
   });
 
-  it('should have modern color scheme with cyan/blue gradients', () => {
+  it('should have Apple-style minimalist design with monochrome + blue accent', () => {
     const { container } = render(<Home />);
 
-    // Check for cyan/blue gradient classes instead of purple
-    const gradientElements = container.querySelectorAll(
-      '[class*="from-cyan"], [class*="to-blue"], [class*="to-emerald"]'
+    // Check for Apple-style design elements (white/gray backgrounds with blue accents)
+    const blueAccentElements = container.querySelectorAll(
+      '[class*="blue-600"], [class*="blue-50"]'
     );
-    expect(gradientElements.length).toBeGreaterThan(0);
+    expect(blueAccentElements.length).toBeGreaterThan(0);
+
+    // Check for clean white/gray backgrounds
+    const whiteBackgrounds = container.querySelectorAll(
+      '[class*="bg-white"], [class*="bg-gray-50"]'
+    );
+    expect(whiteBackgrounds.length).toBeGreaterThan(0);
   });
 
   it('should show educational tone in problem tab', () => {
