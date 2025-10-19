@@ -33,6 +33,7 @@ export default defineConfig({
         'src/lit-actions/**/*.{ts,js}', // Exclude Lit Action code - requires integration tests with real Lit network
         'src/app/**/route.ts', // Exclude API routes - tested via integration tests
         'src/app/**/page.tsx', // Exclude pages - tested via E2E tests
+        'src/instrumentation.ts', // Exclude Next.js instrumentation hook - runs on server startup
         'mcp-server/src/**/__tests__/**/*',
         'mcp-server/src/test-search.ts',
       ],

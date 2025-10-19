@@ -34,9 +34,13 @@ export default function SetupPage() {
   const [success, setSuccess] = useState(false);
   const [prUrl, setPrUrl] = useState<string>('');
   const [oauthConfigured, setOauthConfigured] = useState<boolean | null>(null);
+  const [callbackUrl, setCallbackUrl] = useState('');
 
   // Check OAuth configuration on mount
   useEffect(() => {
+    // Set callback URL for SSR compatibility
+    setCallbackUrl(`${window.location.origin}/api/auth/github/callback`);
+
     fetch('/api/config/status')
       .then((res) => res.json())
       .then((data) => {
@@ -268,7 +272,7 @@ export default function SetupPage() {
                       <li>
                         Set Authorization callback URL to:{' '}
                         <code className="bg-black/30 px-2 py-0.5 rounded text-purple-300">
-                          {window.location.origin}/api/auth/github/callback
+                          {callbackUrl || '(loading...)'}
                         </code>
                       </li>
                       <li>
