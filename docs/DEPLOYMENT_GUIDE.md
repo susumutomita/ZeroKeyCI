@@ -422,6 +422,77 @@ Recommendations:
 
 ## Advanced Features
 
+### Multi-Chain Deployment
+
+Deploy the same contract to multiple networks with a single configuration file.
+
+#### Configuration
+
+Create `.zerokey/deploy-multi.yaml`:
+
+```yaml
+deployments:
+  - network: sepolia
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+
+  - network: polygon
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+
+  - network: base
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+```
+
+#### Running Multi-Chain Deployment
+
+```bash
+# Generate proposals for all networks
+bun run scripts/create-multi-safe-proposals.ts .zerokey/deploy-multi.yaml
+
+# Outputs:
+# - safe-proposal-sepolia.json
+# - safe-proposal-polygon.json
+# - safe-proposal-base.json
+# - multi-deployment-summary.json
+```
+
+#### Summary Output
+
+The script generates a summary file with deployment overview:
+
+```json
+{
+  "totalDeployments": 3,
+  "networks": ["sepolia", "polygon", "base"],
+  "deployments": [
+    {
+      "network": "sepolia",
+      "proposalFile": "safe-proposal-sepolia.json",
+      "expectedAddress": "0x9f265d7fE75d309B971cdc8Cd0C3EA150d8e6dD8",
+      "estimatedCost": "$12.50",
+      "chainId": 11155111
+    }
+  ],
+  "timestamp": "2025-10-19T11:58:55.977Z"
+}
+```
+
+**Key Features:**
+- Single command deploys to multiple networks
+- Individual proposal files per network
+- Cost comparison across all networks
+- Deterministic deployment addresses (same contract = same address on all chains)
+
+**Note:** In production, you'll need separate Safe wallets on each network. The script validates all Safe addresses before generating proposals.
+
 ### Upgradeable Contracts
 
 ZeroKeyCI supports OpenZeppelin upgradeable patterns.

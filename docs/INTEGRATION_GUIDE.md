@@ -304,6 +304,10 @@ jobs:
 
 ### Example 3: Multi-Network Deployment
 
+#### Sequential Deployment (Recommended for Production)
+
+Deploy to testnet first, then mainnet after validation:
+
 ```yaml
 name: Deploy to Multiple Networks
 
@@ -331,6 +335,91 @@ jobs:
     secrets:
       rpc-url: ${{ secrets.MAINNET_RPC_URL }}
 ```
+
+#### Parallel Multi-Chain Deployment
+
+Deploy to multiple networks simultaneously using the multi-chain script:
+
+**Create configuration** (`.zerokey/deploy-multi.yaml`):
+
+```yaml
+deployments:
+  - network: sepolia
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+
+  - network: polygon
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+
+  - network: base
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+```
+
+**Workflow**:
+
+```yaml
+name: Multi-Chain Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-multi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout ZeroKeyCI
+        uses: actions/checkout@v4
+        with:
+          repository: susumutomita/ZeroKeyCI
+          path: .zerokeyci
+          ref: main
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: |
+          cd .zerokeyci
+          bun install --frozen-lockfile
+
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      - name: Create multi-chain proposals
+        run: |
+          cd .zerokeyci
+          bun run scripts/create-multi-safe-proposals.ts ../.zerokey/deploy-multi.yaml
+
+      - name: Upload proposals
+        uses: actions/upload-artifact@v4
+        with:
+          name: multi-chain-proposals
+          path: |
+            safe-proposal-*.json
+            multi-deployment-summary.json
+```
+
+**Output**: Generates separate Safe proposals for each network:
+- `safe-proposal-sepolia.json`
+- `safe-proposal-polygon.json`
+- `safe-proposal-base.json`
+- `multi-deployment-summary.json` (overview)
+
+**Benefits**:
+- Single command deploys to multiple networks
+- Deterministic addresses (same bytecode = same address on all chains)
+- Cost comparison across networks
+- Individual proposals per network for Safe signing
 
 ### Example 4: With Envio Event Indexing
 
