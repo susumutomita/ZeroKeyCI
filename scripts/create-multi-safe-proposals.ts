@@ -39,9 +39,13 @@ const CHAIN_IDS: Record<string, number> = {
   sepolia: 11155111,
   mainnet: 1,
   polygon: 137,
+  'polygon-amoy': 80002,
   arbitrum: 42161,
+  'arbitrum-sepolia': 421614,
   optimism: 10,
+  'optimism-sepolia': 11155420,
   base: 8453,
+  'base-sepolia': 84532,
 };
 
 async function generateProposalForNetwork(

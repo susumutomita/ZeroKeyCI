@@ -19,9 +19,13 @@ export type SupportedNetwork =
   | 'mainnet'
   | 'sepolia'
   | 'polygon'
+  | 'polygon-amoy'
   | 'arbitrum'
+  | 'arbitrum-sepolia'
   | 'optimism'
-  | 'base';
+  | 'optimism-sepolia'
+  | 'base'
+  | 'base-sepolia';
 
 /**
  * Network configurations for supported chains
@@ -92,6 +96,50 @@ export const NETWORK_CONFIGS: Record<SupportedNetwork, NetworkConfig> = {
       decimals: 18,
     },
     testnet: false,
+  },
+  'polygon-amoy': {
+    chainId: 80002,
+    name: 'Polygon Amoy Testnet',
+    explorerUrl: 'https://amoy.polygonscan.com',
+    currency: {
+      name: 'MATIC',
+      symbol: 'MATIC',
+      decimals: 18,
+    },
+    testnet: true,
+  },
+  'arbitrum-sepolia': {
+    chainId: 421614,
+    name: 'Arbitrum Sepolia Testnet',
+    explorerUrl: 'https://sepolia.arbiscan.io',
+    currency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    testnet: true,
+  },
+  'optimism-sepolia': {
+    chainId: 11155420,
+    name: 'Optimism Sepolia Testnet',
+    explorerUrl: 'https://sepolia-optimism.etherscan.io',
+    currency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    testnet: true,
+  },
+  'base-sepolia': {
+    chainId: 84532,
+    name: 'Base Sepolia Testnet',
+    explorerUrl: 'https://sepolia.basescan.org',
+    currency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    testnet: true,
   },
 };
 

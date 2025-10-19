@@ -2859,6 +2859,189 @@ Phase 4 (Optimization Report Generator) is complete and committed. The implement
 
 ---
 
+### Exec Plan: Multi-Chain & Testnet Support
+Created: 2025-10-19 12:00
+Status: ✅ Completed
+
+#### Objective
+Enable external projects to deploy contracts to multiple networks (both mainnets and testnets) with a single command, providing comprehensive multi-chain deployment capability with full testnet coverage for safe testing.
+
+**Success criteria:**
+- Single configuration file for multi-chain deployments
+- Support for all major L2 networks (mainnets + testnets)
+- Individual Safe proposals per network
+- Cost comparison across networks
+- Deterministic addresses across chains
+- Complete testnet coverage for testing before mainnet
+
+#### Guardrails
+- No private keys in CI/CD environments
+- Same security model as single-chain deployments
+- Must support network-specific Safe addresses
+- Must maintain all existing test coverage
+- Backward compatible with single-network deployments
+
+#### TODO
+- [x] Phase 1: Multi-chain deployment infrastructure (PR #56)
+  - [x] Create create-multi-safe-proposals.ts script
+  - [x] Support multiple networks in single config
+  - [x] Generate individual proposals per network
+  - [x] Add gas analysis per network
+  - [x] Create deployment summary output
+  - [x] Document multi-chain deployment workflow
+  - [x] Update INTEGRATION_GUIDE.md with external project examples
+- [x] Phase 2: Comprehensive testnet support (PR #57)
+  - [x] Add Polygon Amoy testnet (chainId: 80002)
+  - [x] Add Arbitrum Sepolia testnet (chainId: 421614)
+  - [x] Add Optimism Sepolia testnet (chainId: 11155420)
+  - [x] Add Base Sepolia testnet (chainId: 84532)
+  - [x] Update gas-price-fetcher with testnet endpoints
+  - [x] Update documentation with testnet examples
+  - [x] Update tests for 10 total networks (5 mainnets + 5 testnets)
+
+#### Validation Steps
+- [x] All tests pass (593 tests passing)
+- [x] Coverage maintained at 99.91%+
+- [x] TypeScript compiles with no errors
+- [x] Linting passes (lint + lint_text)
+- [x] Build succeeds (Next.js build)
+- [x] Multi-chain script works with example config
+- [x] Individual proposals generated per network
+- [x] Summary output displays correctly
+
+#### Progress Log
+
+##### Iteration 1 (2025-10-19 12:00-12:30) - Multi-Chain Deployment (PR #56)
+**What was done:**
+- Created `scripts/create-multi-safe-proposals.ts` (340 lines)
+  - Generates Safe proposals for multiple networks from single config
+  - Individual proposal files per network (safe-proposal-{network}.json)
+  - Summary file with deployment overview (multi-deployment-summary.json)
+  - Gas analysis for each network
+  - Summary table output
+- Created `.zerokey/deploy-multi.yaml` example configuration
+- Enhanced DEPLOYMENT_GUIDE.md with multi-chain deployment section
+- Enhanced INTEGRATION_GUIDE.md with external project integration examples
+- Added chain ID mappings for all 6 networks (sepolia, mainnet, polygon, arbitrum, optimism, base)
+
+**Test status:**
+- ✅ 593 tests passing | 6 skipped
+- ✅ 99.91% statement coverage
+- ✅ TypeScript compilation successful
+- ✅ ESLint validation passed
+- ✅ Prettier formatted
+- ✅ Next.js build successful
+
+**Validation results:**
+- ✅ Multi-chain script tested locally with ExampleUUPS
+- ✅ Generated proposals for 3 networks (sepolia, polygon, base)
+- ✅ Summary file created successfully
+- ✅ PR #56 created and merged
+
+**Files changed:**
+- scripts/create-multi-safe-proposals.ts (new, 340 lines)
+- .zerokey/deploy-multi.yaml (new)
+- docs/DEPLOYMENT_GUIDE.md (enhanced)
+- docs/INTEGRATION_GUIDE.md (enhanced)
+
+##### Iteration 2 (2025-10-19 12:30-13:00) - Testnet Support (PR #57)
+**What was done:**
+- Extended network support from 6 to 10 networks (5 mainnets + 5 testnets)
+- Added 4 L2 testnet configurations to `src/lib/network-config.ts`:
+  - Polygon Amoy (chainId: 80002)
+  - Arbitrum Sepolia (chainId: 421614)
+  - Optimism Sepolia (chainId: 11155420)
+  - Base Sepolia (chainId: 84532)
+- Updated `src/lib/gas-price-fetcher.ts`:
+  - Added gas price API endpoints for all 4 testnets
+  - Added RPC fallback endpoints for reliability
+- Updated `scripts/create-multi-safe-proposals.ts` with testnet chain IDs
+- Updated documentation:
+  - DEPLOYMENT_GUIDE.md: Clear mainnet/testnet separation
+  - INTEGRATION_GUIDE.md: Testnet-focused deployment examples
+  - .zerokey/deploy-multi.yaml: Updated with L2 testnets
+- Fixed tests in `src/lib/__tests__/network-config.test.ts`:
+  - Updated getSupportedNetworks test (6 → 10 networks)
+  - Updated getSupportedChainIds test (6 → 10 chain IDs)
+  - Added assertions for all new testnets
+
+**Test status:**
+- ✅ 593 tests passing | 6 skipped
+- ✅ 99.91% statement coverage
+- ✅ 98.34% branch coverage
+- ✅ All network config tests passing
+- ✅ All validation checks passed
+
+**Validation results:**
+- ✅ TypeScript: no errors
+- ✅ ESLint: no errors
+- ✅ Prettier: formatted
+- ✅ Next.js build: successful
+- ✅ CI checks: PASSING
+  - Main CI: ✅ PASSED (49s)
+  - CodeQL: ✅ PASSED
+  - Analyze (TypeScript): ✅ PASSED (1m10s)
+  - Analyze (actions): ✅ PASSED (45s)
+  - GitGuardian Security: ✅ PASSED
+  - Vercel: ✅ PASSED
+- ⏳ Supplementary checks pending: claude-review, CodeRabbit (non-blocking)
+
+**Files changed (7 files, 109 insertions, 8 deletions):**
+- src/lib/network-config.ts (+50 lines)
+- src/lib/gas-price-fetcher.ts (+12 lines)
+- scripts/create-multi-safe-proposals.ts (+4 lines)
+- docs/DEPLOYMENT_GUIDE.md (+9 lines)
+- docs/INTEGRATION_GUIDE.md (+18 lines)
+- .zerokey/deploy-multi.yaml (+12 lines)
+- src/lib/__tests__/network-config.test.ts (+12 lines)
+
+**User feedback:**
+- User asked: "テストネットサポートしてるってことかな" (Does this mean testnet is supported?)
+- Response: Identified only Sepolia was supported, proposed adding all L2 testnets
+- User approved: "はい" (Yes)
+
+**PR Status:**
+- ✅ PR #57 created: https://github.com/susumutomita/ZeroKeyCI/pull/57
+- ✅ All critical CI checks passing
+- ✅ Ready for review and merge
+
+#### Benefits Delivered
+
+**For External Projects:**
+1. 🌐 **Multi-Chain Deployment** - Deploy to multiple networks with single command
+2. 🧪 **Complete Testnet Coverage** - Test on all L2 testnets before mainnet
+3. 💰 **Cost Comparison** - See deployment costs across all networks
+4. 🎯 **Deterministic Addresses** - Same bytecode = same address on all chains
+5. 📊 **Individual Proposals** - Separate Safe proposals per network
+6. 🔒 **No Private Keys** - Same secure workflow across all networks
+
+**Network Coverage:**
+- Mainnets: Ethereum, Polygon, Arbitrum, Optimism, Base (5 networks)
+- Testnets: Sepolia, Polygon Amoy, Arbitrum Sepolia, Optimism Sepolia, Base Sepolia (5 networks)
+- Total: 10 networks fully supported
+
+### References
+- PR #56: Multi-chain deployment support (merged)
+- PR #57: Comprehensive testnet support (ready for review)
+- Related Issues: External project integration requirements
+- Documentation: DEPLOYMENT_GUIDE.md, INTEGRATION_GUIDE.md
+
+### Handoff Notes
+**Final Summary:**
+Both multi-chain deployment and comprehensive testnet support are complete. External projects can now deploy contracts to multiple networks (both mainnets and testnets) with a single configuration file. All 10 networks are fully supported with gas price fetching, cost comparison, and deterministic address calculation.
+
+**Outstanding Risks:**
+- None - all critical functionality tested and validated
+- Supplementary CI checks (claude-review, CodeRabbit) still pending but non-blocking
+
+**Follow-up Tasks:**
+- PR #57 needs review and merge
+- Consider testing from external project perspective
+- Monitor adoption and gather feedback
+- Potential future: Add more networks as they gain adoption
+
+---
+
 ### Exec Plan: Upgradeable Contract Support
 Created: 2025-10-19 11:00
 Status: 🟡 In Progress
