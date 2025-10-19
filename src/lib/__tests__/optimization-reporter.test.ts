@@ -721,6 +721,74 @@ describe('OptimizationReporter', () => {
     });
   });
 
+  describe('edge cases', () => {
+    it('should handle network comparison with equal costs', async () => {
+      // Setup mocks where all networks have same cost
+      (mockGasPriceFetcher.fetchGasPrice as any).mockImplementation(
+        (_network: SupportedNetwork) => {
+          return Promise.resolve({
+            network: _network,
+            slow: 10,
+            standard: 20,
+            fast: 30,
+            timestamp: Date.now(),
+          });
+        }
+      );
+
+      (mockGasEstimator.estimateWithPrice as any).mockImplementation(
+        (bytecode: string, gasPrice: any, options: any) => {
+          return {
+            network: gasPrice.network,
+            bytecodeSize: 1000,
+            deploymentGas: 250000,
+            breakdown: {
+              baseCost: 21000,
+              creationCost: 32000,
+              codeStorage: 200000,
+              constructorData: 0,
+            },
+            gasPrice,
+            tier: options.tier,
+            costInWei: '5000000000000000',
+            costInEther: '0.005',
+            costInUSD: '12.50', // Same cost for all networks
+          };
+        }
+      );
+
+      const bytecode =
+        '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+      const comparison = await reporter.compareNetworks(bytecode, [
+        'sepolia',
+        'mainnet',
+      ]);
+
+      // When costs are equal, savings should be 0
+      expect(comparison.savings).toBe(0);
+    });
+
+    it('should handle recommendations without potentialSavings or actionItems', async () => {
+      // This tests edge cases in formatReport
+      const report = await reporter.generateReport(
+        '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe',
+        {
+          network: 'sepolia',
+        }
+      );
+
+      // Format the report to exercise all formatting branches
+      const cliOutput = reporter.formatReport(report, 'cli');
+      const ciOutput = reporter.formatReport(report, 'ci');
+      const jsonOutput = reporter.formatReport(report, 'json');
+
+      expect(cliOutput).toContain('Gas Optimization Report');
+      expect(ciOutput).toContain('sepolia'); // CI format includes network name
+      expect(JSON.parse(jsonOutput)).toHaveProperty('bytecode');
+    });
+  });
+
   describe('compareNetworks', () => {
     it('should compare deployment costs across networks', async () => {
       // Setup mock for polygon network
