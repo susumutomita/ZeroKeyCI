@@ -33,6 +33,24 @@ export default function SetupPage() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState(false);
   const [prUrl, setPrUrl] = useState<string>('');
+  const [oauthConfigured, setOauthConfigured] = useState<boolean | null>(null);
+  const [callbackUrl, setCallbackUrl] = useState('');
+
+  // Check OAuth configuration on mount
+  useEffect(() => {
+    // Set callback URL for SSR compatibility
+    setCallbackUrl(`${window.location.origin}/api/auth/github/callback`);
+
+    fetch('/api/config/status')
+      .then((res) => res.json())
+      .then((data) => {
+        setOauthConfigured(data.features.githubOAuthEnabled);
+      })
+      .catch((err) => {
+        console.error('Failed to check config status:', err);
+        setOauthConfigured(false);
+      });
+  }, []);
 
   // Check if user is authenticated on mount
   useEffect(() => {
@@ -222,19 +240,112 @@ export default function SetupPage() {
               </h2>
             </div>
 
-            <p className="text-gray-300 mb-6">
-              Authorize ZeroKeyCI to access your repositories. We need
-              permission to create a pull request with the deployment workflow.
-            </p>
+            {oauthConfigured === false ? (
+              // Show setup instructions when OAuth is not configured
+              <div className="space-y-6">
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-6">
+                  <h3 className="font-semibold text-yellow-300 mb-3 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    GitHub OAuth Not Configured
+                  </h3>
+                  <p className="text-yellow-200 mb-4">
+                    This ZeroKeyCI instance requires GitHub OAuth to be
+                    configured by the administrator.
+                  </p>
 
-            <button
-              onClick={handleConnectGitHub}
-              disabled={loading}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
-            >
-              <Github className="w-5 h-5" />
-              Connect with GitHub
-            </button>
+                  <div className="bg-white/5 rounded-lg p-4 space-y-3">
+                    <p className="text-sm text-gray-300 font-semibold">
+                      For administrators:
+                    </p>
+                    <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
+                      <li>
+                        Create a GitHub OAuth App:{' '}
+                        <a
+                          href="https://github.com/settings/developers"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 underline"
+                        >
+                          github.com/settings/developers
+                        </a>
+                      </li>
+                      <li>
+                        Set Authorization callback URL to:{' '}
+                        <code className="bg-black/30 px-2 py-0.5 rounded text-purple-300">
+                          {callbackUrl || '(loading...)'}
+                        </code>
+                      </li>
+                      <li>
+                        Add environment variables:
+                        <div className="ml-6 mt-2 bg-black/40 p-3 rounded font-mono text-xs">
+                          <div>NEXT_PUBLIC_GITHUB_CLIENT_ID=your_client_id</div>
+                          <div>GITHUB_CLIENT_SECRET=your_client_secret</div>
+                        </div>
+                      </li>
+                      <li>Restart the application</li>
+                    </ol>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-yellow-500/20">
+                    <p className="text-sm text-gray-400">
+                      See{' '}
+                      <a
+                        href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/GITHUB_INTEGRATION.md"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        GitHub Integration Guide
+                      </a>{' '}
+                      for detailed instructions.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
+                  <h3 className="font-semibold text-blue-300 mb-3">
+                    Alternative: Manual Setup
+                  </h3>
+                  <p className="text-gray-300 mb-4">
+                    You can still use ZeroKeyCI without OAuth by manually adding
+                    the workflow files to your repository.
+                  </p>
+                  <a
+                    href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/DEPLOYMENT_GUIDE.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Manual Setup Guide
+                  </a>
+                </div>
+              </div>
+            ) : oauthConfigured === true ? (
+              // Show connect button when OAuth is configured
+              <>
+                <p className="text-gray-300 mb-6">
+                  Authorize ZeroKeyCI to access your repositories. We need
+                  permission to create a pull request with the deployment
+                  workflow.
+                </p>
+
+                <button
+                  onClick={handleConnectGitHub}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                >
+                  <Github className="w-5 h-5" />
+                  Connect with GitHub
+                </button>
+              </>
+            ) : (
+              // Loading state
+              <div className="text-center py-8">
+                <div className="inline-block w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-400 mt-4">Checking configuration...</p>
+              </div>
+            )}
           </div>
         )}
 

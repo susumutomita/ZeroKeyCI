@@ -3197,3 +3197,131 @@ Implement full support for upgradeable contracts (Transparent Proxy and UUPS pat
 - [ ] Phase 3: Add OPA policy validation for proxy deployments
 - [ ] Phase 4: Add integration tests for proxy workflows
 - [ ] Monitor user feedback and add examples as needed
+
+---
+
+## Exec Plan: Fix GitHub OAuth Configuration UX Issue
+Created: 2025-10-19 20:14
+Status: 🟢 In Progress
+
+### Objective
+Resolve the user experience issue where the /setup page shows a cryptic "GitHub OAuth is not configured" error without guidance. Make the feature either work out-of-the-box or provide clear, actionable setup instructions.
+
+### Context
+User reported: "Setup ZeroKeyCI Connect your GitHub account and deploy contracts in 3 minutes Error GitHub OAuth is not configuredって出てつながりもしないんですが"
+
+This is a critical UX bug that blocks the core "Deploy in 3 minutes" promise on the landing page. The /setup page requires OAuth credentials but provides no guidance when they're missing.
+
+### Guardrails
+- Must not break existing OAuth functionality when credentials ARE configured
+- Must provide clear, actionable instructions for administrators
+- Must maintain security (no hardcoded credentials)
+- Must not require users to read documentation to understand the issue
+
+### TODO
+- [x] Investigate current OAuth implementation and error handling
+- [x] Add startup validation for OAuth configuration
+  - [x] Create config-validator.ts module
+  - [x] Add validateGitHubOAuth() function
+  - [x] Add logConfigStatus() for startup logs
+  - [x] Add tests for config validation
+- [x] Improve error UI with setup instructions
+  - [x] Add /api/config/status endpoint
+  - [x] Update setup page to check OAuth configuration
+  - [x] Show helpful error message with setup steps
+  - [x] Link to GitHub Integration Guide
+  - [x] Provide manual setup alternative
+- [x] Test OAuth flow with missing credentials
+  - [x] Verify all 604 tests pass
+  - [x] Verify TypeScript compilation
+  - [x] Verify ESLint passes
+- [ ] Update plans.md with OAuth fix iteration
+- [ ] Create PR with OAuth configuration improvements
+- [ ] Verify CI passes
+- [ ] Merge PR
+
+### Validation Steps
+- [x] All tests pass (604/604 passing, 6 skipped)
+- [x] TypeScript compiles with no errors
+- [x] ESLint passes with no errors
+- [ ] Next.js build succeeds
+- [ ] Visual verification of /setup page with OAuth disabled
+- [ ] Visual verification of /setup page with OAuth enabled
+
+### Progress Log
+
+#### Iteration 1 (2025-10-19 20:14)
+**What was done:**
+- Created `src/lib/config-validator.ts`:
+  - `validateGitHubOAuth()`: Checks if NEXT_PUBLIC_GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET are set
+  - `validateConfig()`: Validates all configuration and returns feature flags
+  - `logConfigStatus()`: Logs configuration status on application startup
+- Created `src/app/api/config/status/route.ts`:
+  - API endpoint that returns feature flags (githubOAuthEnabled, litProtocolEnabled)
+- Updated `src/app/setup/page.tsx`:
+  - Added `oauthConfigured` state that checks `/api/config/status`
+  - Shows helpful error message when OAuth is not configured
+  - Provides step-by-step setup instructions for administrators
+  - Links to GitHub Integration Guide
+  - Offers manual setup alternative
+  - Shows loading state while checking configuration
+- Created `src/lib/__tests__/config-validator.test.ts`:
+  - 11 comprehensive tests for validation logic
+  - Tests for GitHub OAuth validation
+  - Tests for feature flags
+  - Tests for logConfigStatus
+
+**Test status:**
+- Tests: 604 passing, 6 skipped ✓
+- TypeScript: No errors ✓
+- ESLint: No errors ✓
+
+**Decisions made:**
+- **Decision**: Make OAuth configuration optional, not required
+- **Reasoning**: Better UX for self-hosted deployments, provides flexibility
+- **Alternatives considered**: 
+  1. Hardcode OAuth credentials (rejected: security risk)
+  2. Hide /setup page when OAuth not configured (rejected: confusing UX)
+  3. Provide clear error message with instructions (chosen: best UX)
+
+- **Decision**: Check configuration on page load, not on button click
+- **Reasoning**: Fail fast, show error immediately rather than after user clicks
+- **Alternatives considered**: Show error only on button click (rejected: wastes user time)
+
+- **Decision**: Provide both administrator instructions and manual alternative
+- **Reasoning**: Unblock users who can't configure OAuth (permissions, self-hosted)
+- **Alternatives considered**: Only show admin instructions (rejected: doesn't help all users)
+
+**Blockers/Issues:**
+- None
+
+### Open Questions
+- **Q**: Should we create a default OAuth app for the official hosted version?
+  - **A** (pending): Need to check if there's an official deployment URL and create OAuth app for it
+
+### References
+- Related Issues: #68
+- Documentation: docs/GITHUB_INTEGRATION.md
+- User error message: "Setup ZeroKeyCI Connect your GitHub account and deploy contracts in 3 minutes Error GitHub OAuth is not configured"
+
+### Next Steps
+1. Update plans.md with this exec plan
+2. Run Next.js build to verify
+3. Create PR with comprehensive description
+4. Test the visual UX on /setup page
+5. Verify CI passes
+6. Get user feedback on improved error message
+
+### Handoff Notes
+**Final Summary:**
+- (To be completed after PR merge)
+
+**Outstanding Risks:**
+- Users may still find the setup complex if they're not familiar with GitHub OAuth
+- May need to provide a video tutorial or screenshots
+
+**Follow-up Tasks:**
+- Consider creating a default OAuth app for official deployment
+- Add visual screenshots to GitHub Integration Guide
+- Monitor Issue #68 for user feedback
+
