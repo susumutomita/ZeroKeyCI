@@ -1,6 +1,91 @@
 # Claude Agent Playbook
 Follow this checklist when you modify ZeroKey CI. The priority is to operate from constraints: living exec plans, green tests, clear documentation.
 
+## ⚠️  CRITICAL: Core Value Propositions (NEVER DEVIATE)
+
+ZeroKeyCI has **TWO core value propositions** that must NEVER be compromised:
+
+### 1. No Private Keys in CI/CD (Security Innovation)
+
+**THE PRIMARY VALUE**: Deploy smart contracts WITHOUT storing private keys in GitHub Actions.
+
+```yaml
+# ❌ NEVER THIS (traditional approach):
+env:
+  PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}  # SECURITY RISK
+
+# ✅ ALWAYS THIS (ZeroKeyCI approach):
+env:
+  SAFE_ADDRESS: ${{ secrets.SAFE_ADDRESS }}  # NO PRIVATE KEYS
+```
+
+**Core workflow:**
+1. CI generates **unsigned** Safe transaction proposals (no private keys needed)
+2. Safe owners review and approve via multisig (using their own keys)
+3. Contract deploys after threshold signatures
+
+**If private keys are introduced to CI/CD at any point, the entire value proposition is destroyed.**
+
+### 2. ETHOnline 2025 Hackathon Prize Coverage
+
+**Official prize page**: https://ethglobal.com/events/ethonline2025/prizes
+
+**Required integrations** (all must be demonstrated):
+
+#### ✅ Hardhat 3
+- **Status**: Implemented
+- **Evidence**: All contracts compiled with Hardhat 3
+- **Files**: `hardhat.config.ts`, contract compilation in CI
+- **Prize track**: Hardhat Prize
+
+#### ✅ Blockscout
+- **Status**: Implemented
+- **Evidence**: Autoscout + SDK + MCP integration
+- **Files**: `scripts/blockscout-verify.ts`, `.zerokey/explorer.json`
+- **Prize track**: Blockscout Prize (requires Autoscout, SDK, MCP)
+
+#### ✅ Lit Protocol (Vincent)
+- **Status**: Implemented
+- **Evidence**: PKP-based automated signing with conditional logic
+- **Files**:
+  - `src/services/LitPKPSigner.ts`
+  - `src/lit-actions/conditionalSigner.ts`
+  - `scripts/setup/mint-pkp.ts`
+  - `scripts/trigger-pkp-signing.ts`
+- **Prize track**: Lit Protocol Vincent Prize (scoped delegated signing)
+
+#### ✅ Envio
+- **Status**: Implemented
+- **Evidence**: HyperIndex/HyperSync for Safe event monitoring
+- **Files**:
+  - `src/envio/EventHandlers.ts.example`
+  - `.zerokey/envio-config.yaml`
+  - `.zerokey/envio-schema.graphql`
+- **Prize track**: Envio Prize (HyperIndex/HyperSync)
+
+**IMPORTANT**: All integrations MUST be:
+1. Actually implemented (not just mentioned in docs)
+2. Demonstrated in working code
+3. Verified to integrate with core workflow
+4. Documented with setup instructions
+
+If any prize track integration is missing or broken, the hackathon submission has NO VALUE.
+
+### How to Maintain These Core Values
+
+**Before any code change:**
+1. ✅ Does this maintain "no private keys in CI/CD"?
+2. ✅ Does this support all 4 prize track integrations?
+3. ✅ Is this aligned with the ETHOnline 2025 submission?
+
+**Red flags (STOP IMMEDIATELY):**
+- ❌ Adding `PRIVATE_KEY` environment variable to CI
+- ❌ Removing or breaking Hardhat/Blockscout/Lit/Envio integration
+- ❌ Auto-signing in CI without Safe multisig approval
+- ❌ Simplifying away the security model
+
+**When in doubt**: Read README.md sections on "Key Innovation" and "Hackathon Relevance"
+
 ## Exec Plan Ceremony
 1. Before touching code, open or create the relevant section in `plans.md` using the provided template and the phrase “exec plan”.
 2. Log objective, guardrails, ordered TODOs, validation steps, and open questions. Append updates with timestamps; never delete history.

@@ -220,9 +220,9 @@ export const translations = {
           desc: 'Supports Ethereum, Polygon, Sepolia, and other EVM chains. Lit Protocol supports Cayenne, Manzano, Habanero, Datil testnets.',
         },
         gasEstimation: {
-          status: 'Planned',
-          title: 'Automatic Gas Estimation',
-          desc: 'Currently requires manual gas price configuration. Automatic estimation and optimization coming soon.',
+          status: 'Implemented',
+          title: 'Automatic Gas Estimation & Optimization',
+          desc: 'Real-time gas price fetching, deployment cost estimation, network comparison, and optimization recommendations integrated into CI/CD workflow.',
         },
         upgradeable: {
           status: 'Planned',
@@ -492,9 +492,9 @@ export const translations = {
           desc: 'Ethereum、Polygon、Sepolia、その他のEVMチェーンをサポート。Lit ProtocolはCayenne、Manzano、Habanero、Datilテストネットをサポート。',
         },
         gasEstimation: {
-          status: '計画中',
-          title: '自動ガス推定',
-          desc: '現在は手動でガス価格を設定する必要があります。自動推定と最適化を近日実装予定。',
+          status: '実装済み',
+          title: '自動ガス推定・最適化',
+          desc: 'リアルタイムガス価格取得、デプロイコスト推定、ネットワーク比較、最適化推奨をCI/CDワークフローに統合済み。',
         },
         upgradeable: {
           status: '計画中',
