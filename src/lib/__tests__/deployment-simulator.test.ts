@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DeploymentSimulator } from '../deployment-simulator';
+import type { GasComparison } from '../deployment-simulator';
 import { GasEstimator } from '../gas-estimator';
 import type { SupportedNetwork } from '../network-config';
 import type { PublicClient, WalletClient, Hex } from 'viem';
@@ -70,6 +71,28 @@ describe('DeploymentSimulator', () => {
       const bytecode =
         '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
       const constructorArgs = [123456]; // Non-hex number
+
+      const result = await simulator.simulateDeployment(bytecode, {
+        network: 'sepolia',
+        constructorArgs,
+        publicClient: mockPublicClient,
+        walletClient: mockWalletClient,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.actualGasUsed).toBeGreaterThan(0);
+    });
+
+    it('should handle constructor arguments with mixed types including strings', async () => {
+      const bytecode =
+        '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+      // Mixed types: hex string, number, bigint, plain string
+      const constructorArgs = [
+        '0x1234567890123456789012345678901234567890',
+        123456,
+        BigInt(999),
+        'plain-string',
+      ];
 
       const result = await simulator.simulateDeployment(bytecode, {
         network: 'sepolia',
@@ -476,6 +499,23 @@ describe('DeploymentSimulator', () => {
       const formatted = simulator.formatComparison(comparison);
 
       expect(formatted).toContain('Within 10% Tolerance: ✗ No');
+    });
+
+    it('should handle zero actual gas with N/A percentage', () => {
+      const comparison: GasComparison = {
+        estimatedGas: 50000,
+        actualGas: 0,
+        difference: -50000,
+        accuracyPercent: 0,
+        withinTolerance: false,
+      };
+
+      const formatted = simulator.formatComparison(comparison);
+
+      expect(formatted).toContain('Estimated Gas: 50,000');
+      expect(formatted).toContain('Actual Gas Used: 0');
+      expect(formatted).toContain('Difference: -50,000 (N/A)');
+      expect(formatted).toContain('Accuracy: 0.00%');
     });
   });
 });

@@ -30,12 +30,24 @@ export interface GasComparison {
   withinTolerance: boolean; // true if within 10%
 }
 
+/**
+ * Options for deployment simulation
+ */
 interface SimulationOptions {
+  /** Target network for simulation (defaults to 'sepolia') */
   network?: SupportedNetwork;
+  /**
+   * Constructor arguments for contract deployment
+   * @warning Only supports simple types (addresses, numbers, hex strings)
+   * @warning Complex types (arrays, structs, strings) are NOT properly ABI-encoded
+   * @see https://docs.soliditylang.org/en/latest/abi-spec.html
+   */
   constructorArgs?: any[];
+  /** ETH value to send with deployment (in wei) */
   value?: bigint;
-  // Allow dependency injection for testing
+  /** Allow dependency injection for testing */
   publicClient?: PublicClient;
+  /** Allow dependency injection for testing */
   walletClient?: WalletClient;
 }
 
@@ -44,6 +56,17 @@ interface SimulationOptions {
  * Uses Hardhat Network for local simulation
  */
 export class DeploymentSimulator {
+  /**
+   * Tolerance threshold for gas estimation accuracy (10%)
+   * Simulation is considered accurate if actual gas is within this percentage of estimate
+   */
+  private readonly TOLERANCE_THRESHOLD = 0.1;
+
+  /**
+   * Base transaction cost in gas
+   */
+  private readonly BASE_TX_COST = 21000;
+
   /**
    * Simulate contract deployment and measure actual gas usage
    * @param bytecode Contract bytecode (with 0x prefix)
@@ -98,26 +121,50 @@ export class DeploymentSimulator {
 
       // Add constructor arguments if provided
       if (options.constructorArgs && options.constructorArgs.length > 0) {
-        // Encode constructor arguments
-        // For now, we'll just concatenate them as hex
-        // In a real implementation, you'd use proper ABI encoding
+        /**
+         * IMPORTANT: This is a simplified constructor argument encoding for simulation purposes.
+         * Limitations:
+         * - Only supports simple types (addresses, uint256, hex strings)
+         * - Does NOT follow Ethereum ABI encoding specification
+         * - Will NOT work correctly with: arrays, structs, strings, or complex types
+         *
+         * For production use or accurate gas estimation with complex constructors,
+         * consider using viem's encodeAbiParameters with proper type definitions.
+         *
+         * Example proper encoding:
+         * import { encodeAbiParameters, parseAbiParameters } from 'viem';
+         * const encoded = encodeAbiParameters(
+         *   parseAbiParameters('address, uint256'),
+         *   [address, amount]
+         * );
+         */
         const argsHex = options.constructorArgs
           .map((arg) => {
             if (typeof arg === 'string' && arg.startsWith('0x')) {
+              // Already hex-encoded (e.g., address)
               return arg.slice(2);
             }
-            return arg.toString(16).padStart(64, '0');
+            if (typeof arg === 'number' || typeof arg === 'bigint') {
+              // Encode as uint256 (32 bytes)
+              const num = typeof arg === 'bigint' ? arg : BigInt(arg);
+              return num.toString(16).padStart(64, '0');
+            }
+            // Fallback: convert to string and assume it's a hex value
+            const str = String(arg);
+            return str.startsWith('0x') ? str.slice(2) : str;
           })
           .join('');
         deploymentData = (bytecode + argsHex) as Hex;
       }
 
       // Simulate deployment
-      const hash = await walletClient.deployContract({
+      // Note: Empty ABI is acceptable for simulation purposes
+      // Type assertion needed because viem's deployContract expects a non-empty ABI tuple
+      const hash = (await walletClient.deployContract({
         abi: [],
         bytecode: deploymentData,
         value: options.value || BigInt(0),
-      } as any);
+      } as any)) as Hex;
 
       logger.debug('Deployment transaction sent', { hash });
 
@@ -137,7 +184,7 @@ export class DeploymentSimulator {
       const actualGasUsed = Number(receipt.gasUsed);
 
       // Calculate gas breakdown
-      const baseCost = 21000; // Base transaction cost
+      const baseCost = this.BASE_TX_COST;
       const deploymentCost = actualGasUsed - baseCost;
 
       logger.info('Deployment simulation completed successfully', {
@@ -194,7 +241,8 @@ export class DeploymentSimulator {
     const difference = actualGas - estimatedGas;
     const accuracyPercent =
       actualGas > 0 ? 100 - (Math.abs(difference) / actualGas) * 100 : 0;
-    const withinTolerance = Math.abs(difference) < actualGas * 0.1; // 10% tolerance
+    const withinTolerance =
+      Math.abs(difference) < actualGas * this.TOLERANCE_THRESHOLD;
 
     logger.debug('Gas comparison completed', {
       estimatedGas,
@@ -241,12 +289,16 @@ Gas Breakdown:
   formatComparison(comparison: GasComparison): string {
     const sign = comparison.difference >= 0 ? '+' : '';
     const toleranceStatus = comparison.withinTolerance ? '✓' : '✗';
+    const percentageDiff =
+      comparison.actualGas > 0
+        ? `${sign}${((comparison.difference / comparison.actualGas) * 100).toFixed(2)}%`
+        : 'N/A';
 
     return `Gas Estimation Accuracy Report:
 Estimated Gas: ${comparison.estimatedGas.toLocaleString()}
 Actual Gas Used: ${comparison.actualGas.toLocaleString()}
-Difference: ${sign}${comparison.difference.toLocaleString()} (${sign}${((comparison.difference / comparison.actualGas) * 100).toFixed(2)}%)
+Difference: ${sign}${comparison.difference.toLocaleString()} (${percentageDiff})
 Accuracy: ${comparison.accuracyPercent.toFixed(2)}%
-Within 10% Tolerance: ${toleranceStatus} ${comparison.withinTolerance ? 'Yes' : 'No'}`;
+Within ${(this.TOLERANCE_THRESHOLD * 100).toFixed(0)}% Tolerance: ${toleranceStatus} ${comparison.withinTolerance ? 'Yes' : 'No'}`;
   }
 }
