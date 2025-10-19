@@ -1,0 +1,21 @@
+# Multi-chain deployment configuration
+# Deploy the same contract to multiple networks
+
+deployments:
+  - network: sepolia
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: ExampleUUPS
+    constructorArgs: []
+    value: "0"
+
+  - network: polygon
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: ExampleUUPS
+    constructorArgs: []
+    value: "0"
+
+  - network: base
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: ExampleUUPS
+    constructorArgs: []
+    value: "0"
