@@ -344,19 +344,33 @@ Deploy to multiple networks simultaneously using the multi-chain script:
 
 ```yaml
 deployments:
+  # Ethereum Testnets
   - network: sepolia
     safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
     contract: MyContract
     constructorArgs: []
     value: "0"
 
-  - network: polygon
+  # L2 Testnets
+  - network: polygon-amoy
     safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
     contract: MyContract
     constructorArgs: []
     value: "0"
 
-  - network: base
+  - network: arbitrum-sepolia
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+
+  - network: optimism-sepolia
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: MyContract
+    constructorArgs: []
+    value: "0"
+
+  - network: base-sepolia
     safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
     contract: MyContract
     constructorArgs: []

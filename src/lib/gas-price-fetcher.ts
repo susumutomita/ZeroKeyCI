@@ -39,10 +39,18 @@ export class GasPriceFetcher {
       'https://api-sepolia.etherscan.io/api?module=gastracker&action=gasoracle',
     polygon:
       'https://api.polygonscan.com/api?module=gastracker&action=gasoracle',
+    'polygon-amoy':
+      'https://api-amoy.polygonscan.com/api?module=gastracker&action=gasoracle',
     arbitrum: 'https://api.arbiscan.io/api?module=gastracker&action=gasoracle',
+    'arbitrum-sepolia':
+      'https://api-sepolia.arbiscan.io/api?module=gastracker&action=gasoracle',
     optimism:
       'https://api-optimistic.etherscan.io/api?module=gastracker&action=gasoracle',
+    'optimism-sepolia':
+      'https://api-sepolia-optimistic.etherscan.io/api?module=gastracker&action=gasoracle',
     base: 'https://api.basescan.org/api?module=gastracker&action=gasoracle',
+    'base-sepolia':
+      'https://api-sepolia.basescan.org/api?module=gastracker&action=gasoracle',
   };
 
   // Fallback endpoints (RPC-based estimation)
@@ -50,9 +58,13 @@ export class GasPriceFetcher {
     mainnet: 'https://eth.llamarpc.com',
     sepolia: 'https://sepolia.infura.io/v3/public',
     polygon: 'https://polygon-rpc.com',
+    'polygon-amoy': 'https://rpc-amoy.polygon.technology',
     arbitrum: 'https://arb1.arbitrum.io/rpc',
+    'arbitrum-sepolia': 'https://sepolia-rollup.arbitrum.io/rpc',
     optimism: 'https://mainnet.optimism.io',
+    'optimism-sepolia': 'https://sepolia.optimism.io',
     base: 'https://mainnet.base.org',
+    'base-sepolia': 'https://sepolia.base.org',
   };
 
   /**

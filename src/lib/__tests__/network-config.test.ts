@@ -163,10 +163,14 @@ describe('network-config', () => {
       expect(networks).toContain('mainnet');
       expect(networks).toContain('sepolia');
       expect(networks).toContain('polygon');
+      expect(networks).toContain('polygon-amoy');
       expect(networks).toContain('arbitrum');
+      expect(networks).toContain('arbitrum-sepolia');
       expect(networks).toContain('optimism');
+      expect(networks).toContain('optimism-sepolia');
       expect(networks).toContain('base');
-      expect(networks).toHaveLength(6);
+      expect(networks).toContain('base-sepolia');
+      expect(networks).toHaveLength(10);
     });
   });
 
@@ -176,10 +180,14 @@ describe('network-config', () => {
       expect(chainIds).toContain(1); // mainnet
       expect(chainIds).toContain(11155111); // sepolia
       expect(chainIds).toContain(137); // polygon
+      expect(chainIds).toContain(80002); // polygon-amoy
       expect(chainIds).toContain(42161); // arbitrum
+      expect(chainIds).toContain(421614); // arbitrum-sepolia
       expect(chainIds).toContain(10); // optimism
+      expect(chainIds).toContain(11155420); // optimism-sepolia
       expect(chainIds).toContain(8453); // base
-      expect(chainIds).toHaveLength(6);
+      expect(chainIds).toContain(84532); // base-sepolia
+      expect(chainIds).toHaveLength(10);
     });
   });
 

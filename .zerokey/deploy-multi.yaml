@@ -2,19 +2,27 @@
 # Deploy the same contract to multiple networks
 
 deployments:
+  # Ethereum Testnet
   - network: sepolia
     safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
     contract: ExampleUUPS
     constructorArgs: []
     value: "0"
 
-  - network: polygon
+  # L2 Testnets
+  - network: polygon-amoy
     safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
     contract: ExampleUUPS
     constructorArgs: []
     value: "0"
 
-  - network: base
+  - network: arbitrum-sepolia
+    safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
+    contract: ExampleUUPS
+    constructorArgs: []
+    value: "0"
+
+  - network: base-sepolia
     safeAddress: "0xCc87e0A15A934c971fD1E28AaC303c011fe3b591"
     contract: ExampleUUPS
     constructorArgs: []

@@ -37,12 +37,19 @@ Create a Gnosis Safe at [safe.global](https://safe.global):
 
 ```bash
 # Supported networks:
+## Mainnets:
 - Ethereum Mainnet (chainId: 1)
-- Sepolia Testnet (chainId: 11155111)
 - Polygon (chainId: 137)
 - Arbitrum (chainId: 42161)
 - Optimism (chainId: 10)
 - Base (chainId: 8453)
+
+## Testnets:
+- Sepolia (chainId: 11155111)
+- Polygon Amoy (chainId: 80002)
+- Arbitrum Sepolia (chainId: 421614)
+- Optimism Sepolia (chainId: 11155420)
+- Base Sepolia (chainId: 84532)
 ```
 
 **Required Safe configuration:**
