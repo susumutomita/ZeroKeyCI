@@ -2831,4 +2831,114 @@ Phase 4 (Optimization Report Generator) is complete and committed. The implement
 - Monitor CI pipeline and adjust coverage thresholds if needed
 - Consider adding more edge case tests in future iterations
 - Document ETH price USD requirement for production use
-#### Iteration 7 (2025-10-19 10:30-) - Phase 5: CI/CD Integration
+#### Iteration 7 (2025-10-19 10:30-11:00) - Phase 5: CI/CD Integration
+
+**What was done:**
+- Completed Phase 5: CI/CD Integration with gas optimization
+- Added 6 edge case tests to achieve 100% branch coverage in optimization-reporter.ts
+- Created 5 integration tests for deployment workflow
+- Total: 593 tests passing (+15 new tests)
+- Coverage: 99.94% statements, 98.34% branches (above 98% threshold!)
+- Created PR #54 with comprehensive implementation
+- Updated landing page: Gas Estimation status "Planned" → "Implemented"
+
+**Test status:**
+- ✅ All 593 tests passing | 6 skipped
+- ✅ 99.94% statement coverage
+- ✅ 98.34% branch coverage
+- ✅ optimization-reporter.ts: 100% coverage (all metrics)
+
+**Validation results:**
+- ✅ TypeScript: no errors
+- ✅ ESLint: no errors
+- ✅ Prettier: formatted
+- ✅ Next.js build: successful
+- ✅ CI passing on PR #54
+
+**Status:** ✅ Phase 5 complete, PR #54 ready for merge
+
+---
+
+### Exec Plan: Upgradeable Contract Support
+Created: 2025-10-19 11:00
+Status: 🟡 In Progress
+
+#### Objective
+Implement full support for upgradeable contracts (Transparent Proxy and UUPS patterns) in ZeroKeyCI deployment workflow to fulfill landing page promise of "Full support for proxy patterns."
+
+**Success criteria:**
+- deploy.yaml can specify proxy deployment type (transparent, uups)
+- Support for initialization parameters
+- Support for upgrade transactions
+- Full test coverage for proxy deployments
+- Documentation for upgradeable contract deployment
+- Landing page status updated to "Implemented"
+
+#### Guardrails
+- Must maintain 100% test coverage
+- Must support both UUPS and Transparent Proxy patterns
+- Must work with existing Safe multisig workflow
+- Must validate proxy configuration with OPA policies
+- Backward compatible with existing non-proxy deployments
+
+#### TODO
+- [x] Identify current state (UUPS contracts exist, deploy.yaml lacks proxy support)
+- [x] Update landing page Gas Estimation status to "Implemented"
+- [ ] Phase 1: Deploy.yaml specification extension
+  - [ ] Add proxy configuration schema to deploy.yaml
+  - [ ] Support proxyType: "uups" | "transparent"
+  - [ ] Support initializeArgs for proxy initialization
+  - [ ] Support upgrade mode for existing proxies
+- [ ] Phase 2: Deployment script updates
+  - [ ] Update create-safe-proposal.ts to handle proxy deployments
+  - [ ] Add proxy deployment logic (ERC1967Proxy for UUPS, TransparentUpgradeableProxy)
+  - [ ] Add initialization transaction encoding
+  - [ ] Add upgrade transaction support
+- [ ] Phase 3: OPA policy updates
+  - [ ] Add proxy deployment validation rules
+  - [ ] Validate initialization parameters
+  - [ ] Validate upgrade permissions
+- [ ] Phase 4: Tests
+  - [ ] Test UUPS proxy deployment via deploy.yaml
+  - [ ] Test Transparent proxy deployment
+  - [ ] Test proxy initialization
+  - [ ] Test upgrade transactions
+  - [ ] Integration tests for full workflow
+- [ ] Phase 5: Documentation
+  - [ ] Add UPGRADEABLE_CONTRACTS.md guide
+  - [ ] Update deploy.yaml examples
+  - [ ] Update landing page status to "Implemented"
+
+#### Validation Steps
+- [ ] All tests pass (bun run test)
+- [ ] Coverage at 99.9%+ (bun run test:coverage)
+- [ ] TypeScript compiles (bun run typecheck)
+- [ ] Linting passes (bun run lint, bun run lint_text)
+- [ ] Build succeeds (bun run build)
+- [ ] Can deploy UUPS proxy via deploy.yaml
+- [ ] Can deploy Transparent proxy via deploy.yaml
+- [ ] Can upgrade existing proxies
+- [ ] OPA policies validate proxy deployments
+
+#### Progress Log
+
+##### Iteration 1 (2025-10-19 11:00-)
+**What was done:**
+- Analyzed current state: UUPS contracts exist (ExampleUUPS.sol, V2.sol)
+- Found existing test suite for UUPS (ExampleUUPS.test.ts) with upgrade tests
+- Identified gap: deploy.yaml has no proxy configuration support
+- Updated landing page: Gas Estimation "Planned" → "Implemented" (EN + JA)
+- Created comprehensive exec plan for Upgradeable Contract Support
+
+**Current state:**
+- ✅ UUPS contracts implemented (ExampleUUPS.sol, ExampleUUPSV2.sol)
+- ✅ UUPS tests implemented with upgrade tests
+- ❌ deploy.yaml lacks proxy deployment specification
+- ❌ create-safe-proposal.ts doesn't handle proxy deployments
+- ❌ No Transparent Proxy example
+
+**Next steps:**
+- Design deploy.yaml proxy configuration schema
+- Implement proxy deployment in create-safe-proposal.ts
+
+#### Iteration 8 (2025-10-19 11:00-) - Upgradeable Contract Support Phase 1
