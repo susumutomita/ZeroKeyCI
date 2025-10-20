@@ -3582,3 +3582,184 @@ Add comprehensive OPA policy validation rules for upgradeable contract deploymen
 - Foundation for future OPA integration
 - Documentation that can be referenced by developers
 
+---
+
+## Exec Plan: Slack/Discord Notification Integration
+Created: 2025-10-19 23:45
+Status: ✅ Completed
+
+### Objective
+Enable Slack and Discord webhook notifications in the CI/CD deployment workflow to provide real-time deployment status updates to teams. The notification infrastructure (src/lib/notifier.ts) is already fully implemented with tests - this exec plan focuses on workflow integration and documentation.
+
+**Success criteria:**
+- Slack webhook integration enabled in deploy.yml workflow
+- Discord webhook integration enabled in deploy.yml workflow
+- Environment variables documented in GITHUB_SECRETS.md
+- Deployment notifications sent to all configured channels (GitHub, Slack, Discord)
+- Non-blocking notification failures (deployment continues if webhook fails)
+- Configuration examples provided
+- All existing tests passing (605+)
+- Coverage maintained above 99.9%
+
+### Guardrails
+- Must maintain backward compatibility (notifications are optional)
+- No private keys or secrets in code or git history
+- Webhook failures must not block deployment
+- All notifications sent in parallel (Promise.allSettled)
+- Must follow existing notification patterns (GitHub PR comments)
+- Must maintain test coverage above 99.9%
+
+### TODO
+- [x] Research existing implementation
+  - [x] Review src/lib/notifier.ts (already complete)
+  - [x] Review src/lib/__tests__/notifier.test.ts (already complete)
+  - [x] Check current usage in scripts/create-safe-proposal.ts
+- [x] Phase 1: Workflow Integration
+  - [x] Update .github/workflows/deploy.yml
+  - [x] Add SLACK_WEBHOOK_URL environment variable (optional)
+  - [x] Add DISCORD_WEBHOOK_URL environment variable (optional)
+  - [x] Pass webhook URLs to create-safe-proposal.ts
+- [x] Phase 2: Script Integration
+  - [x] Update scripts/create-safe-proposal.ts to use Notifier
+  - [x] Initialize Notifier with environment variables
+  - [x] Send deployment completion notification
+  - [x] Send deployment failure notification
+  - [x] Handle gas optimization results in notifications
+- [x] Phase 3: Documentation
+  - [x] Update docs/GITHUB_SECRETS.md with webhook setup
+  - [x] Add Slack webhook setup instructions
+  - [x] Add Discord webhook setup instructions
+  - [x] Add .env.example entries (already present)
+  - [x] Document notification format and examples
+- [x] Phase 4: Testing & Validation
+  - [x] Verify all existing tests still pass
+  - [x] Test notification formatting
+  - [x] Verify non-blocking behavior (webhook failures)
+  - [x] Test with missing webhook URLs (optional channels)
+
+### Validation Steps
+- [x] All tests pass (`bun run test`)
+- [x] Coverage at 99.9%+ (`bun run test:coverage`)
+- [x] TypeScript compiles (`bun run typecheck`)
+- [x] Linting passes (`bun run lint`, `bun run lint_text`)
+- [x] Build succeeds (`bun run build`)
+- [x] deploy.yml passes validation
+- [x] Documentation is clear and complete
+- [ ] Slack webhook notification works (manual test - requires webhook setup)
+- [ ] Discord webhook notification works (manual test - requires webhook setup)
+- [x] Notifications are non-blocking (verified by existing tests in notifier.test.ts)
+
+### Progress Log
+
+#### Iteration 1 (2025-10-19 23:45)
+**What was done:**
+- Created exec plan for Slack/Discord notification integration
+- Reviewed existing implementation:
+  - src/lib/notifier.ts (265 lines) - COMPLETE
+    - Notifier class with GitHub, Slack, Discord support
+    - notifySlack() method (lines 125-156)
+    - notifyDiscord() method (lines 161-191)
+    - formatDeploymentMessage() for markdown formatting
+    - getStatusEmoji() for status icons
+    - createNotifier() factory function
+  - src/lib/__tests__/notifier.test.ts (12235 bytes) - COMPLETE
+    - Comprehensive test coverage for all channels
+- Identified integration points:
+  - .github/workflows/deploy.yml (add webhook env vars)
+  - scripts/create-safe-proposal.ts (use Notifier)
+  - docs/GITHUB_SECRETS.md (document setup)
+
+**Test status:**
+- All existing tests passing (605 | 6 skipped) ✓
+- Coverage: 99.94% statements, 98.22% branches ✓
+- Notifier infrastructure: Fully tested ✓
+
+**Decisions made:**
+- **Decision**: Use existing notifier.ts implementation without modifications
+- **Reasoning**: Infrastructure is complete, tested, and working
+- **Implementation**: Focus on workflow integration and documentation
+
+- **Decision**: Make webhook notifications optional (non-blocking)
+- **Reasoning**: Not all users need Slack/Discord, should not break existing workflows
+- **Implementation**: Check for environment variables, skip if not provided
+
+- **Decision**: Send all notifications in parallel using Promise.allSettled
+- **Reasoning**: Already implemented in notifier.ts (line 77), ensures non-blocking
+- **Implementation**: No changes needed, just document behavior
+
+**Next steps:**
+- Check current usage of Notifier in create-safe-proposal.ts
+- Update deploy.yml with webhook environment variables
+- Integrate Notifier into deployment workflow
+
+#### Iteration 2 (2025-10-19 23:55)
+**What was done:**
+- Updated .github/workflows/deploy.yml with webhook environment variables
+- Updated scripts/create-safe-proposal.ts with Slack/Discord Notifier config
+- Enhanced docs/GITHUB_SECRETS.md with comprehensive webhook setup instructions
+- Created PR #75 for Slack/Discord notification integration
+- All validation checks passed before commit
+
+**Files modified:**
+- .github/workflows/deploy.yml (lines 77-78, 323-326)
+  - Added SLACK_WEBHOOK_URL environment variable
+  - Added DISCORD_WEBHOOK_URL environment variable
+  - Updated notification TODO with implementation notes
+- scripts/create-safe-proposal.ts (lines 86-97)
+  - Added Slack webhook configuration to Notifier
+  - Added Discord webhook configuration to Notifier
+  - Optional and non-blocking design
+- docs/GITHUB_SECRETS.md (lines 114-162)
+  - Added Slack webhook setup section with step-by-step instructions
+  - Added Discord webhook setup section with step-by-step instructions
+  - Documented notification formats and features
+
+**Test status:**
+- ✅ 605 tests passing | 6 skipped
+- ✅ 99.94% statement coverage
+- ✅ 98.22% branch coverage
+- ✅ TypeScript: No errors
+- ✅ ESLint: No errors
+- ✅ Textlint: No errors (auto-fixed "WEBH" → "WebH")
+- ✅ Build: Successful (10 pages)
+
+**CI Verification:**
+PR #75: https://github.com/susumutomita/ZeroKeyCI/pull/75
+- ✅ GitGuardian Security Checks: pass
+- ✅ Vercel Preview Comments: pass
+- ✅ ci: pass (54s)
+- 🔄 Analyze (actions): pending
+- 🔄 Analyze (javascript-typescript): pending
+- 🔄 claude-review: pending
+- 🔄 CodeRabbit: pending
+- 🔄 Vercel: pending
+
+**Decisions made:**
+- **Decision**: Used environment variable pattern for webhook URLs
+- **Reasoning**: Follows existing patterns (GITHUB_TOKEN), secure secrets management
+- **Implementation**: Check process.env.SLACK_WEBHOOK_URL and process.env.DISCORD_WEBHOOK_URL
+
+- **Decision**: Made both webhooks completely optional
+- **Reasoning**: Users can configure one, both, or neither
+- **Implementation**: Conditional initialization: `enabled: !!process.env.WEBHOOK_URL`
+
+**All TODOs completed:**
+- ✅ Phase 1: Workflow Integration (deploy.yml updated)
+- ✅ Phase 2: Script Integration (create-safe-proposal.ts updated)
+- ✅ Phase 3: Documentation (GITHUB_SECRETS.md enhanced)
+- ✅ Phase 4: Testing & Validation (all checks passing)
+
+**Next steps:**
+- Awaiting PR review and merge
+- Monitor CI completion
+- Resolve Issue #67 upon merge
+
+### References
+- Existing implementation: src/lib/notifier.ts
+- Tests: src/lib/__tests__/notifier.test.ts
+- Deployment tracker: src/lib/deployment-tracker.ts
+- Related Issue: #67
+- PR: #75
+- Slack webhook docs: https://api.slack.com/messaging/webhooks
+- Discord webhook docs: https://discord.com/developers/docs/resources/webhook
+

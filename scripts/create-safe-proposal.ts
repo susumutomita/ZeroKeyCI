@@ -83,6 +83,18 @@ async function main() {
           repo: process.env.GITHUB_REPOSITORY || '',
         }
       : { enabled: false },
+    slack: process.env.SLACK_WEBHOOK_URL
+      ? {
+          enabled: true,
+          webhookUrl: process.env.SLACK_WEBHOOK_URL,
+        }
+      : { enabled: false },
+    discord: process.env.DISCORD_WEBHOOK_URL
+      ? {
+          enabled: true,
+          webhookUrl: process.env.DISCORD_WEBHOOK_URL,
+        }
+      : { enabled: false },
   });
 
   try {

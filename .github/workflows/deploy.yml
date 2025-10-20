@@ -74,6 +74,8 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           GAS_COST_THRESHOLD: ${{ vars.GAS_COST_THRESHOLD || '100' }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           # Create deployment proposal with gas analysis
           echo "🔐 Creating Safe transaction proposal with gas analysis..."
@@ -318,6 +320,8 @@ jobs:
       - name: Send notification
         run: |
           echo "📨 Sending deployment notifications..."
-          # TODO: Integrate with Discord, Slack, or other notification services
+          # Note: Notifications are now sent automatically by create-safe-proposal.ts
+          # Supports: GitHub PR comments, Slack webhooks, Discord webhooks
+          # Configure via: SLACK_WEBHOOK_URL and DISCORD_WEBHOOK_URL secrets
           # TODO: Trigger Safe transaction monitoring
           # TODO: Update deployment dashboard

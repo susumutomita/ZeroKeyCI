@@ -113,21 +113,52 @@ gh secret set LIT_NETWORK --body "datil-dev"
 
 ## 📨 Notifications (Optional)
 
+ZeroKeyCI can send deployment notifications to multiple channels: GitHub PR comments (automatic), Slack, and Discord. Webhook notifications are optional and non-blocking - deployment will continue even if webhook delivery fails.
+
 ### SLACK_WebHOOK_URL
 **Required**: No
-**Description**: Slack webhook for deployment notifications
+**Description**: Slack webhook URL for deployment notifications
+**How to get**:
+1. Go to your Slack workspace
+2. Navigate to **Apps** → **Incoming Webhooks**
+3. Click **Add to Slack**
+4. Select channel for notifications (e.g., `#deployments`)
+5. Copy the webhook URL
 
 ```bash
 gh secret set SLACK_WEBHOOK_URL --body "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 ```
 
+**Notification Format**:
+- Deployment started/completed/failed status
+- Contract name and network
+- Deployment ID and Safe address
+- Gas cost estimates
+- Error details (if failed)
+
 ### DISCORD_WebHOOK_URL
 **Required**: No
-**Description**: Discord webhook for deployment notifications
+**Description**: Discord webhook URL for deployment notifications
+**How to get**:
+1. Open Discord server settings
+2. Go to **Integrations** → **Webhooks**
+3. Click **New Webhook**
+4. Configure webhook:
+   - Name: `ZeroKeyCI`
+   - Channel: Select channel (e.g., `#deployments`)
+5. Click **Copy Webhook URL**
 
 ```bash
 gh secret set DISCORD_WEBHOOK_URL --body "https://discord.com/api/webhooks/YOUR/WEBHOOK/URL"
 ```
+
+**Notification Format**:
+- Deployment status updates
+- Contract details and network info
+- Gas analysis results
+- Safe proposal links
+
+**Note**: You can configure one, both, or neither webhook. GitHub PR comments are always sent automatically.
 
 ---
 
