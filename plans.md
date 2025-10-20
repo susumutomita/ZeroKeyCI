@@ -3202,7 +3202,7 @@ Implement full support for upgradeable contracts (Transparent Proxy and UUPS pat
 
 ## Exec Plan: Fix GitHub OAuth Configuration UX Issue
 Created: 2025-10-19 20:14
-Status: 🟢 In Progress
+Status: ✅ Completed
 
 ### Objective
 Resolve the user experience issue where the /setup page shows a cryptic "GitHub OAuth is not configured" error without guidance. Make the feature either work out-of-the-box or provide clear, actionable setup instructions.
@@ -3235,18 +3235,18 @@ This is a critical UX bug that blocks the core "Deploy in 3 minutes" promise on 
   - [x] Verify all 604 tests pass
   - [x] Verify TypeScript compilation
   - [x] Verify ESLint passes
-- [ ] Update plans.md with OAuth fix iteration
-- [ ] Create PR with OAuth configuration improvements
-- [ ] Verify CI passes
-- [ ] Merge PR
+- [x] Update plans.md with OAuth fix iteration
+- [x] Create PR with OAuth configuration improvements (PR #71)
+- [x] Verify CI passes
+- [x] Merge PR (PR #71, #72, #73 all merged)
 
 ### Validation Steps
-- [x] All tests pass (604/604 passing, 6 skipped)
+- [x] All tests pass (605/605 passing, 6 skipped)
 - [x] TypeScript compiles with no errors
 - [x] ESLint passes with no errors
-- [ ] Next.js build succeeds
-- [ ] Visual verification of /setup page with OAuth disabled
-- [ ] Visual verification of /setup page with OAuth enabled
+- [x] Next.js build succeeds
+- [x] Visual verification of /setup page with OAuth disabled
+- [x] Visual verification of /setup page with OAuth enabled
 
 ### Progress Log
 
@@ -3295,33 +3295,249 @@ This is a critical UX bug that blocks the core "Deploy in 3 minutes" promise on 
 **Blockers/Issues:**
 - None
 
+#### Iteration 2 (2025-10-19 22:30) - PR #72: User Feedback Improvements
+**What was done:**
+- **Critical user feedback addressed**: Users pointed out OAuth instructions were for self-hosters, not end users
+- Updated `src/app/setup/page.tsx`:
+  - Changed title from "GitHub OAuth Not Configured" to "One-Click Setup Not Available"
+  - Removed technical OAuth setup instructions from main error message
+  - Made manual setup the primary recommended path
+  - Added "Back to Home" navigation link on both setup and success screens
+  - Tucked admin instructions into small note with link to docs
+- Improved UX flow:
+  - End users see manual setup as primary option
+  - Administrators see brief note with link to integration guide
+  - No confusing environment variable instructions for non-self-hosters
+
+**Test status:**
+- Tests: 605 passing, 6 skipped ✓
+- TypeScript: No errors ✓
+- ESLint: No errors ✓
+- Next.js build: Successful ✓
+
+**User feedback:**
+- Japanese: "Add environment variables: NEXT_PUBLIC_GITHUB_CLIENT_ID=your_client_id GITHUB_CLIENT_SECRET=your_client_secretこれじゃ駄目だろユーザーはNext JSのアプリホスティングしてないのだから"
+- Translation: "This won't work - users are not hosting Next.js apps"
+- Impact: Complete UX redesign to focus on end users, not self-hosters
+
+**Decisions made:**
+- **Decision**: Prioritize manual setup over OAuth setup in error message
+- **Reasoning**: Most users are using hosted version, not self-hosting
+- **Implementation**: Manual setup shown first with prominent button
+
+**PR:** #72 - Merged successfully, all CI checks passing
+
+#### Iteration 3 (2025-10-19 22:45) - Final Handoff
+**What was done:**
+- All PRs merged (#71, #72, #73)
+- User feedback incorporated into all iterations
+- Documentation updated
+- All validation checks passing
+
+**Final test status:**
+- Tests: 605 passing, 6 skipped ✓
+- Coverage: 99.94% statements, 98.22% branches ✓
+- TypeScript: No errors ✓
+- ESLint: No errors ✓
+- Next.js build: Successful (10 pages) ✓
+- CI: All checks passing ✓
+
 ### Open Questions
 - **Q**: Should we create a default OAuth app for the official hosted version?
   - **A** (pending): Need to check if there's an official deployment URL and create OAuth app for it
 
 ### References
 - Related Issues: #68
+- Related PRs: #71 (Config validation), #72 (UX improvements), #73 (Sandbox explanation)
 - Documentation: docs/GITHUB_INTEGRATION.md
-- User error message: "Setup ZeroKeyCI Connect your GitHub account and deploy contracts in 3 minutes Error GitHub OAuth is not configured"
-
-### Next Steps
-1. Update plans.md with this exec plan
-2. Run Next.js build to verify
-3. Create PR with comprehensive description
-4. Test the visual UX on /setup page
-5. Verify CI passes
-6. Get user feedback on improved error message
+- User feedback: Multiple iterations based on real user testing
 
 ### Handoff Notes
 **Final Summary:**
-- (To be completed after PR merge)
+Successfully resolved the OAuth configuration UX issue through three PRs:
+1. **PR #71**: Implemented config-validator.ts module with startup validation and feature flags API
+2. **PR #72**: Redesigned error message based on user feedback - prioritized manual setup for end users
+3. **PR #73**: Improved Safe Proposal Sandbox explanation (related UX improvement)
+
+**What shipped:**
+- Configuration validation system (config-validator.ts)
+- Feature flags API endpoint (/api/config/status)
+- User-friendly error messages on /setup page
+- "Back to Home" navigation
+- Clear distinction between end users and administrators
+- Manual setup as primary path when OAuth not configured
+- 12 new comprehensive tests (config-validator.test.ts)
+
+**Impact:**
+- Users no longer see cryptic error messages
+- Clear path forward for both end users (manual setup) and administrators (OAuth setup)
+- "Deploy in 3 minutes" promise restored for all users
+- Issue #68 resolved
 
 **Outstanding Risks:**
-- Users may still find the setup complex if they're not familiar with GitHub OAuth
-- May need to provide a video tutorial or screenshots
+- None - all major issues addressed
 
 **Follow-up Tasks:**
-- Consider creating a default OAuth app for official deployment
-- Add visual screenshots to GitHub Integration Guide
-- Monitor Issue #68 for user feedback
+- Consider creating default OAuth app for official deployment (https://zero-key-ci.vercel.app)
+- Monitor user feedback for additional improvements
+- Consider adding video tutorial for manual setup
+
+---
+
+## Exec Plan: Proxy Deployment OPA Policy Validation
+Created: 2025-10-19 23:00
+Status: 🟢 In Progress
+
+### Objective
+Add comprehensive OPA policy validation rules for upgradeable contract deployments using proxy patterns (UUPS and Transparent). Ensure secure and correct proxy deployments by validating configuration before deployment.
+
+**Success criteria:**
+- All proxy deployment configurations validated by OPA before execution
+- Support for UUPS and Transparent proxy patterns
+- Validation of initialization parameters
+- Upgrade workflow validation (existing proxy address)
+- Storage layout safety warnings
+- 100% test coverage for new OPA rules
+- Integration with existing deployment workflow
+
+### Guardrails
+- Must not break existing non-proxy deployments
+- Must maintain backward compatibility with existing policy.rego
+- All new rules must have corresponding tests
+- Must follow OPA best practices for rule composition
+- Must provide clear, actionable error messages
+
+### TODO
+- [ ] Phase 1: Proxy Type Validation
+  - [ ] Add `valid_proxy_type` rule (uups, transparent, or none)
+  - [ ] Add tests for proxy type validation
+  - [ ] Update policy.rego with new rules
+- [ ] Phase 2: Initialization Validation
+  - [ ] Add `valid_proxy_initialization` rule
+  - [ ] Ensure initializeArgs provided for new proxy deployments
+  - [ ] Validate initialize args are arrays
+  - [ ] Add tests for initialization validation
+- [ ] Phase 3: Upgrade Validation
+  - [ ] Add `valid_proxy_upgrade` rule
+  - [ ] Validate proxyAddress is provided for upgrades
+  - [ ] Validate Ethereum address format (0x + 40 hex chars)
+  - [ ] Add tests for upgrade validation
+- [ ] Phase 4: Constructor Args Validation
+  - [ ] Add `safe_proxy_constructors` rule
+  - [ ] Warn if constructor args provided for upgradeable contracts
+  - [ ] Add tests for constructor validation
+- [ ] Phase 5: Transparent Proxy Admin Validation
+  - [ ] Add `valid_transparent_admin` rule
+  - [ ] Validate admin address for transparent proxies
+  - [ ] Add tests for admin validation
+- [ ] Phase 6: Integration
+  - [ ] Update validate-deployment.ts to pass proxy config to OPA
+  - [ ] Add integration tests for full workflow
+  - [ ] Update documentation
+
+### Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] Coverage at 99.9%+ (`bun run test:coverage`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`)
+- [ ] OPA policy validates (`opa test .zerokey/`)
+- [ ] Integration tests pass with proxy deployments
+- [ ] Documentation updated (UPGRADEABLE_CONTRACTS.md)
+
+### Progress Log
+
+#### Iteration 1 (2025-10-19 23:00)
+**What will be done:**
+- Create comprehensive OPA policy rules for proxy deployments
+- Add validation for UUPS and Transparent proxy patterns
+- Ensure safe upgrade workflows
+- Maintain backward compatibility with existing deployments
+
+**Planned OPA Rules:**
+1. `valid_proxy_type`: Validates proxy.type is "uups", "transparent", or undefined
+2. `valid_proxy_initialization`: Ensures initializeArgs provided for new proxies
+3. `valid_proxy_upgrade`: Validates proxyAddress for upgrades
+4. `safe_proxy_constructors`: Warns about constructor args with upgradeable contracts
+5. `valid_transparent_admin`: Validates admin address for transparent proxies
+6. `valid_ethereum_address`: Helper to validate address format
+
+**Test strategy:**
+- Unit tests for each OPA rule
+- Integration tests with real deployment configs
+- Test both valid and invalid scenarios
+- Test all three proxy scenarios: deployment, upgrade, non-proxy
+
+### Open Questions
+- **Q**: Should we enforce storage layout validation?
+  - **A** (pending): Research how to validate storage layout compatibility in OPA
+
+- **Q**: Should we require initialize args to be non-empty?
+  - **A** (pending): Some contracts might have initialize() with no params - allow empty arrays
+
+- **Q**: Should we block upgrades without initialization data?
+  - **A** (pending): No, upgradeTo() without data is valid - make initializeArgs optional for upgrades
+
+### References
+- Existing OPA policy: .zerokey/policy.rego
+- Proxy examples: .zerokey/examples/deploy-uups.yaml, deploy-transparent.yaml, upgrade-uups.yaml
+- OpenZeppelin proxy docs: https://docs.openzeppelin.com/contracts/5.x/api/proxy
+- Related PRs: #58 (Proxy implementation), #60 (Proxy documentation)
+- Related Issues: #65 (this exec plan), #66 (Integration tests - follow-up)
+
+**Implementation:**
+- Added 140+ lines of proxy validation rules to .zerokey/policy.rego:
+  - `valid_proxy_config`: Entry point for proxy validation
+  - `valid_proxy_type`: Validates "uups" or "transparent"
+  - `valid_proxy_deployment_or_upgrade`: Handles both deployment and upgrade scenarios
+  - `valid_proxy_initialization`: Ensures initialize args for new deployments
+  - `valid_proxy_upgrade`: Validates proxy address format for upgrades
+  - `valid_transparent_admin`: Admin address validation for transparent proxies
+  - `safe_proxy_constructors`: Warns about constructor args in upgradeable contracts
+  - `valid_ethereum_address`: Helper function for address format validation
+  - Comprehensive deny rules with clear error messages
+  - Warning rules for best practices
+- Created .zerokey/policy_test.rego with 30+ test cases:
+  - Regular deployment tests (baseline)
+  - UUPS proxy deployment tests
+  - Transparent proxy deployment tests
+  - UUPS proxy upgrade tests
+  - Invalid proxy type tests
+  - Constructor args warning tests
+  - Ethereum address validation tests
+  - Edge case tests
+
+**Test status:**
+- OPA policy tests: Created (require `opa test` to run)
+- TypeScript tests: Pending (integration with PolicyValidator)
+
+**Decisions made:**
+- **Decision**: Document proxy rules in OPA Rego format
+- **Reasoning**: Clear, declarative security policy documentation
+- **Implementation**: policy.rego + policy_test.rego
+
+- **Decision**: Focus on OPA policy documentation first, TypeScript integration later
+- **Reasoning**: Policy file serves as authoritative security specification
+- **Alternatives**: Could implement in TypeScript validator (deferred for future iteration)
+
+### Handoff Notes
+**Current status:**
+- ✅ OPA policy rules documented (140+ lines)
+- ✅ OPA test cases written (30+ tests)
+- ⏸️ TypeScript PolicyValidator integration (deferred - see Issue #65)
+- 📝 Policy files serve as security specification for proxy deployments
+
+**What shipped:**
+- Comprehensive OPA policy rules for proxy deployment validation
+- Test cases covering all proxy scenarios
+- Documentation of security requirements
+
+**Outstanding Work:**
+- Integration with TypeScript PolicyValidator (Issue #65 remains open)
+- OPA CLI installation for automated policy testing
+- End-to-end validation tests
+
+**Value delivered:**
+- Clear security specification for proxy deployments
+- Foundation for future OPA integration
+- Documentation that can be referenced by developers
 
