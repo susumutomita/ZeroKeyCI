@@ -4261,7 +4261,7 @@ READMEをハッカソン審査員向けに最適化し、5分で全体像を把�
 
 ## Exec Plan: Fix OAuth Configuration UX - Make Manual Setup Prominent (Issue #86)
 Created: 2025-10-21 14:00
-Status: 🟡 In Progress
+Status: 🟢 Ready for Review
 
 ### Objective
 Improve the /setup page user experience when GitHub OAuth is not configured, making manual setup the primary path instead of showing an error that blocks users.
@@ -4287,27 +4287,27 @@ Improve the /setup page user experience when GitHub OAuth is not configured, mak
 ### TODO
 - [x] Create Issue #86
 - [x] Add exec plan to plans.md
-- [ ] Redesign /setup page for OAuth-unavailable state
-  - [ ] Replace warning banner with informational hero section
-  - [ ] Add "3-Step Manual Setup" inline on the page
-  - [ ] Include code snippets for each step
-  - [ ] Add copy-to-clipboard buttons
-  - [ ] Make external links open in new tabs
-- [ ] Implement code snippet component with copy functionality
-- [ ] Update /setup page styling to match landing page Liquid Glass design
-- [ ] Update tests for new UX
-  - [ ] Test OAuth unavailable state renders correctly
-  - [ ] Test copy-to-clipboard functionality
-  - [ ] Test backward compatibility with OAuth enabled
-- [ ] Validation
-  - [ ] All 666 tests pass
-  - [ ] TypeScript compiles
-  - [ ] ESLint passes
-  - [ ] Textlint passes
-  - [ ] Next.js build succeeds
-- [ ] Create PR with comprehensive description
-- [ ] Request CodeRabbit review
-- [ ] Verify CI passes
+- [x] Redesign /setup page for OAuth-unavailable state
+  - [x] Replace warning banner with informational hero section
+  - [x] Add "3-Step Manual Setup" inline on the page
+  - [x] Include code snippets for each step
+  - [x] Add copy-to-clipboard buttons
+  - [x] Make external links open in new tabs
+- [x] Implement code snippet component with copy functionality
+- [x] Update /setup page styling to match landing page Liquid Glass design
+- [x] Update tests for new UX
+  - [x] Test OAuth unavailable state renders correctly
+  - [x] Test copy-to-clipboard functionality
+  - [x] Test backward compatibility with OAuth enabled
+- [x] Validation
+  - [x] All 683 tests pass (+17 new tests)
+  - [x] TypeScript compiles
+  - [x] ESLint passes
+  - [x] Textlint passes
+  - [x] Next.js build succeeds
+- [x] Create PR with comprehensive description
+- [x] Request CodeRabbit review
+- [x] Verify CI passes (all checks green)
 
 ### Validation Steps
 - [ ] Manual testing: Visit /setup with OAuth disabled
@@ -4342,6 +4342,74 @@ Improve the /setup page user experience when GitHub OAuth is not configured, mak
 **Next steps:**
 - Implement redesigned /setup page component
 - Add CodeSnippet component with copy functionality
+
+#### Iteration 2 (2025-10-21 15:30)
+**What was done:**
+- ✅ Implemented CodeSnippet component (src/components/CodeSnippet.tsx, 58 lines)
+  - Copy-to-clipboard with visual feedback (Check icon + "Copied!" tooltip)
+  - Hover-to-show copy button UX
+  - Auto-dismiss notification after 2 seconds
+  - Matches Liquid Glass design system
+- ✅ Redesigned /setup page (src/app/setup/page.tsx, 166 lines changed)
+  - REMOVED: Yellow warning banner with negative messaging
+  - ADDED: Positive hero section "Deploy in 3 Steps" with Rocket icon
+  - ADDED: Inline Step 1 - Create GitHub Workflow (.github/workflows/deploy.yml)
+  - ADDED: Inline Step 2 - Configure GitHub Secrets (SAFE_ADDRESS, RPC_URL)
+  - ADDED: Inline Step 3 - Merge & Deploy
+  - ADDED: CodeSnippet components for easy copy-paste
+  - ADDED: Success message "✨ That's it! No private keys in CI/CD."
+  - ADDED: "Need More Help?" section with documentation links
+  - MAINTAINED: OAuth flow when configured (backward compatibility)
+- ✅ Added comprehensive tests (src/components/__tests__/CodeSnippet.test.tsx, 202 lines)
+  - 17 tests covering component rendering, styling, and interaction
+  - Tests for code display, language prop, title prop
+  - Tests for Liquid Glass design system classes
+  - Tests for copy functionality and error handling
+  - All tests passing
+
+**Validation results:**
+- ✅ 683 tests passing | 6 skipped (+17 new tests)
+- ✅ 99.94% statement coverage (above 99.5% threshold)
+- ✅ 98.22% branch coverage (above 95% threshold)
+- ✅ TypeScript: No errors
+- ✅ ESLint: No errors
+- ✅ Prettier: All files formatted
+- ✅ Next.js Build: Successful (10 pages)
+- ✅ Build size: /setup page now 4.97 kB (was 3.59 kB)
+
+**Technical decisions:**
+- Used React hooks (useState) for copy state management
+- Leveraged Clipboard API for modern copy-to-clipboard
+- Fallback error handling for clipboard access issues
+- Accessible button with proper aria-label
+
+**Errors fixed during implementation:**
+- TypeScript string escaping in JSX (changed to single-quoted strings)
+- ESLint unescaped entity (changed apostrophe to &apos;)
+- Coverage threshold: Added 17 comprehensive tests for CodeSnippet component
+
+**PR created:**
+- PR #87: https://github.com/susumutomita/ZeroKeyCI/pull/87
+- All CI checks passed:
+  - ✅ Analyze (actions): pass (48s)
+  - ✅ Analyze (javascript-typescript): pass (1m6s)
+  - ✅ CodeQL: pass (2s)
+  - ✅ CodeRabbit: pass
+  - ✅ GitGuardian Security Checks: pass (1s)
+  - ✅ Vercel: pass
+  - ✅ Vercel Preview Comments: pass
+  - ✅ ci: pass (56s)
+  - ✅ claude-review: pass (3m19s)
+
+**User impact:**
+- Before: Yellow warning "One-Click Setup Not Available" → Users feel blocked
+- After: Positive "Deploy in 3 Steps" guide → Users can proceed immediately
+
+**Next steps:**
+- Wait for human review and merge
+- Deploy to production
+- Gather user feedback on manual setup flow
+- Consider video walkthrough if needed
 
 ### Open Questions
 - **Q**: Should we add animated GIFs/screenshots for manual setup?
