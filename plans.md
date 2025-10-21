@@ -4200,6 +4200,56 @@ READMEをハッカソン審査員向けに最適化し、5分で全体像を把�
 ✅ All validation steps passed
 ✅ PR created and CI passing
 
+#### Iteration 3 (2025-10-21 13:10) - COMPLETED ✅
+**What was done:**
+- Added comprehensive ETHOnline 2025 hackathon judging criteria to CLAUDE.md (66 lines)
+- User explicitly requested: "ちゃんとルールもCLAUDE.mdに書いておこう" (Write the rules properly in CLAUDE.md)
+- User emphasized: "忘れちゃうだろ" (Don't forget) - importance of documenting to prevent context loss
+
+**Added to CLAUDE.md:**
+- General Judging Criteria section (5 evaluation points):
+  - Creativity & Innovation
+  - Technical Difficulty
+  - Functionality & Completeness
+  - Real-World Impact
+  - Sponsor Tech Integration
+- Submission Requirements:
+  - Demo video (2-4 minutes)
+  - GitHub repo with clear commit history
+  - Deadline: Sunday, October 26th 2025 at 12:00 pm EDT
+- README Optimization Rules:
+  - 5-minute rule for judges
+  - MUST HAVE sections documented
+  - OUTCOMES over METRICS principle
+  - What to AVOID (coverage %, file counts, future plans, architecture diagrams)
+- User Feedback Captured:
+  - "こんなのなんの価値もないアウトカムがすべて" (This has no value, outcomes are everything)
+
+**Why this matters:**
+- Prevents future agents from reverting to metrics-focused approach
+- Preserves critical user feedback permanently
+- Ensures README stays optimized for hackathon judges
+- Documents judging criteria so they're not forgotten
+
+**Validation results:**
+- ✅ 666 tests passing | 6 skipped
+- ✅ Textlint: No errors (auto-fixed % → ％)
+- ✅ TypeScript: No errors
+- ✅ ESLint: No errors
+- ✅ Prettier: Formatted
+- ✅ Next.js Build: Successful (10 pages)
+
+**PR created:**
+- PR #84: https://github.com/susumutomita/ZeroKeyCI/pull/84
+- Branch: docs/add-hackathon-judging-criteria
+- CI checks: Passing (GitGuardian ✅, Vercel Preview ✅, others running)
+
+**Completion status:**
+✅ Hackathon judging criteria documented in CLAUDE.md
+✅ User's explicit request fulfilled
+✅ PR created with comprehensive description
+✅ CI verification in progress
+
 ### Open Questions
 - **Q**: README.ja.mdも更新すべきか？
   - **A** (pending): ユーザーに確認
