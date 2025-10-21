@@ -23,23 +23,26 @@ describe('Landing Page i18n', () => {
     const switcher = container.querySelector('.fixed.top-6.right-6');
     const buttons = within(switcher as HTMLElement).getAllByRole('button');
 
-    // Initially EN button should have bg-white class
-    expect(buttons[0]).toHaveClass('bg-white');
-    expect(buttons[1]).not.toHaveClass('bg-white');
+    // Initially EN button should have glass-strong and scale-105 (active state in Liquid Glass design)
+    expect(buttons[0]).toHaveClass('glass-strong');
+    expect(buttons[0]).toHaveClass('scale-105');
+    expect(buttons[1]).not.toHaveClass('scale-105');
 
     // Click Japanese button
     fireEvent.click(buttons[1]);
 
-    // Now JA button should have bg-white class
-    expect(buttons[0]).not.toHaveClass('bg-white');
-    expect(buttons[1]).toHaveClass('bg-white');
+    // Now JA button should have glass-strong and scale-105
+    expect(buttons[0]).not.toHaveClass('scale-105');
+    expect(buttons[1]).toHaveClass('glass-strong');
+    expect(buttons[1]).toHaveClass('scale-105');
 
     // Click EN button again
     fireEvent.click(buttons[0]);
 
     // Back to EN
-    expect(buttons[0]).toHaveClass('bg-white');
-    expect(buttons[1]).not.toHaveClass('bg-white');
+    expect(buttons[0]).toHaveClass('glass-strong');
+    expect(buttons[0]).toHaveClass('scale-105');
+    expect(buttons[1]).not.toHaveClass('scale-105');
   });
 
   it('should highlight active language button', () => {
@@ -50,15 +53,17 @@ describe('Landing Page i18n', () => {
     const enButton = buttons[0];
     const jaButton = buttons[1];
 
-    // Initially EN should be active (has white background)
-    expect(enButton).toHaveClass('bg-white');
-    expect(jaButton).not.toHaveClass('bg-white');
+    // Initially EN should be active (has glass-strong and scale-105 in Liquid Glass design)
+    expect(enButton).toHaveClass('glass-strong');
+    expect(enButton).toHaveClass('scale-105');
+    expect(jaButton).not.toHaveClass('scale-105');
 
     // Click Japanese
     fireEvent.click(jaButton);
 
     // Now JA should be active
-    expect(enButton).not.toHaveClass('bg-white');
-    expect(jaButton).toHaveClass('bg-white');
+    expect(enButton).not.toHaveClass('scale-105');
+    expect(jaButton).toHaveClass('glass-strong');
+    expect(jaButton).toHaveClass('scale-105');
   });
 });

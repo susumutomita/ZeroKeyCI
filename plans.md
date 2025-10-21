@@ -3763,3 +3763,153 @@ PR #75: https://github.com/susumutomita/ZeroKeyCI/pull/75
 - Slack webhook docs: https://api.slack.com/messaging/webhooks
 - Discord webhook docs: https://discord.com/developers/docs/resources/webhook
 
+---
+
+## Exec Plan: Liquid Glass UI Redesign
+Created: 2025-10-20 23:33
+Status: 🔄 In Progress
+
+### Objective
+Transform ZeroKeyCI's landing page UI from traditional Apple-style design to modern Liquid Glass design system, leveraging the existing CSS foundation already implemented in globals.css and tailwind.config.ts.
+
+**Success criteria:**
+- Main landing page (page.tsx) uses glass effects throughout
+- All 593 existing tests pass
+- 100% test coverage maintained
+- TypeScript compiles with no errors
+- All linting passes (lint, lint_text)
+- Next.js build succeeds
+- Visual coherence with existing SafeProposalSandbox glass design
+
+### Guardrails (Non-negotiable constraints)
+- **No breaking changes** to existing functionality
+- **Preserve accessibility**: WCAG AA minimum (contrast ratios, focus states)
+- **Maintain test coverage**: 100% - tests should not need changes since UI is presentational
+- **No removal of content**: Only style changes, no content alterations
+- **Dark mode support**: All glass effects must work in both light and dark modes
+- **Performance**: No heavy animations that impact page load
+
+### TODO
+- [x] Phase 1: Analysis & Planning
+  - [x] Analyze current design (page.tsx using Apple-style)
+  - [x] Verify CSS foundation (globals.css has all glass utilities ✓)
+  - [x] Verify SafeProposalSandbox implementation (already uses glass ✓)
+  - [x] Create exec plan
+- [ ] Phase 2: Development Environment
+  - [ ] Install dependencies with bun
+  - [ ] Verify build works
+- [ ] Phase 3: Refactor Landing Page (page.tsx)
+  - [ ] Replace background gradients with gradient-mesh
+  - [ ] Update hero section cards to use glass-card
+  - [ ] Convert feature cards to glass-card with hover effects
+  - [ ] Update "How It Works" section with glass effects
+  - [ ] Convert "Why It's Safe" cards to glass-card
+  - [ ] Update Lit Protocol section with glass effects
+  - [ ] Convert limitations section to glass-card
+  - [ ] Update roadmap cards with glass effects
+  - [ ] Convert CTA section to glass design
+  - [ ] Add smooth animations (animate-fade-in-up, etc.)
+- [ ] Phase 4: Validation
+  - [ ] Run bun run lint_text
+  - [ ] Run bun run lint
+  - [ ] Run bun run typecheck
+  - [ ] Run bun run test (593 tests must pass)
+  - [ ] Run bun run test:coverage (100% target)
+  - [ ] Run bun run build (Next.js build)
+  - [ ] Visual verification (both light and dark modes)
+
+### Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] Coverage at 100% (`bun run test:coverage`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Text linting passes (`bun run lint_text`)
+- [ ] Code linting passes (`bun run lint`)
+- [ ] Build succeeds (`bun run build`)
+- [ ] Visual verification in light mode
+- [ ] Visual verification in dark mode
+- [ ] Accessibility checks (contrast, focus states)
+
+### Progress Log
+
+#### Iteration 1 (23:33)
+**What was done:**
+- Analyzed codebase structure
+- Discovered globals.css already has complete Liquid Glass design system
+- Discovered tailwind.config.ts already configured with glass utilities
+- Identified that SafeProposalSandbox already uses glass effects
+- Identified that page.tsx is using traditional Apple-style (needs conversion)
+- Created exec plan in plans.md
+
+**Analysis findings:**
+- **CSS Foundation**: ✅ Complete (glass utilities, animations, gradients all present)
+- **Tailwind Config**: ✅ Complete (glass shadows, animations, backdrop blur)
+- **SafeProposalSandbox**: ✅ Already using glass effects (card-modern-bordered, glass-strong, etc.)
+- **page.tsx**: ❌ Not using glass effects (bg-white, border, shadow-sm instead)
+
+**Next steps:**
+- Install dependencies
+- Refactor page.tsx to use glass utilities
+
+**Decisions made:**
+- **Decision**: Focus only on page.tsx refactoring (no CSS changes needed)
+- **Reasoning**: All CSS utilities already exist and work (proven by SafeProposalSandbox)
+- **Scope**: Replace className values only, no structural changes to components
+
+#### Iteration 2 (23:44)
+**What was done:**
+- Successfully refactored ALL sections in page.tsx to use Liquid Glass design
+- Added missing shadow utilities to globals.css (shadow-glass, shadow-glow)
+- Converted 15+ sections including: hero, solution, how it works, why it's safe, lit protocol, limitations, demo, setup, tabs, PKP, roadmap, CTA, footer
+- Applied consistent design patterns across all sections
+- Added staggered animations with delays
+- Implemented full dark mode support throughout
+
+**Refactoring details:**
+- **Backgrounds**: Alternating between transparent and `via-gray-50/50 dark:via-gray-800/30`
+- **Badges**: `glass-strong border border-[color]-300/30 dark:border-[color]-500/30`
+- **Cards**: `glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in`
+- **Icons**: Added dark mode colors (`dark:text-blue-400`, etc.)
+- **Buttons**: Using `btn-primary-modern` and `btn-secondary-modern`
+- **Animations**: Added staggered delays using `style={{animationDelay: \`\${idx * 100}ms\`}}`
+
+**CSS additions (globals.css lines 522-543):**
+```css
+.shadow-glass {
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+.dark .shadow-glass {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(100, 140, 255, 0.4),
+              0 0 40px rgba(100, 140, 255, 0.2),
+              0 8px 32px rgba(31, 38, 135, 0.15);
+}
+.dark .shadow-glow {
+  box-shadow: 0 0 20px rgba(100, 140, 255, 0.5),
+              0 0 40px rgba(100, 140, 255, 0.3),
+              0 8px 32px rgba(0, 0, 0, 0.4);
+}
+```
+
+**Validation needed:**
+- TypeScript compilation (bun run typecheck)
+- Code linting (bun run lint)
+- Text linting (bun run lint_text)
+- Next.js build (bun run build)
+- Visual verification (light/dark modes)
+
+**Next steps:**
+- User will run validation checks
+- Commit and push changes
+- Create pull request
+
+### Open Questions
+- **Q**: Should we add more aggressive glass effects or keep it subtle like Apple?
+  - **A** (23:33): Start with existing glass utilities (glass-card, glass-strong) and see results. Can adjust opacity/blur after visual verification.
+
+### References
+- Related Issue: #64
+- Existing glass implementation: src/app/globals.css (lines 162-521)
+- Tailwind config: tailwind.config.ts (lines 61-130)
+- Example usage: src/components/SafeProposalSandbox.tsx (lines 120, 308, 328, etc.)

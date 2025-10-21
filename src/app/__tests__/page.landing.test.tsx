@@ -151,20 +151,20 @@ describe('Landing Page', () => {
     );
   });
 
-  it('should have Apple-style minimalist design with monochrome + blue accent', () => {
+  it('should have Liquid Glass design with translucent effects and blue accents', () => {
     const { container } = render(<Home />);
 
-    // Check for Apple-style design elements (white/gray backgrounds with blue accents)
+    // Check for Liquid Glass design elements (glass-card, glass-strong)
+    const glassElements = container.querySelectorAll(
+      '[class*="glass-card"], [class*="glass-strong"], [class*="glass"]'
+    );
+    expect(glassElements.length).toBeGreaterThan(0);
+
+    // Check for blue accent elements (maintained from previous design)
     const blueAccentElements = container.querySelectorAll(
-      '[class*="blue-600"], [class*="blue-50"]'
+      '[class*="blue-600"], [class*="blue-50"], [class*="blue-400"], [class*="blue-500"]'
     );
     expect(blueAccentElements.length).toBeGreaterThan(0);
-
-    // Check for clean white/gray backgrounds
-    const whiteBackgrounds = container.querySelectorAll(
-      '[class*="bg-white"], [class*="bg-gray-50"]'
-    );
-    expect(whiteBackgrounds.length).toBeGreaterThan(0);
   });
 
   it('should show educational tone in problem tab', () => {
