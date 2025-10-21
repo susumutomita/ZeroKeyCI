@@ -4259,3 +4259,97 @@ READMEをハッカソン審査員向けに最適化し、5分で全体像を把�
 - Landing page i18n.ts: Already updated with latest features ✅
 - Related docs: INTEGRATION_GUIDE.md, UPGRADEABLE_CONTRACTS.md, PKP_SETUP.md
 
+## Exec Plan: Fix OAuth Configuration UX - Make Manual Setup Prominent (Issue #86)
+Created: 2025-10-21 14:00
+Status: 🟡 In Progress
+
+### Objective
+Improve the /setup page user experience when GitHub OAuth is not configured, making manual setup the primary path instead of showing an error that blocks users.
+
+**User feedback**: "全然使えない" (Cannot use it at all) when seeing OAuth not configured error.
+
+**Root issue**: Current UX treats OAuth unavailability as a blocker, when manual setup is a perfectly valid path.
+
+**Success criteria:**
+- Users can immediately understand how to proceed without OAuth
+- Manual setup instructions are visible directly on /setup page (no link clicking required)
+- "Deploy in 3 minutes" promise is still achievable via manual setup
+- Code snippets are easy to copy with one-click
+- Clear visual hierarchy: Manual setup is the PRIMARY path when OAuth is unavailable
+
+### Guardrails (Non-negotiable constraints)
+- Backward compatibility: OAuth flow must still work when configured
+- No breaking changes to existing API endpoints
+- All existing tests must pass
+- Maintain landing page "Deploy in 3 minutes" promise
+- Security: No exposure of OAuth secrets or sensitive config
+
+### TODO
+- [x] Create Issue #86
+- [x] Add exec plan to plans.md
+- [ ] Redesign /setup page for OAuth-unavailable state
+  - [ ] Replace warning banner with informational hero section
+  - [ ] Add "3-Step Manual Setup" inline on the page
+  - [ ] Include code snippets for each step
+  - [ ] Add copy-to-clipboard buttons
+  - [ ] Make external links open in new tabs
+- [ ] Implement code snippet component with copy functionality
+- [ ] Update /setup page styling to match landing page Liquid Glass design
+- [ ] Update tests for new UX
+  - [ ] Test OAuth unavailable state renders correctly
+  - [ ] Test copy-to-clipboard functionality
+  - [ ] Test backward compatibility with OAuth enabled
+- [ ] Validation
+  - [ ] All 666 tests pass
+  - [ ] TypeScript compiles
+  - [ ] ESLint passes
+  - [ ] Textlint passes
+  - [ ] Next.js build succeeds
+- [ ] Create PR with comprehensive description
+- [ ] Request CodeRabbit review
+- [ ] Verify CI passes
+
+### Validation Steps
+- [ ] Manual testing: Visit /setup with OAuth disabled
+- [ ] Verify code snippets are copyable
+- [ ] Verify all external links open in new tabs
+- [ ] Test on mobile viewport
+- [ ] All automated tests pass (`bun run test`)
+- [ ] Build succeeds (`bun run build`)
+- [ ] Linting passes (`bun run lint`, `bun run lint_text`)
+
+### Progress Log
+
+#### Iteration 1 (2025-10-21 14:00)
+**What was done:**
+- Issue #86 created: https://github.com/susumutomita/ZeroKeyCI/issues/86
+- Analyzed current /setup page implementation
+- Identified UX problems:
+  - Yellow warning banner makes it look like an error
+  - "Not Available" messaging is negative
+  - Manual setup is presented as a fallback, not primary path
+  - Users must click external links to find setup instructions
+  - No inline code snippets for quick setup
+- Created exec plan with redesign approach
+
+**Design decisions:**
+- Treat manual setup as EQUAL to OAuth setup, not a fallback
+- Show step-by-step instructions directly on /setup page
+- Add copy-to-clipboard for code snippets (reduce friction)
+- Use positive messaging: "Quick Setup" instead of "Not Available"
+- Maintain "3 minutes" promise with clear 3-step manual flow
+
+**Next steps:**
+- Implement redesigned /setup page component
+- Add CodeSnippet component with copy functionality
+
+### Open Questions
+- **Q**: Should we add animated GIFs/screenshots for manual setup?
+  - **A** (decision pending): Consider for future iteration if user feedback still shows confusion
+
+### References
+- Issue #86: https://github.com/susumutomita/ZeroKeyCI/issues/86
+- Current /setup page: src/app/setup/page.tsx:258-312
+- PR #71: Previous OAuth UX improvement (merged)
+- User feedback: "全然使えない" (Cannot use it at all)
+

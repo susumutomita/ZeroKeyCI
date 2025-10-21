@@ -1,8 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Github, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
+import {
+  Github,
+  CheckCircle2,
+  AlertCircle,
+  ExternalLink,
+  FileCode,
+  Settings,
+  Rocket,
+} from 'lucide-react';
 import Link from 'next/link';
+import { CodeSnippet } from '@/components/CodeSnippet';
 
 interface GitHubUser {
   login: string;
@@ -256,58 +265,182 @@ export default function SetupPage() {
             </div>
 
             {oauthConfigured === false ? (
-              // Show user-friendly message when OAuth is not configured
-              <div className="space-y-6">
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-6">
-                  <h3 className="font-semibold text-yellow-300 mb-3 flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5" />
-                    One-Click Setup Not Available
+              // Show quick manual setup when OAuth is not configured
+              <div className="space-y-8">
+                {/* Hero Message */}
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-2xl p-6">
+                  <h3 className="text-2xl font-bold text-white mb-3 flex items-center gap-3">
+                    <Rocket className="w-7 h-7 text-blue-400" />
+                    Deploy in 3 Steps
                   </h3>
-                  <p className="text-yellow-200 mb-4">
-                    The one-click GitHub integration is not configured on this
-                    instance. You can still deploy contracts using the manual
-                    setup method below.
+                  <p className="text-gray-200 text-lg">
+                    Add ZeroKeyCI to your repository manually. No OAuth required
+                    - just copy, paste, and deploy!
                   </p>
+                </div>
 
-                  <div className="bg-white/5 rounded-lg p-4">
-                    <p className="text-sm text-gray-300">
-                      <strong>For users:</strong> Use the manual setup guide to
-                      add ZeroKeyCI to your repository without OAuth.
-                    </p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      <strong>For administrators:</strong> This instance
-                      requires GitHub OAuth configuration. See{' '}
-                      <a
-                        href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/GITHUB_INTEGRATION.md"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 underline"
-                      >
-                        GitHub Integration Guide
-                      </a>{' '}
-                      for setup instructions.
-                    </p>
+                {/* Step 1: Create Workflow File */}
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white flex-shrink-0">
+                      1
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                        <FileCode className="w-5 h-5" />
+                        Create GitHub Workflow
+                      </h3>
+                      <p className="text-gray-300 mb-4">
+                        Add this file to your repository at{' '}
+                        <code className="bg-white/10 px-2 py-1 rounded text-sm">
+                          .github/workflows/deploy.yml
+                        </code>
+                      </p>
+                      <CodeSnippet
+                        language="yaml"
+                        code={`name: Deploy Smart Contracts
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+    with:
+      safe-address: \${{ vars.SAFE_ADDRESS }}
+      network: sepolia
+      contract-name: MyContract
+    secrets:
+      rpc-url: \${{ secrets.SEPOLIA_RPC_URL }}`}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
-                  <h3 className="font-semibold text-blue-300 mb-3">
-                    Manual Setup (Recommended)
+                {/* Step 2: Configure Secrets */}
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white flex-shrink-0">
+                      2
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        Configure GitHub Secrets
+                      </h3>
+                      <p className="text-gray-300 mb-4">
+                        Add these secrets in your repository settings → Settings
+                        → Secrets and variables → Actions
+                      </p>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm text-gray-400 mb-2">
+                            Set{' '}
+                            <code className="bg-white/10 px-2 py-1 rounded">
+                              SAFE_ADDRESS
+                            </code>{' '}
+                            (Variable):
+                          </p>
+                          <CodeSnippet
+                            code={
+                              'gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"'
+                            }
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400 mb-2">
+                            Set{' '}
+                            <code className="bg-white/10 px-2 py-1 rounded">
+                              SEPOLIA_RPC_URL
+                            </code>{' '}
+                            (Secret):
+                          </p>
+                          <CodeSnippet
+                            code={
+                              'gh secret set SEPOLIA_RPC_URL --body "https://sepolia.infura.io/v3/YOUR_KEY"'
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 3: Deploy */}
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white flex-shrink-0">
+                      3
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5" />
+                        Merge & Deploy
+                      </h3>
+                      <p className="text-gray-300 mb-4">
+                        Merge any PR to trigger deployment. ZeroKeyCI will
+                        create a Safe proposal automatically.
+                      </p>
+                      <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 rounded-xl p-4">
+                        <p className="text-green-300 font-semibold">
+                          ✨ That&apos;s it! No private keys in CI/CD.
+                        </p>
+                        <p className="text-gray-300 text-sm mt-2">
+                          Safe owners review and sign the deployment proposal
+                          through the Safe web interface.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Resources */}
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+                  <h3 className="font-semibold text-white mb-3">
+                    📚 Need More Help?
                   </h3>
-                  <p className="text-gray-300 mb-4">
-                    Add ZeroKeyCI to your repository by manually creating the
-                    workflow files. This method works for all projects and does
-                    not require OAuth.
+                  <div className="space-y-2">
+                    <a
+                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/INTEGRATION_GUIDE.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-blue-400 hover:text-blue-300 underline"
+                    >
+                      → Full Integration Guide
+                    </a>
+                    <a
+                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/DEPLOYMENT_GUIDE.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-blue-400 hover:text-blue-300 underline"
+                    >
+                      → Deployment Guide
+                    </a>
+                    <a
+                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/UPGRADEABLE_CONTRACTS.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-blue-400 hover:text-blue-300 underline"
+                    >
+                      → Upgradeable Contracts Guide
+                    </a>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-4">
+                    <strong>For administrators:</strong> To enable one-click
+                    OAuth setup,{' '}
+                    <a
+                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/GITHUB_INTEGRATION.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      configure GitHub OAuth
+                    </a>
+                    .
                   </p>
-                  <a
-                    href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/DEPLOYMENT_GUIDE.md"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    View Manual Setup Guide
-                  </a>
                 </div>
               </div>
             ) : oauthConfigured === true ? (
