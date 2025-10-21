@@ -4091,3 +4091,75 @@ Optimize gas estimation performance for large contracts and batch/multi-chain de
 
 **Status:** ✅ Completed - Ready for review
 
+
+---
+
+## Exec Plan: README Hackathon Optimization
+Created: 2025-10-21 11:40
+Status: 🔄 In Progress
+
+### Objective
+READMEをハッカソン審査員向けに最適化し、5分で全体像を把握できるようにする。最新の実装済み機能（ガス最適化、10ネットワーク対応、Slack/Discord通知）を明確に記載する。
+
+**Success criteria:**
+- 審査員が5分でプロジェクトの価値と差別化ポイントを理解できる
+- 実装済み機能が冒頭で明確に分かる
+- 技術的な詳細は後半に配置（興味がある審査員のみが読む）
+- テストとビルドが全て通る
+
+### Guardrails (Non-negotiable constraints)
+- 既存のドキュメントリンクを壊さない
+- Textlint、ESLintが全て通る
+- 技術的な正確性を維持
+- 日本語版（README.ja.md）も更新する場合は同じ構成に
+
+### TODO
+- [ ] Phase 1: 現状分析
+  - [x] README.mdの現在の構成を確認
+  - [x] 不足している機能を特定
+  - [ ] 改善案を作成
+- [ ] Phase 2: README.md改善
+  - [ ] 冒頭に「ETHOnline 2025 Highlights」セクション追加
+  - [ ] 「What Makes This Different」セクション追加
+    - [ ] ガス最適化機能の説明
+    - [ ] 10ネットワーク対応の明記
+    - [ ] Slack/Discord通知機能
+    - [ ] UUPS & Transparent プロキシ対応
+  - [ ] 既存の長い説明を後半に移動
+  - [ ] 見出し構成を最適化（審査員の読む順序を考慮）
+- [ ] Phase 3: Validation
+  - [ ] Textlint実行
+  - [ ] ESLint実行
+  - [ ] リンク切れチェック
+  - [ ] 全テスト通過確認
+
+### Validation Steps
+- [ ] Textlint passes (`bun run lint_text`)
+- [ ] ESLint passes (`bun run lint`)
+- [ ] All tests pass (`bun run test`)
+- [ ] Build succeeds (`bun run build`)
+- [ ] 人間によるレビュー（5分で理解できるか確認）
+
+### Progress Log
+
+#### Iteration 1 (2025-10-21 11:40)
+**What was done:**
+- README.mdの現状確認（389行）
+- 不足している機能を特定：
+  - ガス最適化機能の詳細説明なし
+  - Slack/Discord通知機能の記載なし
+  - 10ネットワーク対応の明確な記載なし
+  - 審査員向けの「5分で理解」構成になっていない
+
+**Next steps:**
+- 改善案の作成と実装
+
+### Open Questions
+- **Q**: README.ja.mdも更新すべきか？
+  - **A** (pending): ユーザーに確認
+
+### References
+- Current README.md: 389 lines
+- Landing page i18n.ts: Already updated with latest features ✅
+- Related docs: INTEGRATION_GUIDE.md, UPGRADEABLE_CONTRACTS.md, PKP_SETUP.md
+
