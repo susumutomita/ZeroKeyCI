@@ -13,6 +13,15 @@ export interface GasBreakdown {
 }
 
 /**
+ * Performance metrics for gas estimation
+ */
+export interface PerformanceMetrics {
+  durationMs: number; // Time taken for estimation
+  cacheHit?: boolean; // Whether cache was used
+  networkCount?: number; // Number of networks compared (for multi-chain)
+}
+
+/**
  * Gas estimation for contract deployment
  */
 export interface GasEstimate {
@@ -23,6 +32,7 @@ export interface GasEstimate {
   costInWei?: string; // Cost in wei (when gas price provided)
   costInEther?: string; // Cost in ether
   costInUSD?: string; // Cost in USD (when ETH price provided)
+  performance?: PerformanceMetrics; // Optional performance metrics
 }
 
 /**
@@ -52,6 +62,15 @@ export interface NetworkComparison {
   estimates: GasEstimateWithPrice[];
   cheapest: GasEstimateWithPrice;
   mostExpensive: GasEstimateWithPrice;
+  performance?: PerformanceMetrics; // Optional performance metrics
+}
+
+/**
+ * LRU Cache entry for bytecode analysis
+ */
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
 }
 
 interface EstimateOptions {
@@ -72,6 +91,7 @@ interface CompareOptions {
 /**
  * Service for estimating gas costs for contract deployment
  * Analyzes bytecode and calculates deployment costs
+ * Includes caching and performance optimizations
  */
 export class GasEstimator {
   // Gas cost constants (based on Ethereum yellow paper)
@@ -81,16 +101,26 @@ export class GasEstimator {
   private readonly CALLDATA_ZERO_BYTE = 4; // Cost for zero byte in calldata
   private readonly CALLDATA_NONZERO_BYTE = 16; // Cost for non-zero byte in calldata
 
+  // Caching configuration
+  private readonly CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+  private readonly MAX_CACHE_SIZE = 100; // Maximum cache entries
+  private bytecodeCache: Map<string, CacheEntry<BytecodeAnalysis>> = new Map();
+
+  // Performance monitoring
+  private readonly SLOW_ESTIMATION_THRESHOLD_MS = 2000; // Warn if >2s
+
   /**
    * Estimate gas required for contract deployment
    * @param bytecode Contract bytecode (with 0x prefix)
    * @param options Estimation options
-   * @returns Gas estimation
+   * @returns Gas estimation with optional performance metrics
    */
   estimateDeployment(
     bytecode: string,
     options: EstimateOptions = {}
   ): GasEstimate {
+    const startTime = performance.now();
+
     // Validate bytecode
     if (!bytecode || bytecode.length === 0) {
       throw new Error('Invalid bytecode: empty bytecode');
@@ -139,10 +169,23 @@ export class GasEstimator {
     const deploymentGas =
       baseCost + creationCost + codeStorage + constructorData;
 
+    const duration = performance.now() - startTime;
+
+    // Warn if estimation is slow
+    if (duration > this.SLOW_ESTIMATION_THRESHOLD_MS) {
+      logger.warn('Slow gas estimation detected', {
+        network,
+        bytecodeSize,
+        durationMs: Math.round(duration),
+        thresholdMs: this.SLOW_ESTIMATION_THRESHOLD_MS,
+      });
+    }
+
     logger.debug('Gas estimation completed', {
       network,
       deploymentGas,
       breakdown: { baseCost, creationCost, codeStorage, constructorData },
+      durationMs: Math.round(duration),
     });
 
     return {
@@ -154,6 +197,9 @@ export class GasEstimator {
         creationCost,
         codeStorage,
         constructorData,
+      },
+      performance: {
+        durationMs: Math.round(duration),
       },
     };
   }
@@ -224,11 +270,27 @@ export class GasEstimator {
   }
 
   /**
-   * Analyze bytecode structure
+   * Analyze bytecode structure with caching
    * @param bytecode Contract bytecode
    * @returns Bytecode analysis
    */
   analyzeBytecode(bytecode: string): BytecodeAnalysis {
+    const startTime = performance.now();
+
+    // Generate cache key (simple hash of bytecode)
+    const cacheKey = this.hashBytecode(bytecode);
+
+    // Check cache first
+    const cached = this.getFromCache(cacheKey);
+    if (cached) {
+      const duration = performance.now() - startTime;
+      logger.debug('Bytecode analysis from cache', {
+        cacheKey: cacheKey.substring(0, 16),
+        durationMs: Math.round(duration),
+      });
+      return cached;
+    }
+
     const cleanBytecode = bytecode.startsWith('0x')
       ? bytecode.slice(2)
       : bytecode;
@@ -247,18 +309,96 @@ export class GasEstimator {
     // Simplified: larger = more complex
     const complexity = Math.min(100, Math.floor((sizeInBytes / 100) * 10));
 
+    const analysis: BytecodeAnalysis = {
+      size,
+      sizeInBytes,
+      hasConstructor,
+      complexity,
+    };
+
+    // Store in cache
+    this.setCache(cacheKey, analysis);
+
+    const duration = performance.now() - startTime;
     logger.debug('Bytecode analysis completed', {
       size,
       sizeInBytes,
       hasConstructor,
       complexity,
+      durationMs: Math.round(duration),
+      cached: false,
     });
 
+    return analysis;
+  }
+
+  /**
+   * Generate simple hash of bytecode for cache key
+   * @param bytecode Contract bytecode
+   * @returns Cache key
+   */
+  private hashBytecode(bytecode: string): string {
+    // Simple hash: first 32 chars + length + last 32 chars
+    const clean = bytecode.startsWith('0x') ? bytecode.slice(2) : bytecode;
+    const prefix = clean.substring(0, 32);
+    const suffix = clean.substring(clean.length - 32);
+    return `${prefix}_${clean.length}_${suffix}`;
+  }
+
+  /**
+   * Get bytecode analysis from cache
+   * @param key Cache key
+   * @returns Cached analysis or undefined
+   */
+  private getFromCache(key: string): BytecodeAnalysis | undefined {
+    const entry = this.bytecodeCache.get(key);
+    if (!entry) return undefined;
+
+    // Check if expired
+    if (Date.now() - entry.timestamp > this.CACHE_TTL) {
+      this.bytecodeCache.delete(key);
+      return undefined;
+    }
+
+    return entry.data;
+  }
+
+  /**
+   * Store bytecode analysis in cache
+   * @param key Cache key
+   * @param data Analysis data
+   */
+  private setCache(key: string, data: BytecodeAnalysis): void {
+    // Evict oldest entry if cache is full
+    if (this.bytecodeCache.size >= this.MAX_CACHE_SIZE) {
+      const firstKey = this.bytecodeCache.keys().next().value;
+      if (firstKey) {
+        this.bytecodeCache.delete(firstKey);
+      }
+    }
+
+    this.bytecodeCache.set(key, {
+      data,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Clear bytecode analysis cache
+   */
+  clearCache(): void {
+    this.bytecodeCache.clear();
+    logger.debug('Bytecode cache cleared');
+  }
+
+  /**
+   * Get cache statistics
+   * @returns Cache stats
+   */
+  getCacheStats(): { size: number; maxSize: number; hitRate?: number } {
     return {
-      size,
-      sizeInBytes,
-      hasConstructor,
-      complexity,
+      size: this.bytecodeCache.size,
+      maxSize: this.MAX_CACHE_SIZE,
     };
   }
 
@@ -297,16 +437,23 @@ Breakdown:
    * @param bytecode Contract bytecode
    * @param gasPrices Gas prices for different networks
    * @param options Comparison options
-   * @returns Network comparison
+   * @returns Network comparison with performance metrics
    */
   compareNetworks(
     bytecode: string,
     gasPrices: GasPrice[],
     options: CompareOptions = {}
   ): NetworkComparison {
+    const startTime = performance.now();
     const tier = options.tier || 'standard';
 
-    // Estimate for each network
+    logger.debug('Starting network comparison', {
+      networkCount: gasPrices.length,
+      tier,
+      bytecodeSize: bytecode.length,
+    });
+
+    // Estimate for each network (synchronous, already fast)
     const estimates = gasPrices.map((gasPrice) =>
       this.estimateWithPrice(bytecode, gasPrice, { tier })
     );
@@ -331,10 +478,22 @@ Breakdown:
       BigInt(curr.costInWei!) > BigInt(max.costInWei!) ? curr : max
     );
 
+    const duration = performance.now() - startTime;
+
+    // Warn if comparison is slow
+    if (duration > this.SLOW_ESTIMATION_THRESHOLD_MS) {
+      logger.warn('Slow network comparison detected', {
+        networkCount: estimates.length,
+        durationMs: Math.round(duration),
+        thresholdMs: this.SLOW_ESTIMATION_THRESHOLD_MS,
+      });
+    }
+
     logger.info('Network comparison completed', {
       networkCount: estimates.length,
       cheapest: cheapest.network,
       mostExpensive: mostExpensive.network,
+      durationMs: Math.round(duration),
     });
 
     return {
@@ -342,6 +501,10 @@ Breakdown:
       estimates,
       cheapest,
       mostExpensive,
+      performance: {
+        durationMs: Math.round(duration),
+        networkCount: estimates.length,
+      },
     };
   }
 

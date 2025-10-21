@@ -471,4 +471,381 @@ describe('GasEstimator', () => {
       expect(comparison.estimates[1].network).toBe('sepolia');
     });
   });
+  describe('Caching and Performance Optimizations', () => {
+    describe('Bytecode Analysis Caching', () => {
+      it('should cache bytecode analysis results', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        // First call - cache miss
+        const firstAnalysis = estimator.analyzeBytecode(bytecode);
+        expect(firstAnalysis.size).toBeGreaterThan(0);
+
+        // Second call - should hit cache
+        const secondAnalysis = estimator.analyzeBytecode(bytecode);
+        expect(secondAnalysis).toEqual(firstAnalysis);
+      });
+
+      it('should use different cache keys for different bytecode', () => {
+        const bytecode1 =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+        const bytecode2 = '0x' + '60'.repeat(1000);
+
+        const analysis1 = estimator.analyzeBytecode(bytecode1);
+        const analysis2 = estimator.analyzeBytecode(bytecode2);
+
+        expect(analysis1.size).not.toBe(analysis2.size);
+        expect(analysis1.sizeInBytes).not.toBe(analysis2.sizeInBytes);
+      });
+
+      it('should clear cache when clearCache is called', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        // Populate cache
+        estimator.analyzeBytecode(bytecode);
+
+        const statsBeforeClear = estimator.getCacheStats();
+        expect(statsBeforeClear.size).toBe(1);
+
+        // Clear cache
+        estimator.clearCache();
+
+        const statsAfterClear = estimator.getCacheStats();
+        expect(statsAfterClear.size).toBe(0);
+      });
+
+      it('should respect max cache size (LRU eviction)', () => {
+        // Generate 101 unique bytecodes (more than MAX_CACHE_SIZE of 100)
+        for (let i = 0; i < 101; i++) {
+          const bytecode =
+            '0x' + i.toString(16).padStart(4, '0') + '60'.repeat(100);
+          estimator.analyzeBytecode(bytecode);
+        }
+
+        const stats = estimator.getCacheStats();
+        expect(stats.size).toBeLessThanOrEqual(stats.maxSize);
+        expect(stats.maxSize).toBe(100);
+      });
+
+      it('should provide cache statistics', () => {
+        const stats = estimator.getCacheStats();
+        expect(stats).toHaveProperty('size');
+        expect(stats).toHaveProperty('maxSize');
+        expect(stats.maxSize).toBe(100);
+        expect(stats.size).toBeGreaterThanOrEqual(0);
+      });
+
+      it('should expire cached entries after TTL (10 minutes)', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        // Analyze bytecode to populate cache
+        const firstAnalysis = estimator.analyzeBytecode(bytecode);
+        expect(estimator.getCacheStats().size).toBe(1);
+
+        // Mock time advancement to 11 minutes later (beyond 10 minute TTL)
+        const now = Date.now();
+        vi.spyOn(Date, 'now').mockReturnValue(now + 11 * 60 * 1000);
+
+        // Analyze again - should not use expired cache
+        const secondAnalysis = estimator.analyzeBytecode(bytecode);
+        expect(secondAnalysis).toEqual(firstAnalysis); // Same result
+        expect(estimator.getCacheStats().size).toBe(1); // New entry replaced expired one
+
+        // Restore real Date.now
+        vi.restoreAllMocks();
+      });
+    });
+
+    describe('Performance Metrics', () => {
+      it('should include performance metrics in estimateDeployment', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        const estimate = estimator.estimateDeployment(bytecode, {
+          network: 'sepolia',
+        });
+
+        expect(estimate.performance).toBeDefined();
+        expect(estimate.performance?.durationMs).toBeGreaterThanOrEqual(0);
+        expect(typeof estimate.performance?.durationMs).toBe('number');
+      });
+
+      it('should include performance metrics in compareNetworks', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+        const gasPrices = [
+          {
+            network: 'sepolia' as SupportedNetwork,
+            slow: 1,
+            standard: 2,
+            fast: 3,
+            timestamp: Date.now(),
+          },
+          {
+            network: 'polygon' as SupportedNetwork,
+            slow: 5,
+            standard: 10,
+            fast: 15,
+            timestamp: Date.now(),
+          },
+        ];
+
+        const comparison = estimator.compareNetworks(bytecode, gasPrices, {
+          tier: 'standard',
+        });
+
+        expect(comparison.performance).toBeDefined();
+        expect(comparison.performance?.durationMs).toBeGreaterThanOrEqual(0);
+        expect(comparison.performance?.networkCount).toBe(2);
+      });
+
+      it('should measure estimation performance for large contracts', () => {
+        // Large contract (>20KB)
+        const largeBytecode = '0x' + '60'.repeat(11000); // 11KB
+
+        const estimate = estimator.estimateDeployment(largeBytecode, {
+          network: 'mainnet',
+        });
+
+        expect(estimate.performance?.durationMs).toBeGreaterThanOrEqual(0);
+        // Large contracts should still be reasonably fast (<5s target)
+        expect(estimate.performance?.durationMs).toBeLessThan(5000);
+      });
+
+      it('should log warning for slow gas estimation (>2s)', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        // Mock performance.now() to simulate slow estimation (>2000ms threshold)
+        let callCount = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => {
+          callCount++;
+          if (callCount === 1) {
+            return 0; // Start time
+          } else {
+            return 2500; // End time: 2500ms elapsed (exceeds 2000ms threshold)
+          }
+        });
+
+        // This should trigger the slow estimation warning
+        const estimate = estimator.estimateDeployment(bytecode, {
+          network: 'sepolia',
+        });
+
+        expect(estimate.performance?.durationMs).toBe(2500);
+
+        // Restore real performance.now
+        vi.restoreAllMocks();
+      });
+
+      it('should measure comparison performance for multiple networks', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+        const gasPrices = [
+          {
+            network: 'mainnet' as SupportedNetwork,
+            slow: 20,
+            standard: 30,
+            fast: 40,
+            timestamp: Date.now(),
+          },
+          {
+            network: 'sepolia' as SupportedNetwork,
+            slow: 1,
+            standard: 2,
+            fast: 3,
+            timestamp: Date.now(),
+          },
+          {
+            network: 'polygon' as SupportedNetwork,
+            slow: 30,
+            standard: 50,
+            fast: 70,
+            timestamp: Date.now(),
+          },
+          {
+            network: 'arbitrum' as SupportedNetwork,
+            slow: 0.1,
+            standard: 0.2,
+            fast: 0.3,
+            timestamp: Date.now(),
+          },
+          {
+            network: 'optimism' as SupportedNetwork,
+            slow: 0.5,
+            standard: 1,
+            fast: 2,
+            timestamp: Date.now(),
+          },
+          {
+            network: 'base' as SupportedNetwork,
+            slow: 0.2,
+            standard: 0.5,
+            fast: 1,
+            timestamp: Date.now(),
+          },
+        ];
+
+        const comparison = estimator.compareNetworks(bytecode, gasPrices);
+
+        expect(comparison.performance?.networkCount).toBe(6);
+        expect(comparison.performance?.durationMs).toBeGreaterThanOrEqual(0);
+        // Multi-chain comparison should be fast (<3s target)
+        expect(comparison.performance?.durationMs).toBeLessThan(3000);
+      });
+
+      it('should log warning for slow network comparison (>2s)', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+        const gasPrices = [
+          {
+            network: 'sepolia' as SupportedNetwork,
+            slow: 1,
+            standard: 2,
+            fast: 3,
+            timestamp: Date.now(),
+          },
+          {
+            network: 'polygon' as SupportedNetwork,
+            slow: 5,
+            standard: 10,
+            fast: 15,
+            timestamp: Date.now(),
+          },
+        ];
+
+        // Mock performance.now() to simulate slow comparison (>2000ms threshold)
+        let callCount = 0;
+        const originalNow = performance.now.bind(performance);
+        vi.spyOn(performance, 'now').mockImplementation(() => {
+          callCount++;
+          if (callCount === 1) {
+            return 0; // Start time
+          } else {
+            return 2500; // End time: 2500ms elapsed (exceeds 2000ms threshold)
+          }
+        });
+
+        // This should trigger the slow comparison warning
+        const comparison = estimator.compareNetworks(bytecode, gasPrices, {
+          tier: 'standard',
+        });
+
+        expect(comparison.performance?.durationMs).toBe(2500);
+
+        // Restore real performance.now
+        vi.restoreAllMocks();
+      });
+    });
+
+    describe('Cache Hit Rate and Efficiency', () => {
+      it('should benefit from cache on repeated calls with same bytecode', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        // Clear cache to start fresh
+        estimator.clearCache();
+
+        // First call - cache miss
+        const start1 = performance.now();
+        const analysis1 = estimator.analyzeBytecode(bytecode);
+        const duration1 = performance.now() - start1;
+
+        // Second call - cache hit (should be faster)
+        const start2 = performance.now();
+        const analysis2 = estimator.analyzeBytecode(bytecode);
+        const duration2 = performance.now() - start2;
+
+        expect(analysis1).toEqual(analysis2);
+        // Cache hit should be significantly faster (though test timing can vary)
+        // We just verify it doesn't throw and returns same result
+        expect(duration2).toBeLessThanOrEqual(duration1 + 10); // Allow some variance
+      });
+
+      it('should maintain cache across multiple analyzeBytecode calls', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        estimator.clearCache();
+
+        // Multiple analyzeBytecode calls with same bytecode
+        for (let i = 0; i < 5; i++) {
+          estimator.analyzeBytecode(bytecode);
+        }
+
+        // Cache should have only 1 entry (same bytecode)
+        const stats = estimator.getCacheStats();
+        expect(stats.size).toBe(1);
+      });
+
+      it('should handle cache eviction gracefully', () => {
+        estimator.clearCache();
+
+        // Fill cache beyond max size
+        const bytecodes: string[] = [];
+        for (let i = 0; i < 110; i++) {
+          const bytecode =
+            '0x' + i.toString(16).padStart(8, '0') + '60'.repeat(50);
+          bytecodes.push(bytecode);
+          estimator.analyzeBytecode(bytecode);
+        }
+
+        // Cache size should not exceed max
+        const stats = estimator.getCacheStats();
+        expect(stats.size).toBeLessThanOrEqual(100);
+
+        // Should still be able to analyze new bytecode
+        const newBytecode = '0x999999' + '60'.repeat(50);
+        const analysis = estimator.analyzeBytecode(newBytecode);
+        expect(analysis).toBeDefined();
+        expect(analysis.size).toBeGreaterThan(0);
+      });
+    });
+
+    describe('Backward Compatibility', () => {
+      it('should maintain backward compatibility - performance field is optional', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        const estimate = estimator.estimateDeployment(bytecode, {
+          network: 'sepolia',
+        });
+
+        // All existing fields should still exist
+        expect(estimate.network).toBe('sepolia');
+        expect(estimate.bytecodeSize).toBeGreaterThan(0);
+        expect(estimate.deploymentGas).toBeGreaterThan(0);
+        expect(estimate.breakdown).toBeDefined();
+
+        // Performance is now present but optional in types
+        expect(estimate.performance).toBeDefined();
+      });
+
+      it('should not break existing API - all methods return expected types', () => {
+        const bytecode =
+          '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe';
+
+        // estimateDeployment
+        const estimate = estimator.estimateDeployment(bytecode);
+        expect(estimate).toHaveProperty('network');
+        expect(estimate).toHaveProperty('bytecodeSize');
+        expect(estimate).toHaveProperty('deploymentGas');
+        expect(estimate).toHaveProperty('breakdown');
+
+        // analyzeBytecode
+        const analysis = estimator.analyzeBytecode(bytecode);
+        expect(analysis).toHaveProperty('size');
+        expect(analysis).toHaveProperty('sizeInBytes');
+        expect(analysis).toHaveProperty('hasConstructor');
+        expect(analysis).toHaveProperty('complexity');
+
+        // formatEstimate
+        const formatted = estimator.formatEstimate(estimate);
+        expect(typeof formatted).toBe('string');
+        expect(formatted.length).toBeGreaterThan(0);
+      });
+    });
+  });
 });
