@@ -72,15 +72,24 @@ export default function Home() {
               </span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-semibold mb-6 text-gray-900 dark:text-white whitespace-pre-line tracking-tight leading-[1.1] animate-fade-in-up" style={{animationDelay: '100ms'}}>
+            <h1
+              className="text-5xl md:text-7xl font-semibold mb-6 text-gray-900 dark:text-white whitespace-pre-line tracking-tight leading-[1.1] animate-fade-in-up"
+              style={{ animationDelay: '100ms' }}
+            >
               {t.hero.title}
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed font-normal animate-fade-in-up" style={{animationDelay: '200ms'}}>
+            <p
+              className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed font-normal animate-fade-in-up"
+              style={{ animationDelay: '200ms' }}
+            >
               {t.hero.subtitle}
             </p>
 
-            <div className="flex gap-4 justify-center flex-wrap mb-20 animate-fade-in-up" style={{animationDelay: '300ms'}}>
+            <div
+              className="flex gap-4 justify-center flex-wrap mb-20 animate-fade-in-up"
+              style={{ animationDelay: '300ms' }}
+            >
               <a
                 href="#setup"
                 className="group btn-primary-modern flex items-center gap-2"
@@ -89,10 +98,7 @@ export default function Home() {
                 {t.hero.getStarted}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </a>
-              <a
-                href="#demo"
-                className="btn-secondary-modern"
-              >
+              <a href="#demo" className="btn-secondary-modern">
                 {t.hero.tryDemo}
               </a>
             </div>
@@ -119,7 +125,7 @@ export default function Home() {
                 <div
                   key={item.title}
                   className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-fade-in-up"
-                  style={{animationDelay: `${400 + idx * 100}ms`}}
+                  style={{ animationDelay: `${400 + idx * 100}ms` }}
                 >
                   <div className="w-12 h-12 glass-medium rounded-xl flex items-center justify-center mb-5 shadow-glass">
                     <item.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -138,7 +144,10 @@ export default function Home() {
       </section>
 
       {/* The Solution Section - Liquid Glass */}
-      <section id="solution" className="relative py-32 bg-gradient-to-b from-transparent via-gray-50/50 to-transparent dark:via-gray-800/30">
+      <section
+        id="solution"
+        className="relative py-32 bg-gradient-to-b from-transparent via-gray-50/50 to-transparent dark:via-gray-800/30"
+      >
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-20">
@@ -183,7 +192,7 @@ export default function Home() {
                 <div
                   key={feature.title}
                   className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
-                  style={{animationDelay: `${idx * 100}ms`}}
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <div className="w-14 h-14 glass-medium rounded-xl flex items-center justify-center mb-5 shadow-glass">
                     <feature.icon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
@@ -307,7 +316,7 @@ export default function Home() {
                   <div
                     key={item.key}
                     className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
-                    style={{animationDelay: `${idx * 100}ms`}}
+                    style={{ animationDelay: `${idx * 100}ms` }}
                   >
                     <div className="w-14 h-14 glass-medium rounded-xl flex items-center justify-center mb-6 shadow-glass">
                       <item.icon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
@@ -370,7 +379,10 @@ export default function Home() {
                       {step.num}
                     </div>
 
-                    <div className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in" style={{animationDelay: `${idx * 100}ms`}}>
+                    <div
+                      className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
+                      style={{ animationDelay: `${idx * 100}ms` }}
+                    >
                       <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                         {step.title}
                       </h4>
@@ -402,7 +414,10 @@ export default function Home() {
 
                   return (
                     <div key={idx} className="relative">
-                      <div className="glass-card p-6 border border-white/10 dark:border-white/5 glow-on-hover h-full flex flex-col animate-scale-in" style={{animationDelay: `${idx * 100}ms`}}>
+                      <div
+                        className="glass-card p-6 border border-white/10 dark:border-white/5 glow-on-hover h-full flex flex-col animate-scale-in"
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      >
                         <div className="w-12 h-12 glass-medium rounded-xl flex items-center justify-center mb-4 mx-auto shadow-glass">
                           {IconComponent && (
                             <IconComponent className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -438,7 +453,7 @@ export default function Home() {
                   <div
                     key={point.title}
                     className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
-                    style={{animationDelay: `${idx * 100}ms`}}
+                    style={{ animationDelay: `${idx * 100}ms` }}
                   >
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 glass-medium rounded-xl flex items-center justify-center flex-shrink-0 shadow-glass">
@@ -496,7 +511,7 @@ export default function Home() {
                   <div
                     key={item.key}
                     className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
-                    style={{animationDelay: `${idx * 100}ms`}}
+                    style={{ animationDelay: `${idx * 100}ms` }}
                   >
                     <div className="flex items-start justify-between gap-4 mb-4">
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -542,7 +557,10 @@ export default function Home() {
       </section>
 
       {/* Setup Wizard Section */}
-      <section id="setup" className="relative py-32 bg-gradient-to-b from-transparent via-gray-50/50 to-transparent dark:via-gray-800/30">
+      <section
+        id="setup"
+        className="relative py-32 bg-gradient-to-b from-transparent via-gray-50/50 to-transparent dark:via-gray-800/30"
+      >
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
@@ -561,11 +579,11 @@ export default function Home() {
             </div>
 
             {/* Get Started Button - Links to Real GitHub Integration */}
-            <div className="flex justify-center animate-fade-in-up" style={{animationDelay: '200ms'}}>
-              <Link
-                href="/setup"
-                className="group relative btn-primary-modern"
-              >
+            <div
+              className="flex justify-center animate-fade-in-up"
+              style={{ animationDelay: '200ms' }}
+            >
+              <Link href="/setup" className="group relative btn-primary-modern">
                 <Rocket className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Get Started Now
                 <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-glow animate-pulse">
@@ -581,11 +599,17 @@ export default function Home() {
                 { num: '0 keys', label: 'Private Keys Needed' },
                 { num: '1 click', label: 'GitHub Integration' },
               ].map((stat, idx) => (
-                <div key={stat.label} className="glass-card p-6 border border-white/10 dark:border-white/5 text-center animate-scale-in" style={{animationDelay: `${300 + idx * 100}ms`}}>
+                <div
+                  key={stat.label}
+                  className="glass-card p-6 border border-white/10 dark:border-white/5 text-center animate-scale-in"
+                  style={{ animationDelay: `${300 + idx * 100}ms` }}
+                >
                   <div className="text-4xl font-semibold text-blue-600 dark:text-blue-400 mb-2">
                     {stat.num}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
+                  <div className="text-gray-600 dark:text-gray-300">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -790,7 +814,10 @@ export default function Home() {
                 </ul>
               </div>
 
-              <div className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in" style={{animationDelay: '100ms'}}>
+              <div
+                className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
+                style={{ animationDelay: '100ms' }}
+              >
                 <div className="w-14 h-14 glass-medium rounded-xl flex items-center justify-center mb-6 shadow-glass">
                   <FileText className="w-7 h-7 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -844,7 +871,9 @@ export default function Home() {
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 glass-strong border border-pink-300/30 dark:border-pink-500/30 rounded-full px-6 py-3 mb-8 animate-fade-in shadow-glass">
                 <Rocket className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-                <span className="text-pink-600 dark:text-pink-300 font-medium">Coming Soon</span>
+                <span className="text-pink-600 dark:text-pink-300 font-medium">
+                  Coming Soon
+                </span>
               </div>
               <h2 className="text-4xl md:text-5xl font-semibold mb-6 text-gray-900 dark:text-white tracking-tight animate-fade-in">
                 Roadmap
@@ -892,7 +921,10 @@ export default function Home() {
                 </ul>
               </div>
 
-              <div className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in" style={{animationDelay: '100ms'}}>
+              <div
+                className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
+                style={{ animationDelay: '100ms' }}
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-14 h-14 glass-medium rounded-xl flex items-center justify-center shadow-glass">
                     <RefreshCw className="w-7 h-7 text-purple-600 dark:text-purple-400" />
@@ -928,7 +960,10 @@ export default function Home() {
                 </ul>
               </div>
 
-              <div className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in" style={{animationDelay: '200ms'}}>
+              <div
+                className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
+                style={{ animationDelay: '200ms' }}
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-14 h-14 glass-medium rounded-xl flex items-center justify-center shadow-glass">
                     <Activity className="w-7 h-7 text-green-600 dark:text-green-400" />
@@ -964,7 +999,10 @@ export default function Home() {
                 </ul>
               </div>
 
-              <div className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in" style={{animationDelay: '300ms'}}>
+              <div
+                className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
+                style={{ animationDelay: '300ms' }}
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-14 h-14 glass-medium rounded-xl flex items-center justify-center shadow-glass">
                     <Globe className="w-7 h-7 text-pink-600 dark:text-pink-400" />
@@ -1027,7 +1065,10 @@ export default function Home() {
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto animate-fade-in">
               {t.cta.subtitle}
             </p>
-            <div className="flex gap-6 justify-center flex-wrap animate-fade-in-up" style={{animationDelay: '200ms'}}>
+            <div
+              className="flex gap-6 justify-center flex-wrap animate-fade-in-up"
+              style={{ animationDelay: '200ms' }}
+            >
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI"
                 className="group btn-primary-modern flex items-center gap-2"
@@ -1047,13 +1088,15 @@ export default function Home() {
                 <div
                   key={stat.label}
                   className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in"
-                  style={{animationDelay: `${300 + idx * 100}ms`}}
+                  style={{ animationDelay: `${300 + idx * 100}ms` }}
                 >
                   <stat.icon className="w-10 h-10 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
                   <div className="text-5xl font-semibold text-gray-900 dark:text-white mb-2">
                     {stat.num}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-300 font-medium">{stat.label}</div>
+                  <div className="text-gray-600 dark:text-gray-300 font-medium">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1065,7 +1108,9 @@ export default function Home() {
       <footer className="relative py-16 border-t border-gray-200/50 dark:border-gray-700/50 glass">
         <div className="container mx-auto px-6 lg:px-12">
           <div className="max-w-6xl mx-auto text-center">
-            <p className="text-gray-600 dark:text-gray-300 mb-8 animate-fade-in">{t.footer.tagline}</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-8 animate-fade-in">
+              {t.footer.tagline}
+            </p>
             <div className="flex justify-center gap-8 flex-wrap animate-fade-in">
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI"
