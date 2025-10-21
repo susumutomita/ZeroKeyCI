@@ -28,48 +28,57 @@ env:
 
 ### 2. ETHOnline 2025 Hackathon Prize Coverage
 
-**Official prize page**: https://ethglobal.com/events/ethonline2025/prizes
+**⚠️ CRITICAL: ALWAYS verify prizes at official page**: https://ethglobal.com/events/ethonline2025/prizes
 
-**Required integrations** (all must be demonstrated):
+**See `docs/ETHONLINE2025_PRIZES.md` for complete verified sponsor list and analysis.**
 
-#### ✅ Hardhat 3
-- **Status**: Implemented
-- **Evidence**: All contracts compiled with Hardhat 3
-- **Files**: `hardhat.config.ts`, contract compilation in CI
-- **Prize track**: Hardhat Prize
+**VERIFIED Prize Targets** (actual sponsors with actual code integration):
 
-#### ✅ Blockscout
-- **Status**: Implemented
-- **Evidence**: Autoscout + SDK + MCP integration
-- **Files**: `scripts/blockscout-verify.ts`, `.zerokey/explorer.json`
-- **Prize track**: Blockscout Prize (requires Autoscout, SDK, MCP)
-
-#### ✅ Lit Protocol (Vincent)
-- **Status**: Implemented
-- **Evidence**: PKP-based automated signing with conditional logic
+#### ✅ Lit Protocol ($5,000)
+- **Status**: Implemented - CORE FEATURE
+- **Evidence**: PKP-based automated signing for keyless CI/CD
 - **Files**:
-  - `src/services/LitPKPSigner.ts`
-  - `src/lit-actions/conditionalSigner.ts`
-  - `scripts/setup/mint-pkp.ts`
-  - `scripts/trigger-pkp-signing.ts`
-- **Prize track**: Lit Protocol Vincent Prize (scoped delegated signing)
+  - `scripts/trigger-pkp-signing.ts` (163 lines)
+  - `docs/PKP_SETUP.md` (complete setup guide)
+  - `.github/workflows/deploy.yml` lines 226-250 (PKP workflow)
+  - Environment vars: `PKP_PUBLIC_KEY`, `LIT_ACTION_IPFS_CID`, `LIT_NETWORK`
+- **Prize track**: Lit Protocol - Programmable Key Pairs
+- **Why strong fit**: PKPs are fundamental to keyless CI/CD architecture
 
-#### ✅ Envio
-- **Status**: Implemented
-- **Evidence**: HyperIndex/HyperSync for Safe event monitoring
+#### ✅ Hardhat ($5,000)
+- **Status**: Implemented - CORE DEPENDENCY
+- **Evidence**: All smart contract development using Hardhat 3.0.7
 - **Files**:
-  - `src/envio/EventHandlers.ts.example`
-  - `.zerokey/envio-config.yaml`
-  - `.zerokey/envio-schema.graphql`
-- **Prize track**: Envio Prize (HyperIndex/HyperSync)
+  - `hardhat.config.ts` (complete configuration)
+  - `package.json`: `"hardhat": "^3.0.7"`
+  - All contract compilation, testing, deployment via Hardhat
+  - 605 tests running with Hardhat infrastructure
+- **Prize track**: Hardhat - Development Environment
+- **Why strong fit**: Essential tool powering entire smart contract workflow
 
-**IMPORTANT**: All integrations MUST be:
-1. Actually implemented (not just mentioned in docs)
-2. Demonstrated in working code
-3. Verified to integrate with core workflow
-4. Documented with setup instructions
+#### ✅ Blockscout ($10,000)
+- **Status**: Implemented - FEATURE INTEGRATION
+- **Evidence**: Automated contract verification + MCP integration
+- **Files**:
+  - `scripts/blockscout-verify.ts` (contract verification)
+  - `.github/workflows/deploy.yml` lines 183-195 (verification step)
+  - `.github/workflows/deploy.yml` lines 197-224 (MCP server integration)
+- **Prize track**: Blockscout - Contract Verification & Explorer
+- **Why strong fit**: Automated verification in CI/CD workflow
 
-If any prize track integration is missing or broken, the hackathon submission has NO VALUE.
+**⚠️ DO NOT CLAIM PRIZES THAT DON'T EXIST:**
+- ❌ "Safe (Gnosis Safe)" - NO PRIZE SPONSOR (we use Safe, but no prize for it)
+- ❌ "Security/Infrastructure" - DOES NOT EXIST as prize category
+- ❌ "Developer Tools" - DOES NOT EXIST as prize category
+- ❌ "Best Overall" - DOES NOT EXIST in sponsor list
+
+**IMPORTANT**: Prize claims MUST be:
+1. Actually verified sponsors (check https://ethglobal.com/events/ethonline2025/prizes)
+2. Actually implemented (not just mentioned in docs)
+3. Demonstrated in working code with file paths
+4. Verifiable evidence of integration
+
+**If you make up prize sponsors or categories, the submission loses credibility.**
 
 ### How to Maintain These Core Values
 
