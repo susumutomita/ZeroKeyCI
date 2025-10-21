@@ -109,6 +109,95 @@ export class PolicyValidator {
     return rules;
   }
 
+  /**
+   * Validate Ethereum address format (0x + 40 hex chars)
+   */
+  private validateEthereumAddress(address: string): boolean {
+    if (!address.startsWith('0x')) return false;
+    if (address.length !== 42) return false;
+    const hexChars = address.substring(2);
+    return /^[0-9a-fA-F]{40}$/.test(hexChars);
+  }
+
+  /**
+   * Validate proxy configuration
+   */
+  private validateProxyConfig(
+    deployment: any,
+    violations: PolicyViolation[],
+    warnings: string[]
+  ): void {
+    const proxy = deployment.proxy;
+
+    if (!proxy) {
+      // No proxy configuration - this is a regular deployment
+      return;
+    }
+
+    logger.debug('Validating proxy configuration', { proxy });
+
+    // 1. Validate proxy type
+    if (!proxy.type || !['uups', 'transparent'].includes(proxy.type)) {
+      violations.push({
+        rule: 'proxy.type',
+        message: `Invalid proxy type: ${proxy.type}. Must be "uups" or "transparent"`,
+        severity: 'error',
+      });
+    }
+
+    // 2. Check if this is a deployment or upgrade
+    const isUpgrade = !!proxy.proxyAddress;
+
+    if (isUpgrade) {
+      // Validate proxy upgrade
+      if (!this.validateEthereumAddress(proxy.proxyAddress)) {
+        violations.push({
+          rule: 'proxy.address',
+          message: `Invalid proxy address: ${proxy.proxyAddress}. Must be valid Ethereum address (0x + 40 hex chars)`,
+          severity: 'error',
+        });
+      }
+
+      // For upgrades, initializeArgs is optional
+      logger.debug('Proxy upgrade detected', {
+        proxyAddress: proxy.proxyAddress,
+      });
+    } else {
+      // Validate proxy deployment
+      if (!proxy.initializeArgs || !Array.isArray(proxy.initializeArgs)) {
+        violations.push({
+          rule: 'proxy.initialization',
+          message:
+            'Proxy deployments must provide initializeArgs array (can be empty)',
+          severity: 'error',
+        });
+      }
+
+      // For transparent proxies, validate admin address if provided
+      if (proxy.type === 'transparent' && proxy.admin) {
+        if (!this.validateEthereumAddress(proxy.admin)) {
+          violations.push({
+            rule: 'proxy.admin',
+            message: `Invalid admin address: ${proxy.admin}. Must be valid Ethereum address`,
+            severity: 'error',
+          });
+        }
+      }
+
+      logger.debug('Proxy deployment detected', {
+        proxyType: proxy.type,
+        hasAdmin: !!proxy.admin,
+      });
+    }
+
+    // 3. Warn about constructor args with upgradeable contracts
+    if (deployment.constructorArgs && deployment.constructorArgs.length > 0) {
+      warnings.push(
+        'Upgradeable contracts should use initialize() instead of constructor. Constructor args detected.'
+      );
+    }
+  }
+
   validate(): ValidationResult {
     logger.info('Starting policy validation', {
       safeAddress: this.proposal.safeAddress,
@@ -133,6 +222,11 @@ export class PolicyValidator {
         message: 'Invalid proposal structure',
         severity: 'error',
       });
+    }
+
+    // Validate proxy configuration if present
+    if (this.proposal.deployment) {
+      this.validateProxyConfig(this.proposal.deployment, violations, warnings);
     }
 
     const txData = this.proposal.proposal;

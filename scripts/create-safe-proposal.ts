@@ -549,6 +549,9 @@ async function main() {
         network: config.network,
         chainId,
         contract: config.contract,
+        constructorArgs: config.constructorArgs || [],
+        value: config.value || '0',
+        proxy: config.proxy, // Include proxy configuration for OPA validation
       },
       ci: {
         workflow: process.env.GITHUB_WORKFLOW || 'local',
