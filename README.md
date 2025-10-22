@@ -9,7 +9,7 @@
 **Key-less CI/CD for smart contracts — secure, auditable, and open.**
 
 > ETHOnline 2025 submission
-> [Demo → https://hackathon.project.io](https://hackathon.project.io)
+> [Demo → https://zero-key-ci.vercel.app](https://zero-key-ci.vercel.app)
 
 ---
 
@@ -135,7 +135,7 @@ jobs:
 
 ### Quick Setup
 
-1. Visit [ZeroKeyCI](https://zerokeyci.dev)
+1. Visit [ZeroKeyCI Setup](https://zero-key-ci.vercel.app/setup)
 2. Click **"Get Started Now"**
 3. Authorize with GitHub
 4. Select your repository

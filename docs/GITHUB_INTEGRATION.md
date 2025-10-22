@@ -45,7 +45,7 @@ When you connect a repository, ZeroKeyCI automatically creates a PR containing:
 
 ### For Users
 
-1. Visit [ZeroKeyCI](https://zerokeyci.dev)
+1. Visit [ZeroKeyCI Setup](https://zero-key-ci.vercel.app/setup)
 2. Click **"Get Started Now"**
 3. Click **"Connect with GitHub"**
 4. Authorize the application
