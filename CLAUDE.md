@@ -261,6 +261,72 @@ No documented workflow step requiring CI verification after PR creation.
 - Added to AGENTS.md as mandatory protocol
 ```
 
+## Hackathon Documentation Guidelines (ETHOnline 2025)
+
+**Official page**: https://ethglobal.com/events/ethonline2025/info/details
+
+### General Judging Criteria (ETHGlobal Standard)
+
+Judges evaluate projects on:
+1. **Creativity & Innovation** - Is this a novel approach? Does it solve the problem in a unique way?
+2. **Technical Difficulty** - What's the complexity of implementation? Did you tackle hard problems?
+3. **Functionality & Completeness** - Does it work? Is it production-ready or a proof-of-concept?
+4. **Real-World Impact** - Will people actually use this? Does it solve a real problem?
+5. **Sponsor Tech Integration** - How well are sponsor technologies integrated? (Depth > breadth)
+
+### Submission Requirements
+
+**REQUIRED for all submissions:**
+- **Demo video** (2-4 minutes) - Must showcase the project working
+- **GitHub repo** - Must prove work done during hackathon
+  - Clear commit history showing hackathon timeline
+  - Distinguish between new code and reused libraries
+- **Submission deadline**: Sunday, October 26th 2025 at 12:00 pm EDT
+
+### README Optimization for Hackathon Judges
+
+**Core principle**: Judges have **5 minutes maximum** to understand your project.
+
+**MUST HAVE sections (in this order):**
+1. **What Makes This Different** (30 seconds read)
+   - Clear problem statement
+   - Your unique solution
+   - Why it's better than alternatives
+
+2. **Real-World Impact** (1 minute read)
+   - **OUTCOMES, not metrics**
+   - Specific numbers: "$177 saved", "10x faster", "2-of-3 vs 1 account"
+   - Before/After comparisons
+
+3. **Sponsor Tech Integration** (1 minute read)
+   - List ALL sponsor technologies used
+   - Show DEPTH of integration (file paths, line numbers)
+   - Explain WHY each tech was chosen
+
+4. **What We Built** (2 minutes read)
+   - 5-7 key features with tangible outcomes
+   - Concrete examples for each feature
+
+**AVOID in hackathon README:**
+- ❌ Test coverage percentages (judges don't care)
+- ❌ File counts, line counts (not outcomes)
+- ❌ Future plans (judges evaluate current state)
+- ❌ Long technical architecture diagrams (judges skip these)
+
+**User feedback from ETHOnline 2025 prep:**
+> "こんなのなんの価値もないアウトカムがすべて"
+> (Translation: "This has no value, outcomes are everything")
+
+**Key lesson**: Show OUTCOMES (money saved, time saved, security improved), not METRICS (tests passing, coverage ％).
+
+### Judging Process
+
+1. **Round 1**: Asynchronous judging of all submissions
+2. **Round 2**: Live judging of top 20％ projects
+3. **Criteria**: Same for both rounds
+
+**Judge perspective**: They review 100+ projects. Make it EASY to understand your value in 5 minutes.
+
 ## Handoff Protocol
 - Summarise the final state in `plans.md`: shipped work, outstanding risks, follow-ups, and the latest test status.
 - Ensure the PR description links the exec plan, lists verification evidence, and names required reviewers for signing, policy, or deployment changes.
