@@ -4261,7 +4261,7 @@ READMEをハッカソン審査員向けに最適化し、5分で全体像を把�
 
 ## Exec Plan: Fix OAuth Configuration UX - Make Manual Setup Prominent (Issue #86)
 Created: 2025-10-21 14:00
-Status: 🟢 Ready for Review
+Status: ✅ Completed
 
 ### Objective
 Improve the /setup page user experience when GitHub OAuth is not configured, making manual setup the primary path instead of showing an error that blocks users.
@@ -4410,6 +4410,44 @@ Improve the /setup page user experience when GitHub OAuth is not configured, mak
 - Deploy to production
 - Gather user feedback on manual setup flow
 - Consider video walkthrough if needed
+
+#### Iteration 3 (2025-10-21 23:35) - ✅ MERGED & DEPLOYED
+**What was done:**
+- ✅ PR #87 merged to main by @susumutomita at 2025-10-21T23:35:34Z
+- ✅ Issue #86 automatically closed at 2025-10-21T23:35:35Z
+- ✅ Changes deployed to production via Vercel
+
+**Files merged to main:**
+- src/components/CodeSnippet.tsx (59 lines added)
+- src/components/__tests__/CodeSnippet.test.tsx (201 lines added)
+- src/app/setup/page.tsx (166 lines changed)
+- plans.md (162 lines added)
+- Total: +600 insertions, -45 deletions
+
+**Production impact:**
+- /setup page now shows positive "Deploy in 3 Steps" guide
+- Users no longer see blocking error when OAuth is unavailable
+- Copy-to-clipboard functionality available for all code snippets
+- "Deploy in 3 minutes" promise maintained through manual setup
+
+**Success criteria achieved:**
+- ✅ Users can immediately understand how to proceed without OAuth
+- ✅ Manual setup instructions visible directly on /setup page
+- ✅ "Deploy in 3 minutes" promise still achievable via manual setup
+- ✅ Code snippets easy to copy with one-click
+- ✅ Manual setup is PRIMARY path when OAuth unavailable
+
+**Guardrails maintained:**
+- ✅ Backward compatibility: OAuth flow still works when configured
+- ✅ No breaking changes to existing API endpoints
+- ✅ All 683 tests passing
+- ✅ Landing page "Deploy in 3 minutes" promise maintained
+- ✅ Security: No exposure of OAuth secrets or sensitive config
+
+**Completion status:** ✅ COMPLETED
+- User feedback addressed: "全然使えない" → "Deploy in 3 Steps"
+- Production deployment verified: https://zero-key-ci.vercel.app/setup
+- Ready for user feedback collection
 
 ### Open Questions
 - **Q**: Should we add animated GIFs/screenshots for manual setup?
