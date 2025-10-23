@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import { PolicyValidator } from '../validate-deployment';
@@ -22,6 +22,13 @@ describe('PolicyValidator - Proxy Validation', () => {
     // Create a basic policy file if it doesn't exist
     if (!existsSync(testPolicyPath)) {
       writeFileSync(testPolicyPath, 'package deployment\n');
+    }
+  });
+
+  afterEach(() => {
+    // Clean up test files after each test
+    if (existsSync(testProposalPath)) {
+      unlinkSync(testProposalPath);
     }
   });
 
