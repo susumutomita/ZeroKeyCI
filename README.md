@@ -11,6 +11,7 @@
 > ETHOnline 2025 submission
 > [Demo → https://zero-key-ci.vercel.app](https://zero-key-ci.vercel.app)
 
+[DeepWiki](https://deepwiki.com/susumutomita/ZeroKeyCI/1-overview)
 ---
 
 ## 🏆 ETHOnline 2025 - What Makes This Different
@@ -323,4 +324,3 @@ gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
 ## 💡 Team
 Built by **Susumu Tomita (たみぃ)** and collaborators
 for **ETHOnline 2025**
-
