@@ -90,13 +90,19 @@ export default function Home() {
               className="flex gap-4 justify-center flex-wrap mb-20 animate-fade-in-up"
               style={{ animationDelay: '300ms' }}
             >
-              <a
-                href="#setup"
+              <Link
+                href="/docs/QUICKSTART.md"
                 className="group btn-primary-modern flex items-center gap-2"
               >
                 <Rocket className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                {t.hero.getStarted}
+                Quick Start Guide
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+              <a
+                href="#setup"
+                className="group btn-secondary-modern flex items-center gap-2"
+              >
+                {t.hero.getStarted}
               </a>
               <a href="#demo" className="btn-secondary-modern">
                 {t.hero.tryDemo}

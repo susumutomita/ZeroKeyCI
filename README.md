@@ -11,6 +11,8 @@
 > ETHOnline 2025 submission
 > [Demo → https://zero-key-ci.vercel.app](https://zero-key-ci.vercel.app)
 
+**🚀 [Quick Start Guide](docs/QUICKSTART.md) - Deploy your first contract in 5 minutes**
+
 [DeepWiki](https://deepwiki.com/susumutomita/ZeroKeyCI/1-overview)
 ---
 
