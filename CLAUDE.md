@@ -135,6 +135,11 @@ When the user says「自律的に動いて」or indicates they want autonomous d
    - If any check fails, fix immediately or document blocker in plans.md
 
 4. **Git Workflow**
+   - **ALWAYS rebase onto latest main before starting work**:
+     ```bash
+     git fetch origin main
+     git rebase origin/main
+     ```
    - Create feature branch: `git checkout -b feat/descriptive-name`
    - Stage only relevant files: `git add [files]`
    - Commit with conventional format:
@@ -150,6 +155,11 @@ When the user says「自律的に動いて」or indicates they want autonomous d
      🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
      Co-Authored-By: Claude <noreply@anthropic.com>
+     ```
+   - **Before pushing, rebase again if main has advanced**:
+     ```bash
+     git fetch origin main
+     git rebase origin/main
      ```
    - Push: `git push -u origin feat/branch-name`
 
