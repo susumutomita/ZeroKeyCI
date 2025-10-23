@@ -202,8 +202,10 @@ contract MyContract is UUPSUpgradeable {
           This is a <strong>demo only</strong>. To deploy real contracts, see
           the{' '}
           <a
-            href="/docs/QUICKSTART.md"
+            href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/QUICKSTART.md"
             className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Quick Start Guide
           </a>{' '}
@@ -541,8 +543,10 @@ contract MyContract is UUPSUpgradeable {
                     your repository:
                   </p>
                   <a
-                    href="/docs/QUICKSTART.md"
+                    href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/QUICKSTART.md"
                     className="btn-primary-modern inline-block px-8 py-4 text-lg"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     📚 Read Quick Start Guide
                   </a>
