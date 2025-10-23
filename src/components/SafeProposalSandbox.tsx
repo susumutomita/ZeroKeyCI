@@ -123,16 +123,91 @@ contract MyContract is UUPSUpgradeable {
           <span className="text-gradient-vibrant">Try It Live</span> - Safe
           Proposal Sandbox
         </h2>
-        <p className="text-body text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-4">
-          Experience keyless contract deployment: Edit the contract
-          configuration below and click &quot;Generate Proposal&quot; to see how
-          ZeroKeyCI creates a Safe multisig transaction for deploying your
-          contract.
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-          <strong>What you&apos;ll see:</strong> (1) Contract settings you can
-          customize, (2) Sample Solidity code, (3) The generated Safe
-          transaction JSON with deployment address and validation hash
+
+        {/* What is this demo? */}
+        <div className="glass rounded-2xl p-6 mb-6 max-w-4xl mx-auto text-left">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <span className="text-2xl">🎯</span>
+            What is this demo?
+          </h3>
+          <p className="text-body text-gray-600 dark:text-gray-300 mb-4">
+            This interactive sandbox shows you{' '}
+            <strong>exactly what ZeroKeyCI generates</strong> when you merge a
+            pull request. No installation required - just edit the configuration
+            and click &quot;Generate Proposal&quot;.
+          </p>
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="glass-strong rounded-xl p-4">
+              <div className="text-2xl mb-2">1️⃣</div>
+              <strong className="block mb-1 text-gray-900 dark:text-white">
+                Edit Config
+              </strong>
+              <span className="text-gray-600 dark:text-gray-400">
+                Contract name, network, Safe address
+              </span>
+            </div>
+            <div className="glass-strong rounded-xl p-4">
+              <div className="text-2xl mb-2">2️⃣</div>
+              <strong className="block mb-1 text-gray-900 dark:text-white">
+                Generate
+              </strong>
+              <span className="text-gray-600 dark:text-gray-400">
+                See the Safe transaction JSON
+              </span>
+            </div>
+            <div className="glass-strong rounded-xl p-4">
+              <div className="text-2xl mb-2">3️⃣</div>
+              <strong className="block mb-1 text-gray-900 dark:text-white">
+                Understand
+              </strong>
+              <span className="text-gray-600 dark:text-gray-400">
+                Learn before you deploy for real
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Why use this? */}
+        <div className="glass rounded-2xl p-6 mb-6 max-w-4xl mx-auto text-left">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <span className="text-2xl">💡</span>
+            Why use this sandbox?
+          </h3>
+          <ul className="space-y-2 text-gray-600 dark:text-gray-300">
+            <li className="flex items-start gap-2">
+              <span className="text-green-600 dark:text-green-400 mt-1">✓</span>
+              <span>
+                <strong>No private keys needed:</strong> See how ZeroKeyCI
+                creates unsigned proposals that Safe owners approve
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-600 dark:text-green-400 mt-1">✓</span>
+              <span>
+                <strong>Preview deployment address:</strong> Know where your
+                contract will be deployed before signing
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-600 dark:text-green-400 mt-1">✓</span>
+              <span>
+                <strong>Validate transaction data:</strong> Inspect the exact
+                Safe transaction your GitHub Actions will generate
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
+          This is a <strong>demo only</strong>. To deploy real contracts, see
+          the{' '}
+          <a
+            href="/docs/QUICKSTART.md"
+            className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+          >
+            Quick Start Guide
+          </a>{' '}
+          for complete setup instructions.
         </p>
       </div>
 
@@ -380,6 +455,97 @@ contract MyContract is UUPSUpgradeable {
                   <p className="text-gray-600 dark:text-gray-300 font-mono">
                     {proposal.value} wei
                   </p>
+                </div>
+              </div>
+
+              {/* Next Steps - What happens in real workflow */}
+              <div className="glass rounded-2xl p-8 border-2 border-blue-500/30 bg-blue-50/10 dark:bg-blue-950/10">
+                <h3 className="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-4 flex items-center gap-2">
+                  <span className="text-3xl">🚀</span>
+                  What Happens Next in a Real Deployment?
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  This sandbox shows you the <strong>proposal JSON</strong> that
+                  ZeroKeyCI generates. In your actual GitHub Actions workflow,
+                  here&apos;s what happens after you merge a PR:
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center text-white font-bold text-lg">
+                      1
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-1">
+                        GitHub Actions Creates Proposal
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        After PR merge, CI compiles your contract, runs tests,
+                        and generates this exact Safe transaction JSON (no
+                        private keys needed!)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-1">
+                        Safe Owners Review
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Proposal appears in your Safe wallet (app.safe.global).
+                        You see the bytecode, deployment address, gas cost -
+                        everything before signing
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                      3
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-1">
+                        Multisig Signatures
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Safe owners sign with their wallets (e.g., 2-of-3
+                        threshold). Need multiple approvals = much more secure
+                        than single key
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg">
+                      4
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-1">
+                        Contract Deployed
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Once threshold reached, execute deployment. Contract
+                        appears at the predicted address. Full audit trail: PR →
+                        CI → Safe → Blockchain
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 glass-strong rounded-xl p-6">
+                  <h4 className="font-bold text-lg mb-3 text-gray-900 dark:text-white">
+                    Ready to Deploy for Real?
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    Follow our complete Quick Start guide to set up ZeroKeyCI in
+                    your repository:
+                  </p>
+                  <a
+                    href="/docs/QUICKSTART.md"
+                    className="btn-primary-modern inline-block px-8 py-4 text-lg"
+                  >
+                    📚 Read Quick Start Guide
+                  </a>
                 </div>
               </div>
             </div>
