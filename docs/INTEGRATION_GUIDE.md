@@ -24,16 +24,16 @@ jobs:
     uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
     with:
       safe-address: ${{ vars.SAFE_ADDRESS }}
-      network: sepolia
+      network: base-sepolia
       contract-name: MyContract
     secrets:
-      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
+      rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
 ```
 
 2. **Configure GitHub secrets**:
 
 ```bash
-gh secret set SEPOLIA_RPC_URL --body "https://sepolia.infura.io/v3/YOUR_KEY"
+gh secret set BASE_SEPOLIA_RPC_URL --body "https://base-sepolia.g.alchemy.com/v2/YOUR_KEY"
 gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
 ```
 
@@ -66,12 +66,12 @@ jobs:
     uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
     with:
       safe-address: ${{ vars.SAFE_ADDRESS }}
-      network: sepolia
+      network: base-sepolia
       contract-name: MyToken
       run-tests: true
       verify-blockscout: true
     secrets:
-      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
+      rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
 ```
 
 ### Method 2: Composite Action
@@ -166,8 +166,8 @@ Create `.zerokey/deploy.yaml`:
 version: 1.0
 
 # Network configuration
-network: sepolia
-chainId: 11155111
+network: base-sepolia
+chainId: 84532
 
 # Contract deployment
 contract: MyContract
@@ -184,6 +184,7 @@ validation:
   requireTests: true
   requireCoverage: 80
   allowedNetworks:
+    - base-sepolia
     - sepolia
     - mainnet
 ```

@@ -4622,3 +4622,95 @@ No single "Quick Start" guide that takes complete beginner from zero to deployed
 - Landing page: src/app/page.tsx
 - Safe Proposal Sandbox: src/components/SafeProposalSandbox.tsx
 
+---
+
+# Exec Plan: Change Default Network to Base Sepolia
+Created: 2025-10-23 15:10
+Status: 🔄 In Progress
+
+## Objective
+Update all default network configurations from Ethereum Sepolia to Base Sepolia to reflect that the issue has been resolved ("治ったので") and Base Sepolia should be the primary testnet going forward.
+
+## Guardrails (Non-negotiable constraints)
+- Must maintain all existing network support (don't remove Sepolia or other networks)
+- No breaking changes to existing deployments
+- All tests must pass
+- Documentation must remain consistent across all files
+- Must preserve multi-network examples in INTEGRATION_GUIDE.md
+
+## TODO
+- [x] Phase 1: Investigation
+  - [x] Identify all files with default network settings
+  - [x] Document current state
+- [ ] Phase 2: Core Configuration Files
+  - [ ] Update `.env.example` - Change `NETWORK=sepolia` to `NETWORK=base-sepolia`
+  - [ ] Update `.zerokey/deploy.yaml` - Change `network: sepolia` to `network: base-sepolia`
+- [ ] Phase 3: Documentation Updates
+  - [ ] Update README.md Quick Start examples
+  - [ ] Update docs/SECURITY.md examples
+  - [ ] Update docs/GITHUB_INTEGRATION.md examples
+  - [ ] Update docs/INTEGRATION_GUIDE.md primary examples (keep multi-network section)
+  - [ ] Update docs/QUICKSTART.md examples
+- [ ] Phase 4: Validation
+  - [ ] Run textlint on all modified markdown files
+  - [ ] Run all tests (`bun run test`)
+  - [ ] Verify TypeScript compilation
+  - [ ] Verify Next.js build
+- [ ] Phase 5: Git & PR
+  - [ ] Rebase onto latest main
+  - [ ] Create feature branch
+  - [ ] Commit changes
+  - [ ] Create PR
+  - [ ] Verify CI passes
+
+## Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`, `bun run lint_text`)
+- [ ] Next.js build succeeds (`bun run build`)
+- [ ] No hardcoded "sepolia" left in default positions (verify with grep)
+- [ ] Multi-network examples still show variety of networks
+
+## Progress Log
+
+### Iteration 1 (2025-10-23 15:10) - Investigation Complete
+**What was done:**
+- Identified all current default network settings
+- Found that Sepolia is currently the default in:
+  - `.env.example` line 19: `NETWORK=sepolia`
+  - `.zerokey/deploy.yaml` line 1: `network: sepolia`
+  - README.md line 88, 291: `network: sepolia` examples
+  - Multiple documentation files using Sepolia as primary example
+
+**Current understanding:**
+- hardhat.config.js doesn't specify defaultNetwork (only has hardhat network)
+- GitHub Actions workflow extracts network from `.zerokey/deploy.yaml`
+- Most examples use Sepolia but multi-network guides show all options
+
+**User request:**
+"治ったので次以降まずデフォルトはBase Sepoliaにしよう"
+(Translation: "It's fixed now, so let's make Base Sepolia the default from now on")
+
+**Decision made:**
+- Change defaults to Base Sepolia
+- Keep all other networks in examples and multi-network guides
+- Update primary examples (Quick Start, first-time setup) to Base Sepolia
+
+**Next steps:**
+1. Update core config files (.env.example, .zerokey/deploy.yaml)
+2. Update documentation examples
+3. Validate and create PR
+
+## Open Questions
+- **Q**: Should we add a comment in .env.example explaining why Base Sepolia is default?
+  - **A** (pending): Will decide based on file clarity
+
+- **Q**: Do we need to update RPC URL examples too?
+  - **A** (pending): Check if BASE_SEPOLIA_RPC_URL needs to be featured more prominently
+
+## References
+- User request: "治ったので次以降まずデフォルトはBase Sepoliaにしよう" (2025-10-23)
+- Current default: Sepolia (Ethereum testnet)
+- New default: Base Sepolia (Base L2 testnet)
+- Files to modify: .env.example, .zerokey/deploy.yaml, README.md, docs/*.md
+

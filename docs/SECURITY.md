@@ -145,7 +145,7 @@ RPC URLs are infrastructure endpoints, not keys. They:
 
 ```yaml
 # .zerokey/deploy.yaml (committed to repo)
-network: sepolia
+network: base-sepolia
 contract: ExampleUUPS
 signers:
   threshold: 2

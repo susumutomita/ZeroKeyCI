@@ -191,7 +191,7 @@ Edit `.zerokey/deploy.yaml` in your repository:
 
 ```yaml
 # Network to deploy to
-network: sepolia
+network: base-sepolia
 
 # Contract name (must match Solidity file)
 contract: YourContract
