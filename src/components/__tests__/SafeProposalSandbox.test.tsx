@@ -257,4 +257,29 @@ describe('SafeProposalSandbox', () => {
     // Reset
     mockThrowNonError = false;
   });
+
+  it('should use fallback chainId for unknown network', async () => {
+    render(<SafeProposalSandbox />);
+
+    // Get network select by label
+    const networkSelect = screen.getByLabelText('Network') as HTMLSelectElement;
+
+    // Add unknown-network option to the select
+    const option = document.createElement('option');
+    option.value = 'unknown-network';
+    option.text = 'Unknown Network';
+    networkSelect.appendChild(option);
+
+    // Change to unknown network (not in chainIds map)
+    fireEvent.change(networkSelect, { target: { value: 'unknown-network' } });
+
+    const button = screen.getByText('Generate Safe Proposal');
+    fireEvent.click(button);
+
+    // Should still generate proposal using fallback chainId (11155111)
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Generated Proposal'));
+      expect(screen.getByText(/0x0000000000000000/)).toBeInTheDocument();
+    });
+  });
 });

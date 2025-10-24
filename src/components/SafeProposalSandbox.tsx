@@ -68,6 +68,7 @@ contract MyContract is UUPSUpgradeable {
 
       const chainIds: Record<string, number> = {
         sepolia: 11155111,
+        'base-sepolia': 84532,
         mainnet: 1,
         polygon: 137,
         arbitrum: 42161,

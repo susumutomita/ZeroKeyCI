@@ -27,7 +27,7 @@
    - Example: `0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0`
    - **Save this! You'll need it in Step 2.**
 
-**Cost:** Free on Sepolia testnet (requires testnet ETH, see below)
+**Cost:** Free on Base Sepolia testnet (requires testnet ETH, see below)
 
 > **Production tip:** For mainnet, use 2-of-3 or 3-of-5 threshold for better security. See [SAFE_SETUP.md](./SAFE_SETUP.md) for details.
 
@@ -35,10 +35,10 @@
 
 Your Safe needs ETH to pay gas fees.
 
-1. **Visit [sepoliafaucet.com](https://sepoliafaucet.com)** or [faucets.chain.link](https://faucets.chain.link)
+1. **Visit [Alchemy Base Sepolia Faucet](https://www.alchemy.com/faucets/base-sepolia)** or [Base Network Faucets](https://docs.base.org/docs/tools/network-faucets/)
 2. **Paste your Safe address** (from Step 1)
-3. **Request ETH** (you'll get 0.5 ETH on Sepolia)
-4. **Wait ~30 seconds** for transaction to confirm
+3. **Request ETH** (you'll get testnet ETH on Base Sepolia)
+4. **Wait ~5 seconds** for transaction to confirm (Base is fast!)
 
 ### Step 3: Get RPC URL (1 minute)
 
@@ -47,16 +47,16 @@ ZeroKeyCI needs an RPC URL to communicate with the blockchain.
 **Option A: Alchemy (Recommended)**
 1. Visit [alchemy.com](https://www.alchemy.com)
 2. Sign up (free tier: 300M requests/month)
-3. Create App → Ethereum Sepolia
+3. Create App → Base Sepolia
 4. Copy API Key
-5. Your RPC URL: `https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY`
+5. Your RPC URL: `https://base-sepolia.g.alchemy.com/v2/YOUR_API_KEY`
 
 **Option B: Infura**
 1. Visit [infura.io](https://www.infura.io)
 2. Sign up (free tier: 100K requests/day)
-3. Create Project → Web3 API → Sepolia
+3. Create Project → Web3 API → Base Sepolia
 4. Copy Project ID
-5. Your RPC URL: `https://sepolia.infura.io/v3/YOUR_PROJECT_ID`
+5. Your RPC URL: `https://base-sepolia.infura.io/v3/YOUR_PROJECT_ID`
 
 ---
 
@@ -86,11 +86,11 @@ jobs:
     uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
     with:
       safe-address: ${{ vars.SAFE_ADDRESS }}
-      network: sepolia
+      network: base-sepolia
       contract-name: MyContract
       verify-blockscout: true
     secrets:
-      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
+      rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
 ```
 
 **What this does:**
@@ -120,11 +120,11 @@ gh variable set SAFE_ADDRESS --body "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0"
 6. Value: `0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0` (your Safe address from Step 1)
 7. Click **Add variable**
 
-#### Set SEPOLIA_RPC_URL (Secret)
+#### Set BASE_SEPOLIA_RPC_URL (Secret)
 
 ```bash
 # Using GitHub CLI (recommended)
-gh secret set SEPOLIA_RPC_URL --body "https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY"
+gh secret set BASE_SEPOLIA_RPC_URL --body "https://base-sepolia.g.alchemy.com/v2/YOUR_API_KEY"
 ```
 
 **Or via GitHub UI:**
@@ -132,8 +132,8 @@ gh secret set SEPOLIA_RPC_URL --body "https://eth-sepolia.g.alchemy.com/v2/YOUR_
 2. Settings → Secrets and variables → Actions
 3. Click **Secrets** tab
 4. Click **New repository secret**
-5. Name: `SEPOLIA_RPC_URL`
-6. Value: `https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY` (your RPC URL from Step 3)
+5. Name: `BASE_SEPOLIA_RPC_URL`
+6. Value: `https://base-sepolia.g.alchemy.com/v2/YOUR_API_KEY` (your RPC URL from Step 3)
 7. Click **Add secret**
 
 ### Step 6: Verify Configuration
@@ -150,8 +150,8 @@ gh secret list
 
 You should see:
 ```
-SAFE_ADDRESS    updated 1m ago
-SEPOLIA_RPC_URL updated 1m ago
+SAFE_ADDRESS           updated 1m ago
+BASE_SEPOLIA_RPC_URL   updated 1m ago
 ```
 
 ---
@@ -305,14 +305,14 @@ gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
 **Fix:**
 ```bash
 # Must include full URL with API key
-gh secret set SEPOLIA_RPC_URL --body "https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY"
+gh secret set BASE_SEPOLIA_RPC_URL --body "https://base-sepolia.g.alchemy.com/v2/YOUR_KEY"
 ```
 
 ### "Insufficient funds for gas"
 
 **Cause:** Safe has no ETH
 
-**Fix:** Send testnet ETH to your Safe address using [sepoliafaucet.com](https://sepoliafaucet.com)
+**Fix:** Send testnet ETH to your Safe address using [Alchemy Base Sepolia Faucet](https://www.alchemy.com/faucets/base-sepolia)
 
 ### "Contract compilation failed"
 
