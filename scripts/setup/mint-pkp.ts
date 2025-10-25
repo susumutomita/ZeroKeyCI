@@ -17,11 +17,13 @@
  */
 
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitNetwork } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import * as readline from 'readline';
+
+// Lit Network types as string literals (compatible with all Lit SDK versions)
+type LitNetworkType = 'datil-dev' | 'datil-test' | 'datil';
 
 export interface PKPMintResult {
   tokenId: string;
@@ -70,16 +72,16 @@ export function validatePrivateKey(privateKey: string): boolean {
 /**
  * Get Lit network from environment or user input
  */
-export async function getLitNetwork(): Promise<LitNetwork> {
+export async function getLitNetwork(): Promise<LitNetworkType> {
   const envNetwork = process.env.LIT_NETWORK;
 
   if (envNetwork) {
-    const validNetworks: LitNetwork[] = [
-      LitNetwork.DatilDev,
-      LitNetwork.DatilTest,
-      LitNetwork.Datil,
+    const validNetworks: LitNetworkType[] = [
+      'datil-dev',
+      'datil-test',
+      'datil',
     ];
-    const network = envNetwork as LitNetwork;
+    const network = envNetwork as LitNetworkType;
 
     if (validNetworks.includes(network)) {
       console.log(`📡 Using Lit Network from environment: ${network}`);
@@ -100,14 +102,14 @@ export async function getLitNetwork(): Promise<LitNetwork> {
 
   switch (choice || '1') {
     case '1':
-      return LitNetwork.DatilDev;
+      return 'datil-dev';
     case '2':
-      return LitNetwork.DatilTest;
+      return 'datil-test';
     case '3':
-      return LitNetwork.Datil;
+      return 'datil';
     default:
       console.log('Invalid choice, using datil-dev');
-      return LitNetwork.DatilDev;
+      return 'datil-dev';
   }
 }
 
@@ -147,7 +149,7 @@ export async function getPrivateKey(): Promise<string> {
  * Mint a new PKP NFT
  */
 export async function mintPKP(
-  network: LitNetwork,
+  network: LitNetworkType,
   privateKey: string
 ): Promise<PKPMintResult> {
   console.log('\n🔨 Minting PKP NFT...');
