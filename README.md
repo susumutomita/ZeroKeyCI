@@ -311,17 +311,25 @@ on:
     types: [closed]
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write
+
 jobs:
   deploy:
     if: github.event.pull_request.merged == true
-    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
-    with:
-      safe-address: ${{ vars.SAFE_ADDRESS }}
-      network: base-sepolia
-      contract-name: MyContract
-      verify-blockscout: true
-    secrets:
-      rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: susumutomita/ZeroKeyCI@main
+        with:
+          safe-address: ${{ vars.SAFE_ADDRESS }}
+          network: base-sepolia
+          contract-name: MyContract
+          verify-blockscout: true
+          rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
 ```
 
 2. **Configure GitHub secrets**:
@@ -335,12 +343,6 @@ gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
    - Merge a PR → ZeroKeyCI creates Safe proposal
    - Safe owners sign → Execute deployment
    - No private keys in CI!
-
-### Integration Options
-
-- **Method 1**: Reusable workflow (recommended)
-- **Method 2**: Composite action (custom control)
-- **Method 3**: Fork and customize
 
 **→ [Complete Integration Guide](docs/INTEGRATION_GUIDE.md)**
 

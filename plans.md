@@ -5489,3 +5489,60 @@ jobs:
 - Related PR: #97 (Fix: Add dependency installation before contract compilation)
 - action.yml: lines 119-126 (current broken test step)
 
+---
+
+# Exec Plan: Simplify architecture - Remove reusable-deploy.yml wrapper
+
+**Created**: 2025-10-25
+**Status**: ✅ Completed
+
+## Objective
+Eliminate unnecessary 2-layer architecture by removing reusable-deploy.yml and making action.yml the single entry point for ZeroKeyCI deployments.
+
+## Problem Statement
+User feedback: "私がよくわからないもの uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main この指定の仕方なんだけどactions.ymlが/Users/susumu/ethglobal/ZeroKeyCI/action.ymlにあるのになんでこんな呼び出しをするガイドになっているのか"
+
+Translation: "I don't understand why we're using reusable-deploy.yml when action.yml exists"
+
+User's response: "いやないよお前が設計したんだろ" (No, you designed it)
+
+Follow-up: "過剰というか使いづらいだろなめてんのか" (It's not just excessive, it's hard to use)
+
+## Solution
+Delete reusable-deploy.yml entirely and integrate its functionality into action.yml.
+
+## Changes Made
+
+### action.yml (54 lines added)
+- Added PR comment step using gh CLI (lines 395-429)
+- Added summary step (lines 431-443)
+- Now completely self-contained
+
+### .github/workflows/reusable-deploy.yml (DELETED)
+- 175 lines removed via `git rm`
+
+### README.md (lines 303-347)
+- Updated Quick Integration Steps with new pattern
+- Added permissions section
+- Removed "Integration Options" section
+
+## New Usage Pattern
+
+**Before:**
+```yaml
+uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+```
+
+**After:**
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - uses: susumutomita/ZeroKeyCI@main
+```
+
+## Benefits
+- ✅ 1-layer architecture (down from 2)
+- ✅ 175 lines removed
+- ✅ Simpler API
+- ✅ All functionality preserved
+
