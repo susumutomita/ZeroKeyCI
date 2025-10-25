@@ -353,8 +353,18 @@ runs:
           exit 1
         }
 
-        jq -e '.safe' ${{ github.workspace }}/safe-proposal.json > /dev/null || {
-          echo "::error::Missing 'safe' field in proposal"
+        jq -e '.safeAddress' ${{ github.workspace }}/safe-proposal.json > /dev/null || {
+          echo "::error::Missing 'safeAddress' field in proposal"
+          exit 1
+        }
+
+        jq -e '.proposal' ${{ github.workspace }}/safe-proposal.json > /dev/null || {
+          echo "::error::Missing 'proposal' field in proposal"
+          exit 1
+        }
+
+        jq -e '.chainId' ${{ github.workspace }}/safe-proposal.json > /dev/null || {
+          echo "::error::Missing 'chainId' field in proposal"
           exit 1
         }
 
