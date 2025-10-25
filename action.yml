@@ -391,3 +391,53 @@ runs:
         fi
 
         echo "✅ Envio indexing configured"
+
+    - name: Comment on PR with proposal details
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        PROPOSAL_HASH="${{ steps.create-proposal.outputs.proposal_hash }}"
+        SAFE_ADDRESS="${{ inputs.safe-address }}"
+        NETWORK="${{ inputs.network }}"
+        CONTRACT="${{ inputs.contract-name }}"
+
+        cat << EOF > pr-comment.md
+        ## 🚀 ZeroKeyCI Deployment Proposal
+
+        A keyless Safe transaction proposal has been generated.
+
+        ### 📋 Deployment Details
+        - **Contract**: \`${CONTRACT}\`
+        - **Network**: \`${NETWORK}\`
+        - **Safe Address**: \`${SAFE_ADDRESS}\`
+        - **Proposal Hash**: \`${PROPOSAL_HASH}\`
+
+        ### 🔐 Next Steps
+        1. Safe owners review and sign the proposal
+        2. Once threshold is reached, execute the transaction
+        3. Contract will be deployed without any private keys in CI/CD
+
+        ### 📦 Artifacts
+        - [Download Proposal](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+        ---
+        *Powered by [ZeroKeyCI](https://github.com/susumutomita/ZeroKeyCI) - Keyless Smart Contract Deployment*
+        EOF
+
+        gh pr comment ${{ github.event.pull_request.number }} --body-file pr-comment.md
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "## ✅ ZeroKeyCI Deployment Proposal Created" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Safe Address**: \`${{ inputs.safe-address }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Network**: \`${{ inputs.network }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Contract**: \`${{ inputs.contract-name }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Proposal Hash**: \`${{ steps.create-proposal.outputs.proposal_hash }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔐 Security" >> $GITHUB_STEP_SUMMARY
+        echo "No private keys were used or stored in this workflow." >> $GITHUB_STEP_SUMMARY
+        echo "Safe owners must sign and execute the proposal separately." >> $GITHUB_STEP_SUMMARY
