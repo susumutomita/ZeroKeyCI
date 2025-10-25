@@ -45,6 +45,12 @@ interface DeployConfig {
   };
 }
 
+const projectRoot = process.env.ZERO_KEY_PROJECT_ROOT
+  ? resolve(process.env.ZERO_KEY_PROJECT_ROOT)
+  : process.env.CALLING_REPO_ROOT
+    ? resolve(process.env.CALLING_REPO_ROOT)
+    : process.cwd();
+
 /**
  * Send notification with timeout to prevent deployment delays
  * @param notifier - Notifier instance
@@ -99,7 +105,7 @@ async function submitUnsignedProposalToSafe(
     });
 
     const result = await safeService.proposeTransaction({
-      safeAddress: proposal.safe,
+      safeAddress: safeAddress,
       safeTransactionData: {
         to: proposal.to,
         value: proposal.value,
@@ -171,7 +177,10 @@ async function main() {
   });
 
   try {
-    logger.info('Starting Safe proposal creation', { deploymentId });
+    logger.info('Starting Safe proposal creation', {
+      deploymentId,
+      projectRoot,
+    });
     tracker.start(deploymentId, {
       workflow: process.env.GITHUB_WORKFLOW || 'local',
       runId: process.env.GITHUB_RUN_ID || 'local',
@@ -184,7 +193,7 @@ async function main() {
       'Reading deployment configuration'
     );
 
-    const configPath = resolve(process.cwd(), '.zerokey', 'deploy.yaml');
+    const configPath = resolve(projectRoot, '.zerokey', 'deploy.yaml');
 
     if (!require('fs').existsSync(configPath)) {
       throw new ConfigurationError('Deployment configuration not found', {
@@ -249,7 +258,7 @@ async function main() {
     );
 
     const artifactPath = resolve(
-      process.cwd(),
+      projectRoot,
       'artifacts',
       'contracts',
       `${config.contract}.sol`,
@@ -490,7 +499,7 @@ async function main() {
             ? 'ERC1967Proxy'
             : 'TransparentUpgradeableProxy';
         const proxyArtifactPath = resolve(
-          process.cwd(),
+          projectRoot,
           'artifacts',
           'contracts',
           'proxies',
@@ -614,9 +623,18 @@ async function main() {
     const serialized = builder.serializeProposal(proposal);
     const parsed = JSON.parse(serialized);
 
+    // Submit unsigned proposal to Safe Transaction Service
+    const safeTxHashFromApi = await submitUnsignedProposalToSafe(
+      parsed,
+      chainId,
+      safeAddress
+    );
+
     // Add additional metadata for CI
     const enrichedProposal = {
       ...parsed,
+      safeTxHash: safeTxHashFromApi || null,
+      submissionStatus: safeTxHashFromApi ? 'queued' : 'manual',
       deployment: {
         expectedAddress: deploymentAddress,
         network: config.network,
@@ -651,15 +669,8 @@ async function main() {
     };
 
     // Write proposal to file
-    const outputPath = resolve(process.cwd(), 'safe-proposal.json');
+    const outputPath = resolve(projectRoot, 'safe-proposal.json');
     writeFileSync(outputPath, JSON.stringify(enrichedProposal, null, 2));
-
-    // Submit unsigned proposal to Safe Transaction Service
-    const safeTxHashFromApi = await submitUnsignedProposalToSafe(
-      parsed,
-      chainId,
-      safeAddress
-    );
 
     if (safeTxHashFromApi) {
       logger.info('✨ Transaction available in Safe UI queue for signing', {
