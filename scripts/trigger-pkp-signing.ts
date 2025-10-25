@@ -86,16 +86,42 @@ export function validateEnvironment(): EnvironmentConfig {
 
 /**
  * Load Safe proposal from JSON file
+ * Supports both legacy and SerializedProposal formats
  */
 export function loadProposal(filePath: string): SafeTransaction {
   try {
     const content = readFileSync(filePath, 'utf-8');
-    const proposal = JSON.parse(content) as SafeTransaction;
+    const data = JSON.parse(content);
 
-    // Validate required fields
-    if (!proposal.safe || !proposal.to || !proposal.data) {
+    let proposal: SafeTransaction;
+
+    // Check if it's SerializedProposal format (new)
+    if (data.safeAddress && data.proposal) {
+      proposal = {
+        safe: data.safeAddress,
+        to: data.proposal.to,
+        value: data.proposal.value,
+        data: data.proposal.data,
+        operation: data.proposal.operation,
+        safeTxGas: data.proposal.safeTxGas || '0',
+        baseGas: data.proposal.baseGas || '0',
+        gasPrice: data.proposal.gasPrice || '0',
+        gasToken:
+          data.proposal.gasToken ||
+          '0x0000000000000000000000000000000000000000',
+        refundReceiver:
+          data.proposal.refundReceiver ||
+          '0x0000000000000000000000000000000000000000',
+        nonce: data.proposal.nonce || 0,
+        validationHash: data.validationHash,
+      };
+    }
+    // Legacy format
+    else if (data.safe && data.to && data.data) {
+      proposal = data as SafeTransaction;
+    } else {
       throw new Error(
-        'Invalid proposal: missing required fields (safe, to, data)'
+        'Invalid proposal: missing required fields (safeAddress/safe, proposal.to/to, proposal.data/data)'
       );
     }
 
@@ -177,9 +203,8 @@ export async function submitToSafe(
   console.log('📤 Submitting signed transaction to Safe...');
 
   try {
-    // Determine chain ID from Safe address or environment
-    // For now, default to Sepolia (11155111)
-    const chainId = '11155111'; // TODO: Make this configurable
+    // Get chain ID from environment or default to Sepolia
+    const chainId = process.env.CHAIN_ID || '11155111';
 
     const safeService = new SafeApiKit({
       chainId: BigInt(chainId),
