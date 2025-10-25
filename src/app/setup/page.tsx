@@ -310,6 +310,206 @@ gh pr merge
             </div>
           </div>
 
+          {/* Optional: PKP Automation */}
+          <div className="glass-card p-8 border border-purple-300/30 dark:border-purple-500/30 mb-6 animate-fade-in">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                4
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    Optional: Enable PKP Automation
+                  </h2>
+                  <span className="px-3 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
+                    Advanced • 15-20 min
+                  </span>
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Skip manual signing and enable fully automated deployments
+                  using Lit Protocol PKPs (Programmable Key Pairs).
+                </p>
+
+                {/* What is PKP */}
+                <div className="mb-6 p-4 bg-purple-50/50 dark:bg-purple-900/10 border border-purple-300/30 dark:border-purple-500/30 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    What is PKP Automation?
+                  </h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    A PKP (Programmable Key Pair) is a distributed cryptographic
+                    key controlled by Lit Protocol&apos;s decentralized network.
+                    The private key is split across multiple nodes - no single
+                    party can access it.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-medium text-purple-700 dark:text-purple-300 mb-1">
+                        ✅ Use PKP if you want:
+                      </p>
+                      <ul className="text-gray-700 dark:text-gray-300 space-y-1 ml-4">
+                        <li>• Fully automated deployments</li>
+                        <li>• Deploy multiple times per day</li>
+                        <li>• Conditional signing (tests, OPA)</li>
+                        <li>• No manual Safe UI interaction</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-medium text-blue-700 dark:text-blue-300 mb-1">
+                        ℹ️ Stick with Manual if you:
+                      </p>
+                      <ul className="text-gray-700 dark:text-gray-300 space-y-1 ml-4">
+                        <li>• Deploy infrequently (weekly/monthly)</li>
+                        <li>• Want maximum control</li>
+                        <li>• Prefer human approval</li>
+                        <li>• Are just getting started</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* GitHub Secrets for PKP */}
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  Additional GitHub Secrets for PKP
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  After completing PKP setup, add these secrets to your
+                  repository:
+                </p>
+
+                <CodeSnippet
+                  language="bash"
+                  title="Terminal - Add PKP Secrets"
+                  code={`gh secret set PKP_PUBLIC_KEY --body "0xYourPKPAddress"
+gh secret set LIT_ACTION_IPFS_CID --body "QmYour...IPFSHash"
+gh variable set LIT_NETWORK --body "datil-dev"`}
+                />
+
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-white">
+                          Secret Name
+                        </th>
+                        <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-white">
+                          What It Is
+                        </th>
+                        <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-white">
+                          How to Get It
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-gray-700 dark:text-gray-300">
+                      <tr className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3 px-3 font-mono text-xs bg-gray-50 dark:bg-gray-800/50">
+                          PKP_PUBLIC_KEY
+                        </td>
+                        <td className="py-3 px-3">
+                          Your PKP&apos;s Ethereum address
+                        </td>
+                        <td className="py-3 px-3">
+                          Run{' '}
+                          <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                            bun run scripts/setup/mint-pkp.ts
+                          </code>
+                        </td>
+                      </tr>
+                      <tr className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3 px-3 font-mono text-xs bg-gray-50 dark:bg-gray-800/50">
+                          LIT_ACTION_IPFS_CID
+                        </td>
+                        <td className="py-3 px-3">
+                          IPFS hash of your signing logic
+                        </td>
+                        <td className="py-3 px-3">
+                          See{' '}
+                          <a
+                            href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/LIT_ACTION_SETUP.md"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-600 dark:text-purple-400 hover:underline"
+                          >
+                            LIT_ACTION_SETUP.md
+                          </a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-3 font-mono text-xs bg-gray-50 dark:bg-gray-800/50">
+                          LIT_NETWORK
+                        </td>
+                        <td className="py-3 px-3">Lit Protocol network name</td>
+                        <td className="py-3 px-3">
+                          <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                            datil-dev
+                          </code>{' '}
+                          (testnet) or{' '}
+                          <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                            datil
+                          </code>{' '}
+                          (mainnet)
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Update Workflow */}
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+                  Update Your Workflow
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Enable PKP signing in your{' '}
+                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+                    .github/workflows/deploy.yml
+                  </code>
+                  :
+                </p>
+
+                <CodeSnippet
+                  language="yaml"
+                  title=".github/workflows/deploy.yml (with PKP)"
+                  code={`      - uses: susumutomita/ZeroKeyCI@main
+        with:
+          safe-address: \${{ vars.SAFE_ADDRESS }}
+          network: base-sepolia
+          contract-name: MyContract
+          verify-blockscout: true
+          rpc-url: \${{ secrets.RPC_URL }}
+          # PKP Automation (add these lines)
+          pkp-enabled: true
+          pkp-public-key: \${{ secrets.PKP_PUBLIC_KEY }}
+          lit-action-ipfs-cid: \${{ secrets.LIT_ACTION_IPFS_CID }}
+          lit-network: \${{ vars.LIT_NETWORK }}`}
+                />
+
+                {/* Complete Setup Guide */}
+                <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <BookOpen className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-1">
+                        📖 Full PKP Setup Guide Required
+                      </p>
+                      <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-2">
+                        PKP setup requires multiple steps (mint NFT, grant
+                        permissions, add to Safe). Follow the complete guide:
+                      </p>
+                      <a
+                        href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PKP_SETUP.md"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:underline"
+                      >
+                        <span>Complete PKP Setup Guide →</span>
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Need More Help? */}
           <div className="mt-12 glass-card border border-blue-300/30 dark:border-blue-500/30 rounded-xl p-8">
             <div className="flex items-start gap-4 mb-6">
@@ -357,6 +557,23 @@ gh pr merge
                   </p>
                 </div>
                 <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              </a>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PKP_SETUP.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 glass-card border border-white/10 hover:border-purple-300/30 dark:hover:border-purple-500/30 rounded-lg transition-all group"
+              >
+                <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    PKP Setup Guide
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Setup automated signing
+                  </p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
               </a>
               <a
                 href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/DEMO_MODE.md"
