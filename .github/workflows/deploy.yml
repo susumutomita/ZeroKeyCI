@@ -259,6 +259,23 @@ jobs:
             const contract = '${{ steps.deploy-config.outputs.contract }}';
             const pkpSigned = '${{ steps.pkp-signing.outputs.pkp_signed }}' === 'true';
 
+            // Network to Safe chain prefix mapping
+            const chainPrefixes = {
+              'mainnet': 'eth',
+              'sepolia': 'sep',
+              'polygon': 'matic',
+              'amoy': 'amoy',
+              'arbitrum': 'arb1',
+              'arbitrum-sepolia': 'arb-sep',
+              'optimism': 'oeth',
+              'optimism-sepolia': 'oeth-sep',
+              'base': 'base',
+              'base-sepolia': 'base-sep'
+            };
+
+            const chainPrefix = chainPrefixes[network] || network;
+            const safeAppUrl = `https://app.safe.global/transactions/queue?safe=${chainPrefix}:${safeAddress}`;
+
             let comment = `## 🚀 Deployment Proposal Created
 
             A Safe transaction proposal has been generated for this deployment.
@@ -267,7 +284,8 @@ jobs:
             - **Contract**: \`${contract}\`
             - **Network**: \`${network}\`
             - **Safe Address**: \`${safeAddress}\`
-            - **Proposal Hash**: \`${proposalHash}\``;
+            - **Proposal Hash**: \`${proposalHash}\`
+            - **🔗 Safe UI**: [Open in Safe →](${safeAppUrl})`;
 
             if (pkpSigned) {
               comment += `
@@ -285,9 +303,10 @@ jobs:
               comment += `
 
             ### 🔐 Next Steps
-            1. Safe owners can review and sign the proposal
-            2. Once threshold is reached, execute the transaction
-            3. Contract will be deployed at deterministic address`;
+            1. **[Open Safe UI](${safeAppUrl})** to review the proposal
+            2. Safe owners can sign the transaction
+            3. Once threshold is reached, execute the transaction
+            4. Contract will be deployed at deterministic address`;
             }
 
             comment += `
