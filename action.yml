@@ -377,6 +377,26 @@ runs:
         path: ${{ github.workspace }}/safe-proposal.json
         retention-days: 30
 
+    - name: Auto-submit to Safe Transaction Service (PKP)
+      if: env.PKP_PUBLIC_KEY != ''
+      shell: bash
+      env:
+        PKP_PUBLIC_KEY: ${{ env.PKP_PUBLIC_KEY }}
+        LIT_ACTION_IPFS_CID: ${{ env.LIT_ACTION_IPFS_CID }}
+        LIT_NETWORK: ${{ env.LIT_NETWORK }}
+        SAFE_ADDRESS: ${{ inputs.safe-address }}
+        CHAIN_ID: ${{ steps.create-proposal.outputs.chain_id }}
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        echo "🤖 Auto-submitting proposal with PKP..."
+
+        cd ${{ github.action_path }}
+        bun run scripts/trigger-pkp-signing.ts ${{ github.workspace }}/safe-proposal.json
+
+        echo "✅ PKP auto-submission completed"
+
     - name: Verify contract on Blockscout
       id: verify-contract
       if: inputs.verify-blockscout == 'true'
