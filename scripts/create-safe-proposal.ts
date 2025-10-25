@@ -186,27 +186,78 @@ async function main() {
       runId: process.env.GITHUB_RUN_ID || 'local',
     });
 
-    // Read deployment configuration
+    // Read deployment configuration (prioritize env vars over file)
     tracker.startPhase(
       deploymentId,
       'validation',
       'Reading deployment configuration'
     );
 
-    const configPath = resolve(projectRoot, '.zerokey', 'deploy.yaml');
+    let config: DeployConfig = {
+      network: '',
+      contract: '',
+    };
 
-    if (!require('fs').existsSync(configPath)) {
-      throw new ConfigurationError('Deployment configuration not found', {
-        configKey: 'deployConfig',
-        expectedFormat: 'YAML file at .zerokey/deploy.yaml',
-        context: { configPath },
-      });
+    // Try to load from environment variables first (from GitHub Actions inputs)
+    const envNetwork = process.env.NETWORK;
+    const envContractName = process.env.CONTRACT_NAME;
+
+    if (envNetwork && envContractName) {
+      config.network = envNetwork;
+      config.contract = envContractName;
+      logger.debug(
+        'Deployment configuration loaded from environment variables',
+        {
+          config,
+        }
+      );
+    } else {
+      // Fallback to .zerokey/deploy.yaml file if env vars not provided
+      const configPath = resolve(projectRoot, '.zerokey', 'deploy.yaml');
+
+      if (require('fs').existsSync(configPath)) {
+        const configContent = readFileSync(configPath, 'utf-8');
+        const fileConfig = yaml.load(configContent) as DeployConfig;
+
+        // Use file values for missing env vars
+        config.network = envNetwork || fileConfig.network;
+        config.contract = envContractName || fileConfig.contract;
+
+        logger.debug('Deployment configuration loaded from file', {
+          config,
+          configPath,
+        });
+      } else if (!envNetwork || !envContractName) {
+        // Neither env vars nor file provided - error
+        throw new ConfigurationError(
+          'Deployment configuration not found. Provide either:\n' +
+            '  1. GitHub Actions inputs (network, contract-name), or\n' +
+            '  2. .zerokey/deploy.yaml file',
+          {
+            configKey: 'deployConfig',
+            expectedFormat:
+              'Environment variables (NETWORK, CONTRACT_NAME) or YAML file at .zerokey/deploy.yaml',
+            context: {
+              configPath,
+              envNetwork,
+              envContractName,
+            },
+          }
+        );
+      }
     }
 
-    const configContent = readFileSync(configPath, 'utf-8');
-    const config = yaml.load(configContent) as DeployConfig;
-
-    logger.debug('Deployment configuration loaded', { config });
+    // Final validation - ensure we have both required fields
+    if (!config.network || !config.contract) {
+      throw new ConfigurationError(
+        'Missing required deployment configuration',
+        {
+          configKey: 'deployConfig',
+          expectedFormat: 'Both network and contract must be specified',
+          context: { config },
+        }
+      );
+    }
 
     // Validate environment variables
     const safeAddress = process.env.SAFE_ADDRESS;

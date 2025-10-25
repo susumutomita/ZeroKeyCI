@@ -217,6 +217,8 @@ runs:
       shell: bash
       env:
         SAFE_ADDRESS: ${{ inputs.safe-address }}
+        NETWORK: ${{ inputs.network }}
+        CONTRACT_NAME: ${{ inputs.contract-name }}
         ZERO_KEY_PROJECT_ROOT: ${{ github.workspace }}
         CALLING_REPO_ROOT: ${{ github.workspace }}
         GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
