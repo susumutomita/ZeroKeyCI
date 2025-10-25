@@ -18,7 +18,7 @@ describe('Landing Page', () => {
     render(<Home />);
     const getStartedButton = screen.getByText(/Get Started in 3 Minutes/i);
     expect(getStartedButton).toBeInTheDocument();
-    expect(getStartedButton).toHaveAttribute('href', '#setup');
+    expect(getStartedButton).toHaveAttribute('href', '/setup');
   });
 
   it('should render the GitHub link', () => {

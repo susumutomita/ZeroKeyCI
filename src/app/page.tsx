@@ -95,18 +95,9 @@ export default function Home() {
                 className="group btn-primary-modern flex items-center gap-2"
               >
                 <Rocket className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                Quick Start Guide
+                {t.hero.getStarted}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
-              <a
-                href="#setup"
-                className="group btn-secondary-modern flex items-center gap-2"
-              >
-                {t.hero.getStarted}
-              </a>
-              <a href="#demo" className="btn-secondary-modern">
-                {t.hero.tryDemo}
-              </a>
             </div>
 
             {/* Key Benefits - Liquid Glass */}
@@ -437,15 +428,13 @@ export default function Home() {
                   ))}
                 </div>
 
-                <a
+                <Link
                   href={t.automationOptions.pkp.ctaLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="btn-primary-modern w-full flex items-center justify-center gap-2"
                 >
                   {t.automationOptions.pkp.cta}
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </Link>
               </div>
             </div>
 
