@@ -5546,3 +5546,240 @@ steps:
 - ✅ Simpler API
 - ✅ All functionality preserved
 
+
+---
+
+# Exec Plan: Unsigned Proposal Submission for Manual Signing Mode
+Created: 2025-10-25 21:30
+Status: 🟡 In Progress
+
+## Objective
+Enable Manual Signing mode to submit unsigned proposals to Safe Transaction Service API so that transactions automatically appear in Safe UI queue, making ZeroKeyCI usable for commercial users without PKP setup.
+
+## User Problem
+**User feedback**: "こうなっている" - Safe UI queue is empty despite successful GitHub Actions run.
+
+**Root cause**: Manual Signing mode creates proposal file locally but does NOT submit to Safe Transaction Service API. Users must manually create the transaction in Safe UI by copying all details, which is:
+- Tedious and error-prone
+- Poor UX for commercial product
+- Makes "Deploy in 3 Minutes" promise false
+
+**Current behavior**:
+- Manual mode: Creates `safe-proposal.json` file only → Empty Safe UI queue ❌
+- PKP mode: Creates file + submits to Safe API → Appears in Safe UI queue ✅
+
+## Guardrails (Non-negotiable constraints)
+- ✅ Must NOT require PKP environment variables for basic workflow
+- ✅ Must maintain "no private keys in CI" security model
+- ✅ All tests must pass with 99％+ coverage
+- ✅ Must work with all supported networks (sepolia, base-sepolia, polygon, etc.)
+- ✅ Must NOT break existing PKP workflow
+- ✅ Error handling must be graceful (Safe API failures don't block deployment file creation)
+
+## TODO
+- [x] Phase 1: Investigation and Planning
+  - [x] Analyze trigger-pkp-signing.ts for Safe API submission pattern
+  - [x] Identify what senderSignature value to use for unsigned proposals
+  - [x] Create exec plan in plans.md
+- [ ] Phase 2: Implementation
+  - [ ] Add Safe Transaction Service submission to create-safe-proposal.ts
+  - [ ] Handle unsigned proposal (empty signature or safe address as sender)
+  - [ ] Add graceful error handling if Safe API submission fails
+  - [ ] Add logging for Safe API submission
+- [ ] Phase 3: Testing
+  - [ ] Update create-safe-proposal.test.ts to mock Safe API submission
+  - [ ] Test with actual Safe address on Base Sepolia
+  - [ ] Verify transaction appears in Safe UI queue
+- [ ] Phase 4: Documentation
+  - [ ] Update README workflow diagram to show automatic queue display
+  - [ ] Update PR comment template to reflect new behavior
+  - [ ] Update i18n translations (automationOptions.manual.pros)
+
+## Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] Coverage maintained at 99％+ (`bun run test:coverage`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`)
+- [ ] Build succeeds (`bun run build`)
+- [ ] Manual test: Create proposal and verify it appears in Safe UI queue
+
+## Technical Design
+
+### Safe API Submission Pattern (from trigger-pkp-signing.ts:196-243)
+```typescript
+const safeService = new SafeApiKit({
+  chainId: BigInt(chainId),
+});
+
+const result = await safeService.proposeTransaction({
+  safeAddress: proposal.safe,
+  safeTransactionData: {
+    to: proposal.to,
+    value: proposal.value,
+    data: proposal.data,
+    operation: proposal.operation,
+    safeTxGas: proposal.safeTxGas,
+    baseGas: proposal.baseGas,
+    gasPrice: proposal.gasPrice,
+    gasToken: proposal.gasToken,
+    refundReceiver: proposal.refundReceiver,
+    nonce: proposal.nonce,
+  },
+  safeTxHash: proposal.validationHash,
+  senderAddress: envConfig.pkpPublicKey, // For unsigned: use Safe address
+  senderSignature: signatureData, // For unsigned: use '0x'
+});
+```
+
+### Changes to create-safe-proposal.ts
+**Location**: After line 594 (after proposal file is saved)
+
+**New function to add**:
+```typescript
+async function submitUnsignedProposalToSafe(
+  proposal: any,
+  chainId: number,
+  safeAddress: string
+): Promise<string | null> {
+  try {
+    logger.info('📤 Submitting unsigned proposal to Safe Transaction Service...');
+    
+    const safeService = new SafeApiKit({
+      chainId: BigInt(chainId),
+    });
+    
+    const result = await safeService.proposeTransaction({
+      safeAddress: proposal.safe,
+      safeTransactionData: {
+        to: proposal.to,
+        value: proposal.value,
+        data: proposal.data,
+        operation: proposal.operation || 0,
+        safeTxGas: proposal.safeTxGas || '0',
+        baseGas: proposal.baseGas || '0',
+        gasPrice: proposal.gasPrice || '0',
+        gasToken: proposal.gasToken || '0x0000000000000000000000000000000000000000',
+        refundReceiver: proposal.refundReceiver || '0x0000000000000000000000000000000000000000',
+        nonce: proposal.nonce || 0,
+      },
+      safeTxHash: proposal.validationHash,
+      senderAddress: safeAddress, // Use Safe address itself for unsigned
+      senderSignature: '0x', // Empty signature for unsigned
+    });
+    
+    const safeTxHash = result.safeTxHash || proposal.validationHash;
+    logger.info(`✅ Unsigned proposal submitted to Safe UI`, { safeTxHash });
+    
+    return safeTxHash;
+  } catch (error) {
+    // Non-blocking: Safe API submission failure doesn't prevent deployment
+    logger.warn('⚠️  Failed to submit to Safe Transaction Service (non-blocking)', {
+      error: (error as Error).message,
+    });
+    logger.info('💡 Manual creation in Safe UI is still possible using proposal file');
+    return null;
+  }
+}
+```
+
+### Integration Point
+After line 594 in create-safe-proposal.ts:
+```typescript
+// Write proposal to file
+const outputPath = resolve(process.cwd(), 'safe-proposal.json');
+writeFileSync(outputPath, JSON.stringify(enrichedProposal, null, 2));
+
+// NEW: Submit unsigned proposal to Safe Transaction Service
+const safeTxHashFromApi = await submitUnsignedProposalToSafe(
+  parsed,
+  chainId,
+  safeAddress
+);
+
+if (safeTxHashFromApi) {
+  logger.info('✨ Transaction available in Safe UI queue for signing');
+} else {
+  logger.info('📝 Use proposal file to manually create transaction in Safe UI');
+}
+```
+
+## Progress Log
+
+### Iteration 1 (21:30)
+**What was done:**
+- Analyzed root cause: Manual mode doesn't submit to Safe API
+- Reviewed trigger-pkp-signing.ts to understand Safe API submission pattern
+- Created comprehensive exec plan with technical design
+- Identified that unsigned proposals use Safe address as sender with '0x' signature
+
+**Test status:**
+- Not yet implemented
+
+**Decisions made:**
+- Decision: Make Safe API submission non-blocking (failures don't stop workflow)
+- Rationale: Proposal file is still created, so manual fallback is always available
+- Decision: Use Safe address itself as senderAddress for unsigned proposals
+- Rationale: PKP mode uses PKP address, so we mirror that pattern with Safe address
+- Decision: Empty signature '0x' for unsigned proposals
+- Rationale: Standard pattern for unsigned Safe proposals
+
+**Open questions:**
+- Q: Will Safe Transaction Service accept unsigned proposals with '0x' signature?
+- A: Need to test with actual Safe address on Base Sepolia
+
+**Next steps:**
+- Implement submitUnsignedProposalToSafe function
+- Add import for SafeApiKit
+- Add tests for Safe API submission
+
+### Iteration 2 (2025-10-25 23:45)
+**What was done:**
+- ✅ Added import: `import SafeApiKit from '@safe-global/api-kit';` (line 25)
+- ✅ Implemented `submitUnsignedProposalToSafe()` function (lines 75-141)
+  - Creates SafeApiKit instance with chainId
+  - Calls proposeTransaction() with proposal data
+  - Uses Safe address as senderAddress with '0x' signature for unsigned proposals
+  - Non-blocking error handling (failures logged but don't stop workflow)
+  - Returns safeTxHash on success, null on failure
+- ✅ Integrated function call after proposal file write (lines 653-671)
+  - Submits unsigned proposal to Safe Transaction Service
+  - Logs success/failure appropriately
+  - Provides clear user feedback
+
+**Code changes:**
+- `scripts/create-safe-proposal.ts`:
+  - Line 25: Added SafeApiKit import
+  - Lines 75-141: New submitUnsignedProposalToSafe() function
+  - Lines 653-671: Integration point with logging
+
+**Validation results:**
+- ✅ TypeScript: No errors (bun run typecheck)
+- ✅ ESLint: No errors (bun run lint)
+- ✅ Tests: All 683 tests passing | 6 skipped (bun run test)
+- ✅ Build: Successful (bun run build)
+  - 10 pages built
+  - / (landing page): 17.6 kB
+  - /setup: 5.25 kB
+
+**Technical decisions:**
+- Decision: Use Safe address as senderAddress for unsigned proposals
+- Rationale: Mirrors PKP pattern (PKP uses PKP address, Manual uses Safe address)
+- Decision: Empty signature '0x' for unsigned proposals
+- Rationale: Standard Safe pattern for unsigned/pending proposals
+- Decision: Non-blocking error handling for Safe API failures
+- Rationale: Proposal file is always created, so manual fallback always available
+- Decision: Detailed logging for both success and failure paths
+- Rationale: Users need clear feedback about whether transaction is in queue
+
+**TODO updates:**
+- [x] Phase 2: Implementation - COMPLETED
+  - [x] Add Safe Transaction Service submission to create-safe-proposal.ts
+  - [x] Handle unsigned proposal (empty signature or safe address as sender)
+  - [x] Add graceful error handling if Safe API submission fails
+  - [x] Add logging for Safe API submission
+
+**Next steps:**
+- Add tests for unsigned proposal submission (Phase 3)
+- Manual test with actual Safe address on Base Sepolia
+- Update documentation to reflect new behavior (Phase 4)
+

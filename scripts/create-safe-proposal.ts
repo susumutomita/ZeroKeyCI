@@ -22,6 +22,7 @@ import { GasPriceFetcher } from '../src/lib/gas-price-fetcher';
 import { GasEstimator } from '../src/lib/gas-estimator';
 import { OptimizationReporter } from '../src/lib/optimization-reporter';
 import type { SupportedNetwork } from '../src/lib/network-config';
+import SafeApiKit from '@safe-global/api-kit';
 
 interface ProxyConfig {
   type: 'uups' | 'transparent';
@@ -68,6 +69,78 @@ async function notifyWithTimeout(
       deploymentId: payload.deploymentId,
       status: payload.status,
     });
+  }
+}
+
+/**
+ * Submit unsigned proposal to Safe Transaction Service
+ * @param proposal - Safe transaction proposal
+ * @param chainId - Network chain ID
+ * @param safeAddress - Safe wallet address
+ * @returns Safe transaction hash if successful, null otherwise
+ */
+async function submitUnsignedProposalToSafe(
+  proposal: any,
+  chainId: number,
+  safeAddress: string
+): Promise<string | null> {
+  try {
+    logger.info(
+      '📤 Submitting unsigned proposal to Safe Transaction Service...',
+      {
+        chainId,
+        safeAddress,
+        to: proposal.to,
+      }
+    );
+
+    const safeService = new SafeApiKit({
+      chainId: BigInt(chainId),
+    });
+
+    const result = await safeService.proposeTransaction({
+      safeAddress: proposal.safe,
+      safeTransactionData: {
+        to: proposal.to,
+        value: proposal.value,
+        data: proposal.data,
+        operation: proposal.operation || 0,
+        safeTxGas: proposal.safeTxGas || '0',
+        baseGas: proposal.baseGas || '0',
+        gasPrice: proposal.gasPrice || '0',
+        gasToken:
+          proposal.gasToken || '0x0000000000000000000000000000000000000000',
+        refundReceiver:
+          proposal.refundReceiver ||
+          '0x0000000000000000000000000000000000000000',
+        nonce: proposal.nonce || 0,
+      },
+      safeTxHash: proposal.validationHash,
+      senderAddress: safeAddress, // Use Safe address itself for unsigned proposals
+      senderSignature: '0x', // Empty signature for unsigned proposals
+    });
+
+    const safeTxHash = result.safeTxHash || proposal.validationHash;
+    logger.info('✅ Unsigned proposal submitted to Safe UI queue', {
+      safeTxHash,
+      chainId,
+    });
+
+    return safeTxHash;
+  } catch (error) {
+    // Non-blocking: Safe API submission failure doesn't prevent deployment
+    logger.warn(
+      '⚠️  Failed to submit to Safe Transaction Service (non-blocking)',
+      {
+        error: (error as Error).message,
+        chainId,
+        safeAddress,
+      }
+    );
+    logger.info(
+      '💡 Manual creation in Safe UI is still possible using proposal file'
+    );
+    return null;
   }
 }
 
@@ -580,6 +653,26 @@ async function main() {
     // Write proposal to file
     const outputPath = resolve(process.cwd(), 'safe-proposal.json');
     writeFileSync(outputPath, JSON.stringify(enrichedProposal, null, 2));
+
+    // Submit unsigned proposal to Safe Transaction Service
+    const safeTxHashFromApi = await submitUnsignedProposalToSafe(
+      parsed,
+      chainId,
+      safeAddress
+    );
+
+    if (safeTxHashFromApi) {
+      logger.info('✨ Transaction available in Safe UI queue for signing', {
+        safeTxHash: safeTxHashFromApi,
+      });
+    } else {
+      logger.info(
+        '📝 Use proposal file to manually create transaction in Safe UI',
+        {
+          proposalFile: outputPath,
+        }
+      );
+    }
 
     tracker.completePhase(
       deploymentId,
