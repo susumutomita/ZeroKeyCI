@@ -5430,11 +5430,62 @@ Tests should be run in a SEPARATE CI/CD job, not during deployment.
 - **UPDATED**: N/A - tests disabled by default
 
 **Q**: Should we remove `run-tests` input entirely?
-- **A**: Keep it for now for backward compatibility, but discourage use and default to false
+- **A**: ~~Keep it for now for backward compatibility, but discourage use and default to false~~
+- **UPDATED**: YES - Completely removed in Iteration 4
+
+### Iteration 4 (2025-10-25 15:20) - Complete Removal
+**User feedback**: "このステップ不要だと思うんだけど"
+
+Translation: "I don't think this step is necessary"
+
+**Analysis:**
+User is absolutely right. The entire "Run tests" step and `run-tests` input should be removed:
+1. Tests are NOT a deployment concern
+2. Having this option creates confusion
+3. Users should handle tests in separate CI jobs
+
+**What was done:**
+- **Removed** `run-tests` input from action.yml (lines 37-40)
+- **Removed** entire "Run tests" step from action.yml (lines 119-139)
+- **Removed** `run-tests` input from reusable-deploy.yml (lines 34-38)
+- **Removed** `run-tests` parameter passing in reusable-deploy.yml (line 125)
+
+**Files modified:**
+- action.yml: Removed input definition and entire test step (27 lines removed)
+- .github/workflows/reusable-deploy.yml: Removed input and parameter (2 locations)
+
+**Recommended workflow pattern:**
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm test
+
+  deploy:
+    needs: test  # Only deploy after tests pass
+    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+    with:
+      safe-address: ${{ secrets.SAFE_ADDRESS }}
+      network: base-sepolia
+      contract-name: MyContract
+    secrets:
+      rpc-url: ${{ secrets.RPC_URL }}
+```
+
+**Decisions made:**
+- Decision: Complete removal of test functionality
+- Reasoning: Deployment tool should focus on deployment only
+- Tests are user's responsibility in separate jobs
+
+**Blockers/Issues:**
+- None
 
 ## References
 - Failed workflow: https://github.com/susumutomita/ZeroKeyCI-sample/actions/runs/18799039762/job/53643811960
 - User report: "/Users/susumu/ethglobal/ZeroKeyCI-sample に呼び出しているコードがある"
+- User feedback: "このステップ不要だと思うんだけど" (This step is unnecessary)
 - Related PR: #97 (Fix: Add dependency installation before contract compilation)
 - action.yml: lines 119-126 (current broken test step)
 

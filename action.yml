@@ -34,11 +34,6 @@ inputs:
     required: false
     default: '.zerokey/policy.rego'
 
-  run-tests:
-    description: 'Whether to run tests before creating proposal (not recommended - run tests in separate CI job)'
-    required: false
-    default: 'false'
-
   verify-blockscout:
     description: 'Whether to verify contract on Blockscout after deployment'
     required: false
@@ -115,28 +110,6 @@ runs:
         echo "📦 Installing ZeroKeyCI..."
         cd ${{ github.action_path }}
         bun install --frozen-lockfile
-
-    - name: Run tests
-      if: inputs.run-tests == 'true'
-      shell: bash
-      run: |
-        echo "🧪 Running tests..."
-
-        # Run calling repository tests, not ZeroKeyCI internal tests
-        if [ -f "package.json" ] && grep -q '"test"' package.json; then
-          echo "Found test script in package.json"
-
-          if [ -f "node_modules/.bin/hardhat" ]; then
-            echo "Running Hardhat tests..."
-            ./node_modules/.bin/hardhat test
-          else
-            echo "Running npm test..."
-            npm test
-          fi
-        else
-          echo "::warning::No test script found in calling repository"
-          echo "Skipping tests..."
-        fi
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
