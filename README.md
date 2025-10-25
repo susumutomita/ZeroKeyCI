@@ -76,21 +76,39 @@ Add to your repository's workflow:
 
 ```yaml
 # .github/workflows/deploy.yml
-name: Deploy with ZeroKeyCI
+name: Deploy Smart Contracts with ZeroKeyCI
 
 on:
   pull_request:
     types: [closed]
+    branches: [main]
+  workflow_dispatch: # Manual execution allowed
+
+permissions:
+  actions: write
+  pull-requests: write
+  contents: read
 
 jobs:
   deploy:
-    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
-    with:
-      safe-address: ${{ vars.SAFE_ADDRESS }}
-      network: base-sepolia
-      contract-name: MyContract
-    secrets:
-      rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Security: Using @main for latest version
+      # Recommended to pin to specific SHA in production: susumutomita/ZeroKeyCI@<commit-sha>
+      - uses: susumutomita/ZeroKeyCI@main
+        with:
+          safe-address: ${{ vars.SAFE_ADDRESS }}
+          network: base-sepolia
+          contract-name: MyContract
+          verify-blockscout: true
+          rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
 ```
 
 **That's it. No private keys in CI. Ever.**
@@ -304,25 +322,32 @@ ZeroKeyCI is designed as a **reusable GitHub Action** that you can integrate int
 
 ```yaml
 # your-project/.github/workflows/deploy.yml
-name: Deploy Smart Contracts
+name: Deploy Smart Contracts with ZeroKeyCI
 
 on:
   pull_request:
     types: [closed]
     branches: [main]
+  workflow_dispatch: # Manual execution allowed
 
 permissions:
-  contents: read
-  pull-requests: write
   actions: write
+  pull-requests: write
+  contents: read
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
+      # Security: Using @main for latest version
+      # Recommended to pin to specific SHA in production: susumutomita/ZeroKeyCI@<commit-sha>
       - uses: susumutomita/ZeroKeyCI@main
         with:
           safe-address: ${{ vars.SAFE_ADDRESS }}
