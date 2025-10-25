@@ -5229,3 +5229,212 @@ This causes ZeroKeyCI-sample to fail with "Error: Unsupported network: base-sepo
 - network-config.ts: src/lib/network-config.ts (lines 18-144)
 - User error: "Error: Unsupported network: base-sepolia" from ZeroKeyCI-sample
 
+---
+
+# Exec Plan: Fix action.yml test step to run calling repository tests (Issue: ZeroKeyCI-sample CI failure)
+Created: 2025-10-25
+Status: 🟡 In Progress
+
+## Objective
+Fix the GitHub Actions failure in ZeroKeyCI-sample caused by the "Run tests" step attempting to run ZeroKeyCI's internal tests instead of the calling repository's tests.
+
+## Problem Statement
+**User report**: "https://github.com/susumutomita/ZeroKeyCI-sample/actions/runs/18799039762/job/53643811960 まだsampleが失敗するから直すこと"
+
+**Root cause analysis:**
+```
+Error: Cannot find module 'contracts/HelloZeroKeyCI.sol' (while resolving '/contracts/HelloZeroKeyCI.sol')
+```
+
+The error occurs in action.yml lines 119-126:
+```yaml
+- name: Run tests
+  if: inputs.run-tests == 'true'
+  shell: bash
+  run: |
+    echo "🧪 Running tests..."
+    cd ${{ github.action_path }}  # ← This goes to .zerokeyci directory
+    bun run test                   # ← Runs ZeroKeyCI's tests
+    bun run test:coverage
+```
+
+**Why it fails:**
+1. `cd ${{ github.action_path }}` changes to `.zerokeyci` directory (ZeroKeyCI repo)
+2. `bun run test` executes ZeroKeyCI's internal test suite
+3. ZeroKeyCI tests try to compile test contracts including `HelloZeroKeyCI.sol`
+4. But `HelloZeroKeyCI.sol` exists in the calling repository (ZeroKeyCI-sample), not in ZeroKeyCI repo
+5. Test compilation fails with "Cannot find module" error
+
+## Guardrails
+- `run-tests: true` should run the **calling repository's tests**, not ZeroKeyCI's tests
+- ZeroKeyCI's internal tests should only run during ZeroKeyCI development (not when called as action)
+- Maintain backward compatibility with existing users
+- If calling repository has no tests, gracefully warn and continue
+- Support multiple test frameworks (Hardhat, npm test, etc.)
+
+## TODO
+- [x] Analyze failure logs from ZeroKeyCI-sample
+- [x] Identify root cause in action.yml
+- [ ] Update "Run tests" step to execute calling repository tests
+- [ ] Add fallback for repositories without tests
+- [ ] Test fix with ZeroKeyCI-sample
+- [ ] Run validation checks
+- [ ] Create PR with fix
+- [ ] Verify CI passes on both ZeroKeyCI and ZeroKeyCI-sample
+
+## Solution Design
+
+### Current behavior (WRONG):
+```yaml
+- name: Run tests
+  if: inputs.run-tests == 'true'
+  shell: bash
+  run: |
+    echo "🧪 Running tests..."
+    cd ${{ github.action_path }}  # Goes to ZeroKeyCI directory
+    bun run test                   # Runs ZeroKeyCI tests (WRONG)
+```
+
+### Fixed behavior (CORRECT):
+```yaml
+- name: Run tests
+  if: inputs.run-tests == 'true'
+  shell: bash
+  run: |
+    echo "🧪 Running tests..."
+    # Run calling repository tests, not ZeroKeyCI tests
+    if [ -f "package.json" ] && grep -q '"test"' package.json; then
+      if [ -f "node_modules/.bin/hardhat" ]; then
+        echo "Running Hardhat tests..."
+        ./node_modules/.bin/hardhat test
+      elif grep -q '"test"' package.json; then
+        echo "Running npm test..."
+        npm test
+      fi
+    else
+      echo "::warning::No test script found in calling repository"
+      echo "Skipping tests..."
+    fi
+```
+
+## Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`)
+- [ ] Textlint passes (`bun run lint_text`)
+- [ ] ZeroKeyCI-sample CI passes with fix
+- [ ] Verify: `run-tests: true` runs calling repo tests
+- [ ] Verify: `run-tests: false` skips tests entirely
+
+## Progress Log
+
+### Iteration 1 (2025-10-25 15:00)
+**What was done:**
+- Analyzed GitHub Actions failure logs
+- Identified root cause: action.yml runs ZeroKeyCI tests instead of calling repo tests
+- Created exec plan with solution design
+
+**Files to modify:**
+- action.yml: lines 119-126 (Run tests step)
+
+**Test status:**
+- ⏳ Pending implementation
+
+**Decisions made:**
+- Decision: Run calling repository's tests, not ZeroKeyCI's internal tests
+- Reasoning: `run-tests` input is meant for user's smart contract tests, not CI tool tests
+- Design choice: Support both Hardhat tests and npm test script
+- Fallback: Warn and continue if no tests found (don't fail)
+
+**Blockers/Issues:**
+- None
+
+### Iteration 2 (2025-10-25 15:10)
+**What was done:**
+- Modified action.yml lines 119-139:
+  - Removed: `cd ${{ github.action_path }}` (was going to ZeroKeyCI directory)
+  - Removed: `bun run test` and `bun run test:coverage` (ZeroKeyCI internal tests)
+  - Added: Detection of package.json test script
+  - Added: Hardhat test execution (`./node_modules/.bin/hardhat test`)
+  - Added: Fallback to npm test
+  - Added: Warning message if no tests found (non-blocking)
+
+**Files modified:**
+- action.yml: lines 119-139 (complete rewrite of Run tests step)
+
+**Test status:**
+- ✅ TypeScript: No errors
+- ✅ ESLint: No errors
+- ✅ Textlint: No errors
+- ✅ Tests: 684 passed | 6 skipped (690)
+- ⏳ ZeroKeyCI-sample: Pending (will test after push)
+
+**Decisions made:**
+- Decision: Support both Hardhat and npm test
+- Reasoning: Hardhat is most common for smart contracts, but npm test provides fallback
+- Decision: Make missing tests a warning, not error
+- Reasoning: Some repos may be in early development without tests
+
+**Blockers/Issues:**
+- None
+
+### Iteration 3 (2025-10-25 15:15) - User Feedback
+**User feedback**: "よくわからないのはテストなんか実行しなくていいと思うんだけど、だってデプロイだけするんだよねなんでそんな余計なステップをいれているのか"
+
+Translation: "I don't understand why we need to run tests. We're just deploying, right? Why add this extra step?"
+
+**Analysis:**
+User is absolutely correct. ZeroKeyCI's purpose is:
+1. Compile contracts
+2. Create Safe proposal
+3. Deploy
+
+Tests should be run in a SEPARATE CI/CD job, not during deployment.
+
+**What was done:**
+- Changed `run-tests` default from `'true'` to `'false'`
+- Updated description to discourage use: "not recommended - run tests in separate CI job"
+- Tests should be run before deployment in separate job:
+  ```yaml
+  jobs:
+    test:
+      steps:
+        - run: npm test  # ← Run tests here
+
+    deploy:
+      needs: test  # ← Only deploy if tests pass
+      uses: ZeroKeyCI/.github/workflows/reusable-deploy.yml
+      with:
+        run-tests: false  # ← Tests already passed
+  ```
+
+**Files modified:**
+- action.yml: line 40 (changed default from 'true' to 'false')
+- action.yml: line 38 (updated description)
+
+**Decisions made:**
+- Decision: Disable tests by default
+- Reasoning: Tests should be separate CI concern, not deployment concern
+- Best practice: Use GitHub Actions `needs:` to enforce test → deploy ordering
+
+**Blockers/Issues:**
+- None
+
+## Open Questions
+**Q**: Should we also support other test frameworks (Truffle, Foundry)?
+- **A**: ~~Start with Hardhat (most common). Add others if users request~~
+- **UPDATED**: Not needed - tests should run in separate CI job, not in ZeroKeyCI
+
+**Q**: Should missing tests be a warning or error?
+- **A**: ~~Warning only - some repos may not have tests yet~~
+- **UPDATED**: N/A - tests disabled by default
+
+**Q**: Should we remove `run-tests` input entirely?
+- **A**: Keep it for now for backward compatibility, but discourage use and default to false
+
+## References
+- Failed workflow: https://github.com/susumutomita/ZeroKeyCI-sample/actions/runs/18799039762/job/53643811960
+- User report: "/Users/susumu/ethglobal/ZeroKeyCI-sample に呼び出しているコードがある"
+- Related PR: #97 (Fix: Add dependency installation before contract compilation)
+- action.yml: lines 119-126 (current broken test step)
+
