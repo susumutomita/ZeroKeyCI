@@ -31,12 +31,6 @@ on:
         type: string
         default: '.zerokey/policy.rego'
 
-      run-tests:
-        description: 'Run tests before deployment'
-        required: false
-        type: boolean
-        default: true
-
       verify-blockscout:
         description: 'Verify on Blockscout'
         required: false
@@ -122,7 +116,6 @@ jobs:
           rpc-url: ${{ secrets.rpc-url }}
           deploy-config-path: ${{ inputs.deploy-config-path }}
           policy-path: ${{ inputs.policy-path }}
-          run-tests: ${{ inputs.run-tests }}
           verify-blockscout: ${{ inputs.verify-blockscout }}
           blockscout-api-url: ${{ secrets.blockscout-api-url || 'https://eth-sepolia.blockscout.com/api' }}
           enable-envio: ${{ inputs.enable-envio }}

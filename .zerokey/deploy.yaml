@@ -1,4 +1,4 @@
-network: base-sepolia
+network: sepolia
 contract: TestContract
 constructorArgs: []
 value: "0"
