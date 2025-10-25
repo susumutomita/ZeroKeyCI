@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import SafeProposalSandbox from '@/components/SafeProposalSandbox';
+import { CodeSnippet } from '@/components/CodeSnippet';
 import Link from 'next/link';
 import { useTranslations, type Language } from '@/lib/i18n';
 import {
@@ -90,16 +91,14 @@ export default function Home() {
               className="flex gap-4 justify-center flex-wrap mb-20 animate-fade-in-up"
               style={{ animationDelay: '300ms' }}
             >
-              <a
-                href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/QUICKSTART.md"
+              <Link
+                href="/setup"
                 className="group btn-primary-modern flex items-center gap-2"
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 <Rocket className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Quick Start Guide
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </a>
+              </Link>
               <a
                 href="#setup"
                 className="group btn-secondary-modern flex items-center gap-2"
@@ -792,62 +791,158 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Setup Wizard Section */}
+      {/* Setup Section - Deploy in 3 Steps */}
       <section
         id="setup"
         className="relative py-32 bg-gradient-to-b from-transparent via-gray-50/50 to-transparent dark:via-gray-800/30"
       >
         <div className="container mx-auto px-6 lg:px-12">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 glass-strong border border-orange-300/30 dark:border-orange-500/30 rounded-full px-6 py-3 mb-8 animate-fade-in shadow-glass">
                 <Rocket className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                 <span className="text-orange-600 dark:text-orange-300 font-medium">
-                  {t.setup.badge}
+                  Deploy in 3 Steps
                 </span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-semibold mb-6 text-gray-900 dark:text-white whitespace-pre-line tracking-tight animate-fade-in">
-                {t.setup.title}
+              <h2 className="text-4xl md:text-5xl font-semibold mb-6 text-gray-900 dark:text-white tracking-tight animate-fade-in">
+                Start Deploying in 3 Minutes
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-fade-in">
-                {t.setup.subtitle}
+                No OAuth, no complex setup. Just copy, paste, and deploy.
               </p>
             </div>
 
-            {/* Get Started Button - Links to Real GitHub Integration */}
-            <div
-              className="flex justify-center animate-fade-in-up"
-              style={{ animationDelay: '200ms' }}
-            >
-              <Link href="/setup" className="group relative btn-primary-modern">
-                <Rocket className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                Get Started Now
-                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-glow animate-pulse">
-                  FREE
-                </span>
-              </Link>
+            {/* Step 1: Create Workflow */}
+            <div className="glass-card p-8 border border-white/10 dark:border-white/5 mb-6 animate-fade-in">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                  1
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Create GitHub Workflow
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Add this file to{' '}
+                    <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+                      .github/workflows/deploy.yml
+                    </code>{' '}
+                    in your repository:
+                  </p>
+                  <CodeSnippet
+                    language="yaml"
+                    title=".github/workflows/deploy.yml"
+                    code={`name: Deploy with ZeroKeyCI
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: susumutomita/ZeroKeyCI@main
+        with:
+          safe-address: \${{ vars.SAFE_ADDRESS }}
+          network: base-sepolia
+          contract-name: MyContract
+          verify-blockscout: true
+          rpc-url: \${{ secrets.RPC_URL }}`}
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Quick stats */}
-            <div className="mt-16 grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-              {[
-                { num: '3 min', label: 'Setup Time' },
-                { num: '0 keys', label: 'Private Keys Needed' },
-                { num: '1 click', label: 'GitHub Integration' },
-              ].map((stat, idx) => (
-                <div
-                  key={stat.label}
-                  className="glass-card p-6 border border-white/10 dark:border-white/5 text-center animate-scale-in"
-                  style={{ animationDelay: `${300 + idx * 100}ms` }}
-                >
-                  <div className="text-4xl font-semibold text-blue-600 dark:text-blue-400 mb-2">
-                    {stat.num}
-                  </div>
-                  <div className="text-gray-600 dark:text-gray-300">
-                    {stat.label}
+            {/* Step 2: Configure Secrets */}
+            <div className="glass-card p-8 border border-white/10 dark:border-white/5 mb-6 animate-fade-in">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                  2
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Configure GitHub Secrets
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Run these commands in your repository to set up required
+                    secrets:
+                  </p>
+                  <CodeSnippet
+                    language="bash"
+                    title="Terminal"
+                    code={`gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
+gh secret set RPC_URL --body "https://base-sepolia.g.alchemy.com/v2/YOUR_KEY"`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Merge and Deploy */}
+            <div className="glass-card p-8 border border-white/10 dark:border-white/5 animate-fade-in">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                  3
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Merge PR & Deploy
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    When you merge a PR to main, ZeroKeyCI automatically creates
+                    a Safe proposal. No private keys in CI!
+                  </p>
+                  <div className="p-4 bg-green-50/50 dark:bg-green-900/10 border border-green-300/30 dark:border-green-500/30 rounded-lg">
+                    <p className="text-green-700 dark:text-green-300 font-medium">
+                      ✨ That&apos;s it! No private keys needed in CI/CD. Your
+                      Safe owners sign proposals in the Safe UI.
+                    </p>
                   </div>
                 </div>
-              ))}
+              </div>
+            </div>
+
+            {/* Need More Help? */}
+            <div className="mt-12 text-center p-6 glass-card border border-blue-300/30 dark:border-blue-500/30 rounded-xl">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                Need More Help?
+              </h3>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <a
+                  href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/INTEGRATION_GUIDE.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  📖 Integration Guide
+                </a>
+                <a
+                  href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/SAFE_SETUP.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  🛡️ Safe Setup Guide
+                </a>
+                <a
+                  href="https://github.com/susumutomita/ZeroKeyCI/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  💬 Ask Questions
+                </a>
+              </div>
             </div>
           </div>
         </div>
