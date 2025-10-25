@@ -4714,3 +4714,421 @@ Update all default network configurations from Ethereum Sepolia to Base Sepolia 
 - New default: Base Sepolia (Base L2 testnet)
 - Files to modify: .env.example, .zerokey/deploy.yaml, README.md, docs/*.md
 
+---
+
+# Exec Plan: Improve Onboarding UX - Demo Mode vs Production Mode
+Created: 2025-10-24 (conversation timestamp)
+Status: 🔍 Investigation
+
+## Objective
+Address critical user feedback about onboarding friction and explore solutions that maintain security while improving "try before you buy" experience.
+
+## User Feedback (Critical)
+
+**Original message (Japanese):**
+> "つまりSafe アドレスとしてこちらが用意した0xfbD23fcc0D45a3BD6CdBff38b8C03C2A8E9ec663を使ってもいいし自分で持ち込むこともOKという形にしないと全く意味がないと思うけど、ユースケースがおかしいと思います"
+
+**Translation:**
+> "In other words, I think it's meaningless unless we make it so that users can either use the Safe address we prepared (0xfbD23fcc0D45a3BD6CdBff38b8C03C2A8E9ec663) or bring their own - I think the use case is wrong."
+
+**User's core concern:**
+- Current onboarding requires too much setup before users can try ZeroKeyCI
+- Users should have option to use a "provided/demo" Safe for testing
+- Users should also be able to bring their own Safe for production
+- Without both options, the product is not useful
+
+## Problem Analysis
+
+### Current Onboarding Friction (High Barrier to Entry)
+
+**Step 1: Create Safe Wallet (~5 minutes)**
+- Visit app.safe.global
+- Connect MetaMask
+- Select network
+- Configure threshold
+- Confirm transaction (costs gas even on testnet)
+- Copy Safe address
+
+**Step 2: Get Testnet ETH (~2 minutes)**
+- Visit faucet
+- Request ETH
+- Wait for confirmation
+
+**Step 3: Get RPC URL (~3 minutes)**
+- Sign up for Alchemy/Infura
+- Create project
+- Copy API key
+
+**Step 4: Configure GitHub (~2 minutes)**
+- Set SAFE_ADDRESS variable
+- Set RPC_URL secret
+
+**Total time before first deploy: ~12 minutes**
+
+This is HIGH FRICTION for users who just want to "try it out."
+
+### Core Security Constraint (Non-Negotiable)
+
+ZeroKeyCI's primary value proposition:
+```
+✅ NO PRIVATE KEYS IN CI/CD
+```
+
+If we provide a shared Safe that everyone uses:
+- ❌ ZeroKeyCI team controls the signing keys
+- ❌ ZeroKeyCI team must sign every demo deployment (operational burden)
+- ❌ Trust model becomes centralized (defeats core value)
+- ❌ Shared Safe could run out of funds
+- ❌ Users don't learn the real security model
+
+## Proposed Solutions
+
+### Option 1: "Try It in Browser" Sandbox (NO DEPLOYMENT)
+
+**Concept:**
+- Interactive browser-based sandbox
+- Shows what Safe proposal WOULD look like
+- NO actual deployment to blockchain
+- NO Safe address required
+
+**Implementation:**
+```typescript
+// Already exists: src/components/SafeProposalSandbox.tsx
+// Enhancement needed: Make this the PRIMARY onboarding experience
+
+1. Landing page → "Try It Live" button
+2. User pastes contract code
+3. Click "Generate Proposal"
+4. Show exact Safe transaction JSON that would be created
+5. Show gas estimates, deployment address
+6. "Ready to deploy for real? Create your Safe →"
+```
+
+**Pros:**
+- ✅ ZERO setup required
+- ✅ Instant gratification
+- ✅ No operational burden
+- ✅ Users understand the flow before committing
+- ✅ No security compromise
+
+**Cons:**
+- ❌ Not a "real" deployment
+- ❌ Users don't experience full CI/CD flow
+
+**Effort:** Low (component already exists, needs UX polish)
+
+### Option 2: "Demo Mode" with ZeroKeyCI-Owned Safe (COMPROMISED SECURITY)
+
+**Concept:**
+- ZeroKeyCI provides a testnet Safe address
+- Users can deploy using this shared Safe
+- ZeroKeyCI backend auto-signs proposals
+- Rate limited (e.g., 1 deployment per user per day)
+
+**Implementation:**
+```yaml
+# .github/workflows/deploy.yml
+jobs:
+  deploy:
+    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
+    with:
+      demo-mode: true  # Use ZeroKeyCI's demo Safe
+      network: base-sepolia
+      contract-name: MyContract
+```
+
+**Pros:**
+- ✅ Real deployment experience
+- ✅ Full CI/CD flow
+- ✅ Lower barrier to entry
+
+**Cons:**
+- ❌ **CRITICAL: Defeats "no keys in CI" value prop**
+- ❌ Operational burden (ZeroKeyCI must run signing service)
+- ❌ Security risk (users think this is production-ready)
+- ❌ Rate limiting needed (abuse prevention)
+- ❌ Costs (testnet ETH funding)
+- ❌ Users don't learn real security model
+
+**Verdict:** ❌ **REJECTED** - Compromises core value proposition
+
+### Option 3: "One-Click Safe Creation" API (LOWER FRICTION)
+
+**Concept:**
+- ZeroKeyCI provides API endpoint: `POST /api/create-safe`
+- User clicks "Create Safe for Me" button
+- Backend creates Safe on behalf of user
+- User gets Safe address instantly
+- User MUST add their own wallet as owner
+
+**Implementation:**
+```typescript
+// New endpoint: src/app/api/create-safe/route.ts
+import Safe, { SafeFactory } from '@safe-global/protocol-kit'
+
+export async function POST(request: Request) {
+  const { network, userAddress } = await request.json()
+
+  // Create Safe with user as owner
+  const safeFactory = await SafeFactory.init({
+    provider: RPC_URL,
+    signer: TEMP_DEPLOYMENT_KEY, // Only for Safe creation
+  })
+
+  const safe = await safeFactory.deploySafe({
+    owners: [userAddress],  // USER controls the Safe
+    threshold: 1,
+  })
+
+  return { safeAddress: safe.getAddress() }
+}
+```
+
+**Pros:**
+- ✅ Reduces onboarding time from ~12 min to ~2 min
+- ✅ User still controls their Safe (security maintained)
+- ✅ Real deployment experience
+- ✅ No operational burden after creation
+
+**Cons:**
+- ❌ Still requires MetaMask connection
+- ❌ Still requires testnet ETH
+- ❌ Deployment key needed (only for Safe creation, not deployment)
+
+**Effort:** Medium
+
+### Option 4: "Quick Start Template Repository" (LOWER FRICTION)
+
+**Concept:**
+- Provide GitHub template repository with everything pre-configured
+- User clicks "Use this template"
+- Repository has sample contract + workflow
+- User only needs to set 2 secrets:
+  - `SAFE_ADDRESS`
+  - `BASE_SEPOLIA_RPC_URL`
+
+**Implementation:**
+```bash
+# New repo: github.com/susumutomita/zerokeyci-quickstart-template
+
+Repository structure:
+zerokeyci-quickstart-template/
+├── contracts/
+│   └── HelloWorld.sol          # Simple sample contract
+├── .github/workflows/
+│   └── deploy.yml              # Pre-configured workflow
+├── hardhat.config.js           # Pre-configured
+└── README.md                   # Step-by-step guide
+```
+
+**Pros:**
+- ✅ Users get working setup instantly
+- ✅ Clear "fill in the blanks" experience
+- ✅ No code writing needed for first deploy
+- ✅ Maintains security model
+
+**Cons:**
+- ❌ Still requires Safe creation
+- ❌ Still requires RPC URL setup
+
+**Effort:** Low (create template repo)
+
+### Option 5: Improved Documentation + Video Tutorial (LOWEST EFFORT)
+
+**Concept:**
+- Create step-by-step video walkthrough (~3 minutes)
+- Interactive checklist on /setup page
+- Clear progress indicators
+- Embedded video tutorial
+
+**Pros:**
+- ✅ Very low effort
+- ✅ Helps users understand the flow
+- ✅ No security compromise
+
+**Cons:**
+- ❌ Doesn't reduce actual friction
+- ❌ Users still need ~12 minutes of setup
+
+**Effort:** Very Low
+
+## Recommended Approach: Hybrid Solution
+
+**Combine Option 1 + Option 4 + Option 5**
+
+### Phase 1: Immediate (Low Effort)
+1. **Improve SafeProposalSandbox UX** (Option 1)
+   - Make it prominent on landing page
+   - Add "Try without signing up" messaging
+   - Show realistic example with gas estimates
+
+2. **Create Template Repository** (Option 4)
+   - Pre-configured contracts + workflow
+   - Clear README with checklist
+
+3. **Video Tutorial** (Option 5)
+   - 3-minute walkthrough
+   - Embed on /setup page
+
+### Phase 2: Future (Medium Effort)
+4. **One-Click Safe Creation** (Option 3)
+   - API endpoint for Safe creation
+   - Reduces setup time significantly
+   - Maintains security model
+
+**DO NOT IMPLEMENT:**
+- ❌ Option 2 (Demo Mode with auto-signing) - defeats core value
+
+## Guardrails (Non-negotiable constraints)
+- **MUST maintain "no private keys in CI" for actual deployments**
+- **MUST NOT create centralized signing service for shared Safe**
+- Users MUST control their own Safe addresses for production use
+- Demo/sandbox experiences MUST NOT be confused with production-ready
+
+## TODO (Immediate - Phase 1)
+
+- [ ] Phase 1.1: Improve SafeProposalSandbox UX
+  - [ ] Add "Try It Live - No Setup Required" hero section to landing page
+  - [ ] Link to /sandbox from README
+  - [ ] Add realistic contract example
+  - [ ] Show gas estimates and deployment address
+  - [ ] Add "Ready to deploy? Create your Safe →" CTA
+
+- [ ] Phase 1.2: Create Quick Start Template Repository
+  - [ ] Create new repo: zerokeyci-quickstart-template
+  - [ ] Add sample HelloWorld.sol contract
+  - [ ] Add pre-configured deploy.yml workflow
+  - [ ] Add step-by-step README with checklist
+  - [ ] Add "Use this template" button
+
+- [ ] Phase 1.3: Video Tutorial
+  - [ ] Record 3-minute setup walkthrough
+  - [ ] Upload to YouTube
+  - [ ] Embed in docs/QUICKSTART.md
+  - [ ] Add to /setup page
+
+- [ ] Phase 1.4: Documentation Improvements
+  - [ ] Add estimated time for each setup step
+  - [ ] Add progress checklist to QUICKSTART.md
+  - [ ] Clarify "Why your own Safe?" security explanation
+  - [ ] Add FAQ: "Can I use a shared Safe?"
+
+## Validation Steps
+- [ ] SafeProposalSandbox works without any user setup
+- [ ] Template repository deploys successfully after only setting 2 secrets
+- [ ] Video tutorial is clear and under 3 minutes
+- [ ] Documentation clearly explains security trade-offs
+- [ ] User feedback: Does this reduce friction?
+
+## Progress Log
+
+### Iteration 1 (2025-10-24) - User Feedback Analysis
+
+**User feedback received:**
+```
+つまりSafe アドレスとしてこちらが用意した0xfbD23fcc0D45a3BD6CdBff38b8C03C2A8E9ec663を
+使ってもいいし自分で持ち込むこともOKという形にしないと全く意味がないと思うけど、
+ユースケースがおかしいと思います
+```
+
+**Translation:**
+Users want BOTH options:
+- Option A: Use ZeroKeyCI-provided demo Safe (easy onboarding)
+- Option B: Bring your own Safe (production use)
+
+**Root cause of feedback:**
+- Current onboarding has ~12 minutes of setup before first deploy
+- Users want "try before you buy" experience
+- Creating Safe wallet is highest friction point
+
+**Analysis:**
+- User's suggestion (shared Safe) has security implications
+- Cannot provide auto-signing service without defeating core value prop
+- Need alternative solutions that maintain security
+
+**Decision made:**
+- Document all options in exec plan
+- Recommend hybrid approach (Sandbox + Template + Tutorial)
+- DO NOT implement centralized demo Safe with auto-signing
+- Prioritize improving sandbox experience and documentation
+
+**Next steps:**
+1. Share analysis with user
+2. Get feedback on proposed solutions
+3. Implement Phase 1 (low effort, high impact)
+
+### Iteration 2 (2025-10-24) - User Approval of Balanced Approach
+
+**User statement:**
+> "ここまでわかったことをプルリクエスト送ろう、少なくともSAFE_ADDRESSはこちらで用意したものを使えるしって形にしたほうが試しやすいよね。"
+
+**Translation:**
+> "Let's send a PR with what we've learned so far. At least making it so users can use the SAFE_ADDRESS we provide would make it easier to try, right?"
+
+**Key insight from user:**
+The user agrees with providing a demo Safe address, but with a BALANCED approach:
+- ✅ Provide demo Safe address (0xfbD23fcc0D45a3BD6CdBff38b8C03C2A8E9ec663)
+- ✅ Users can use it to understand the flow
+- ✅ Users can bring their own Safe for production
+- ❌ DO NOT auto-sign (users still need to sign manually)
+- ✅ Clear documentation: "Demo mode" vs "Production mode"
+
+**This approach solves the core problem:**
+- Reduces onboarding friction (no Safe creation needed for demo)
+- Maintains security model (no auto-signing, users control keys)
+- Educational value (users learn the workflow before production)
+- Clear upgrade path (demo → production with own Safe)
+
+**Implementation decision:**
+Create PR implementing:
+1. `docs/DEMO_MODE.md` - Explain demo vs production clearly
+2. Update `docs/QUICKSTART.md` - Add "Quick Try (Demo Mode)" section
+3. Update `README.md` - Mention demo mode in Quick Start
+4. Update `.env.example` - Include demo Safe address as option
+5. Update `plans.md` - Document this approach
+
+**User will still need to:**
+- Sign proposals manually in Safe UI (no auto-signing)
+- Understand this is for demo/learning only
+- Create their own Safe for production
+
+**Security maintained:**
+- No private keys in CI/CD (still true)
+- No centralized signing service (still true)
+- Users control the demo Safe by being added as signers
+- Clear migration path to production
+
+**Next steps:**
+1. Implement documentation changes
+2. Create PR
+3. Get user feedback on documentation clarity
+
+## Open Questions
+
+**Q1:** Is the SafeProposalSandbox sufficient for "try before you buy" experience?
+- **Answer:** Pending user feedback
+
+**Q2:** Should we implement one-click Safe creation API (Option 3)?
+- **Security concern:** Requires ZeroKeyCI to hold deployment key for Safe creation
+- **Alternative:** Guide users to use Safe UI for creation
+- **Answer:** Defer to Phase 2, evaluate after Phase 1 feedback
+
+**Q3:** What's the minimum viable onboarding time we can achieve?
+- **Current:** ~12 minutes (Safe creation + RPC URL + GitHub config)
+- **With Template Repo:** ~8 minutes (still need Safe + RPC)
+- **With One-Click Safe:** ~4 minutes (still need RPC + add to GitHub)
+- **Sandbox only:** ~0 minutes (but no real deployment)
+- **Answer:** Target 5 minutes with Phase 1 + Phase 2
+
+**Q4:** Should we support "demo mode" with rate-limited shared Safe?
+- **Security analysis:** Defeats core value proposition
+- **Alternative:** Improve sandbox to feel more "real"
+- **Answer:** NO - maintain security model
+
+## References
+- User request: "別レポジトリからワークフローを呼び出せばOKという理解なんだけど" (2025-10-24)
+- User concern: "ユースケースがおかしいと思います" (2025-10-24)
+- Core value prop: NO PRIVATE KEYS IN CI/CD (non-negotiable)
+- Current SafeProposalSandbox: src/components/SafeProposalSandbox.tsx
+- Existing Quick Start Guide: docs/QUICKSTART.md
+

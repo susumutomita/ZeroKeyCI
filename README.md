@@ -13,6 +13,8 @@
 
 **🚀 [Quick Start Guide](docs/QUICKSTART.md) - Deploy your first contract in 5 minutes**
 
+**⚡ NEW: [Demo Mode](docs/DEMO_MODE.md) - Try ZeroKeyCI in 3 minutes (no Safe setup required!)**
+
 [DeepWiki](https://deepwiki.com/susumutomita/ZeroKeyCI/1-overview)
 ---
 
@@ -92,6 +94,33 @@ jobs:
 ```
 
 **That's it. No private keys in CI. Ever.**
+
+### ⚡ Try Before You Commit (Demo Mode)
+
+**Want to test ZeroKeyCI without setting up a Safe wallet?**
+
+Use our demo Safe address to try the full workflow in 3 minutes:
+
+```yaml
+# Use the demo Safe for testing
+with:
+  safe-address: 0xfbD23fcc0D45a3BD6CdBff38b8C03C2A8E9ec663  # Demo Safe on Base Sepolia
+  network: base-sepolia
+  contract-name: MyContract
+```
+
+**What you get:**
+- ✅ Full CI/CD workflow experience
+- ✅ Real testnet deployment
+- ✅ Understand Safe proposal flow
+- ✅ No Safe wallet setup needed
+
+**Security:**
+- ⚠️ Demo mode is for **learning only** (Base Sepolia testnet)
+- ⚠️ You still sign proposals manually (no auto-signing)
+- ⚠️ For production, create your own Safe
+
+**[→ Demo Mode Guide](docs/DEMO_MODE.md)** | **[→ Create Your Own Safe](docs/SAFE_SETUP.md)**
 
 ### 📚 Complete Documentation
 
