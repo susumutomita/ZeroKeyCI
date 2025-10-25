@@ -171,8 +171,7 @@ export const translations = {
           'More complex architecture',
         ],
         cta: 'Set Up PKP Automation',
-        ctaLink:
-          'https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PKP_SETUP.md',
+        ctaLink: '/setup',
       },
       comparison: {
         title: 'Which Should You Choose?',
@@ -554,8 +553,7 @@ export const translations = {
           'より複雑なアーキテクチャ',
         ],
         cta: 'PKP自動化をセットアップ',
-        ctaLink:
-          'https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PKP_SETUP.md',
+        ctaLink: '/setup',
       },
       comparison: {
         title: 'どちらを選ぶべきか？',
