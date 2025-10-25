@@ -793,16 +793,16 @@ async function main() {
 
     // Log detailed proposal structure for debugging
     logger.debug('Serialized proposal structure (for Safe API submission)', {
-      to: parsed.to,
-      value: parsed.value,
-      data: parsed.data?.substring(0, 100) + '...',
-      operation: parsed.operation,
-      safeTxGas: parsed.safeTxGas,
-      baseGas: parsed.baseGas,
-      gasPrice: parsed.gasPrice,
-      gasToken: parsed.gasToken,
-      refundReceiver: parsed.refundReceiver,
-      nonce: parsed.nonce,
+      to: parsed.proposal.to,
+      value: parsed.proposal.value,
+      data: parsed.proposal.data?.substring(0, 100) + '...',
+      operation: parsed.proposal.operation,
+      safeTxGas: parsed.proposal.safeTxGas,
+      baseGas: parsed.proposal.baseGas,
+      gasPrice: parsed.proposal.gasPrice,
+      gasToken: parsed.proposal.gasToken,
+      refundReceiver: parsed.proposal.refundReceiver,
+      nonce: parsed.proposal.nonce,
       validationHash: parsed.validationHash,
     });
 
@@ -816,7 +816,7 @@ async function main() {
     }
 
     const safeTxHashFromApi = await submitUnsignedProposalToSafe(
-      parsed,
+      parsed.proposal,
       chainId,
       safeAddress,
       rpcUrl
