@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import SafeProposalSandbox from '@/components/SafeProposalSandbox';
 import { CodeSnippet } from '@/components/CodeSnippet';
 import Link from 'next/link';
 import { useTranslations, type Language } from '@/lib/i18n';
@@ -763,30 +762,6 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Demo Section */}
-      <section id="demo" className="relative py-32">
-        <div className="container mx-auto px-6 lg:px-12">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 glass-strong border border-green-300/30 dark:border-green-500/30 rounded-full px-6 py-3 mb-8 animate-fade-in shadow-glass">
-                <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <span className="text-green-600 dark:text-green-300 font-medium">
-                  Try It Live
-                </span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-semibold mb-6 text-gray-900 dark:text-white tracking-tight animate-fade-in">
-                {t.demo.title}
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-fade-in">
-                {t.demo.subtitle}
-              </p>
-            </div>
-
-            <SafeProposalSandbox />
           </div>
         </div>
       </section>
