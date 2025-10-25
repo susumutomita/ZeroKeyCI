@@ -12,9 +12,9 @@ inputs:
     required: true
 
   network:
-    description: 'Network to deploy to (sepolia, mainnet, polygon, arbitrum)'
+    description: 'Network to deploy to (mainnet, sepolia, polygon, polygon-amoy, arbitrum, arbitrum-sepolia, optimism, optimism-sepolia, base, base-sepolia)'
     required: true
-    default: 'sepolia'
+    default: 'base-sepolia'
 
   contract-name:
     description: 'Name of the contract to deploy (must match .sol filename)'
@@ -97,7 +97,7 @@ runs:
           exit 1
         fi
 
-        if [[ ! "${{ inputs.network }}" =~ ^(sepolia|mainnet|polygon|arbitrum)$ ]]; then
+        if [[ ! "${{ inputs.network }}" =~ ^(mainnet|sepolia|polygon|polygon-amoy|arbitrum|arbitrum-sepolia|optimism|optimism-sepolia|base|base-sepolia)$ ]]; then
           echo "::error::Unsupported network: ${{ inputs.network }}"
           exit 1
         fi
@@ -213,13 +213,19 @@ runs:
           }
 
           const chainIds: Record<string, number> = {
-            'sepolia': 11155111,
             'mainnet': 1,
+            'sepolia': 11155111,
             'polygon': 137,
+            'polygon-amoy': 80002,
             'arbitrum': 42161,
+            'arbitrum-sepolia': 421614,
+            'optimism': 10,
+            'optimism-sepolia': 11155420,
+            'base': 8453,
+            'base-sepolia': 84532,
           };
 
-          const chainId = chainIds[network || 'sepolia'];
+          const chainId = chainIds[network || 'base-sepolia'];
           if (!chainId) {
             throw new Error(`Unknown network: ${network}`);
           }
@@ -286,10 +292,16 @@ runs:
 
         # Determine chain ID
         case "${{ inputs.network }}" in
-          sepolia) echo "chain_id=11155111" >> $GITHUB_OUTPUT ;;
           mainnet) echo "chain_id=1" >> $GITHUB_OUTPUT ;;
+          sepolia) echo "chain_id=11155111" >> $GITHUB_OUTPUT ;;
           polygon) echo "chain_id=137" >> $GITHUB_OUTPUT ;;
+          polygon-amoy) echo "chain_id=80002" >> $GITHUB_OUTPUT ;;
           arbitrum) echo "chain_id=42161" >> $GITHUB_OUTPUT ;;
+          arbitrum-sepolia) echo "chain_id=421614" >> $GITHUB_OUTPUT ;;
+          optimism) echo "chain_id=10" >> $GITHUB_OUTPUT ;;
+          optimism-sepolia) echo "chain_id=11155420" >> $GITHUB_OUTPUT ;;
+          base) echo "chain_id=8453" >> $GITHUB_OUTPUT ;;
+          base-sepolia) echo "chain_id=84532" >> $GITHUB_OUTPUT ;;
         esac
 
     - name: Validate proposal structure

@@ -5132,3 +5132,100 @@ Create PR implementing:
 - Current SafeProposalSandbox: src/components/SafeProposalSandbox.tsx
 - Existing Quick Start Guide: docs/QUICKSTART.md
 
+---
+
+# Exec Plan: Fix action.yml network validation for all supported networks (Issue: base-sepolia unsupported)
+Created: 2025-10-25
+Status: 🟡 In Progress
+
+## Objective
+Fix the "Unsupported network: base-sepolia" error by updating action.yml to support all networks defined in network-config.ts.
+
+## Problem Statement
+PR #94 changed the default network from `sepolia` to `base-sepolia`, but action.yml's validation logic was not updated:
+- action.yml line 100: regex only includes `(sepolia|mainnet|polygon|arbitrum)`
+- action.yml line 288-293: chain ID mapping missing new networks
+- action.yml line 215-220: embedded script missing new networks
+
+This causes ZeroKeyCI-sample to fail with "Error: Unsupported network: base-sepolia".
+
+## Guardrails
+- Maintain consistency with network-config.ts (source of truth)
+- Ensure all 10 supported networks work: mainnet, sepolia, polygon, polygon-amoy, arbitrum, arbitrum-sepolia, optimism, optimism-sepolia, base, base-sepolia
+- Keep default network as `base-sepolia` (per PR #94)
+- All validation tests must pass
+
+## TODO
+- [x] Update action.yml input description (line 15)
+- [x] Update action.yml default network to base-sepolia (line 17)
+- [x] Update network validation regex (line 100)
+- [x] Update chain ID mapping in output step (line 288-299)
+- [x] Update chain ID mapping in embedded script (line 215-226)
+- [x] Update default network in embedded script (line 228)
+- [ ] Run validation tests
+- [ ] Create PR with fix
+- [ ] Verify ZeroKeyCI-sample works with base-sepolia
+
+## Network Mappings (from network-config.ts)
+| Network           | Chain ID  | Source Line |
+|-------------------|-----------|-------------|
+| mainnet           | 1         | Line 34     |
+| sepolia           | 11155111  | Line 45     |
+| polygon           | 137       | Line 56     |
+| polygon-amoy      | 80002     | Line 100    |
+| arbitrum          | 42161     | Line 67     |
+| arbitrum-sepolia  | 421614    | Line 111    |
+| optimism          | 10        | Line 78     |
+| optimism-sepolia  | 11155420  | Line 122    |
+| base              | 8453      | Line 89     |
+| base-sepolia      | 84532     | Line 133    |
+
+## Validation Steps
+- [ ] All tests pass (`bun run test`)
+- [ ] TypeScript compiles (`bun run typecheck`)
+- [ ] Linting passes (`bun run lint`)
+- [ ] Textlint passes (`bun run lint_text`)
+- [ ] Manual verification: ZeroKeyCI-sample workflow succeeds
+
+## Progress Log
+
+### Iteration 1 (2025-10-25 14:00)
+**What was done:**
+- Updated action.yml inputs (lines 15-17):
+  - Description now lists all 10 supported networks
+  - Default changed from 'sepolia' to 'base-sepolia'
+- Updated network validation regex (line 100):
+  - Added all 10 networks to regex pattern
+- Updated chain ID mapping in output step (lines 288-299):
+  - Added 6 missing networks (polygon-amoy, arbitrum-sepolia, optimism, optimism-sepolia, base, base-sepolia)
+- Updated embedded script chain ID mapping (lines 215-226):
+  - Added same 6 missing networks
+  - Changed default from 'sepolia' to 'base-sepolia' (line 228)
+
+**Files modified:**
+- action.yml: 4 locations updated
+
+**Test status:**
+- ✅ All tests pass: 683/683 passing, 6 skipped
+- ✅ TypeScript: No errors
+- ✅ ESLint: No errors
+- ✅ Textlint: No errors
+- ⏳ Manual verification: Pending (ZeroKeyCI-sample workflow test)
+
+**Decisions made:**
+- Decision: Use network-config.ts as single source of truth
+- Reasoning: Prevents future desync between TypeScript code and GitHub Action
+- Alternatives considered: Could create a script to generate action.yml from network-config.ts (future improvement)
+
+**Blockers/Issues:**
+- None
+
+## Open Questions
+**Q**: Should we automate sync between network-config.ts and action.yml?
+- **A**: Future improvement - for now, manual sync with validation
+
+## References
+- Related PR: #94 (feat: change default network from Sepolia to Base Sepolia)
+- network-config.ts: src/lib/network-config.ts (lines 18-144)
+- User error: "Error: Unsupported network: base-sepolia" from ZeroKeyCI-sample
+
