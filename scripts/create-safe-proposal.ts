@@ -172,27 +172,52 @@ async function submitUnsignedProposalToSafe(
       apiKey: safeApiKey,
     });
 
-    const result = await safeService.proposeTransaction({
+    // Prepare transaction data with detailed logging
+    const safeTransactionData = {
+      to: proposal.to,
+      value: proposal.value,
+      data: proposal.data,
+      operation: proposal.operation || 0,
+      safeTxGas: proposal.safeTxGas || '0',
+      baseGas: proposal.baseGas || '0',
+      gasPrice: proposal.gasPrice || '0',
+      gasToken:
+        proposal.gasToken || '0x0000000000000000000000000000000000000000',
+      refundReceiver:
+        proposal.refundReceiver || '0x0000000000000000000000000000000000000000',
+      nonce: proposal.nonce || 0,
+    };
+
+    const proposePayload = {
       safeAddress: safeAddress,
-      safeTransactionData: {
-        to: proposal.to,
-        value: proposal.value,
-        data: proposal.data,
-        operation: proposal.operation || 0,
-        safeTxGas: proposal.safeTxGas || '0',
-        baseGas: proposal.baseGas || '0',
-        gasPrice: proposal.gasPrice || '0',
-        gasToken:
-          proposal.gasToken || '0x0000000000000000000000000000000000000000',
-        refundReceiver:
-          proposal.refundReceiver ||
-          '0x0000000000000000000000000000000000000000',
-        nonce: proposal.nonce || 0,
-      },
+      safeTransactionData,
       safeTxHash: proposal.validationHash,
-      senderAddress, // Use first Safe owner as sender
-      senderSignature: '0x', // Empty signature for unsigned proposals
+      senderAddress,
+      senderSignature: '0x',
+    };
+
+    // Log full request payload for debugging (truncate data for readability)
+    logger.debug('Safe API proposeTransaction payload', {
+      safeAddress: proposePayload.safeAddress,
+      safeTxHash: proposePayload.safeTxHash,
+      senderAddress: proposePayload.senderAddress,
+      senderSignature: proposePayload.senderSignature,
+      safeTransactionData: {
+        to: safeTransactionData.to,
+        value: safeTransactionData.value,
+        dataLength: safeTransactionData.data?.length || 0,
+        dataPreview: safeTransactionData.data?.substring(0, 66) + '...',
+        operation: safeTransactionData.operation,
+        safeTxGas: safeTransactionData.safeTxGas,
+        baseGas: safeTransactionData.baseGas,
+        gasPrice: safeTransactionData.gasPrice,
+        gasToken: safeTransactionData.gasToken,
+        refundReceiver: safeTransactionData.refundReceiver,
+        nonce: safeTransactionData.nonce,
+      },
     });
+
+    const result = await safeService.proposeTransaction(proposePayload);
 
     const safeTxHash = result.safeTxHash || proposal.validationHash;
     logger.info('✅ Unsigned proposal submitted to Safe UI queue', {
@@ -202,11 +227,35 @@ async function submitUnsignedProposalToSafe(
 
     return safeTxHash;
   } catch (error) {
+    // Enhanced error logging to capture full API error details
+    const err = error as any;
+
+    // Log detailed error information
+    logger.error('❌ Safe API submission failed - Full error details:', err, {
+      // HTTP response details (if available from axios or fetch)
+      statusCode: err.response?.status || err.status,
+      statusText: err.response?.statusText || err.statusText,
+      responseData: err.response?.data || err.data,
+      responseBody: err.response?.body,
+      responseHeaders: err.response?.headers,
+      // Request details
+      requestUrl: err.config?.url || err.url,
+      requestMethod: err.config?.method || err.method,
+      requestHeaders: err.config?.headers,
+      requestData:
+        typeof err.config?.data === 'string'
+          ? JSON.parse(err.config.data)
+          : err.config?.data,
+      // Safe API context
+      chainId,
+      safeAddress,
+    });
+
     // Non-blocking: Safe API submission failure doesn't prevent deployment
     logger.warn(
       '⚠️  Failed to submit to Safe Transaction Service (non-blocking)',
       {
-        error: (error as Error).message,
+        error: err.message,
         chainId,
         safeAddress,
       }
@@ -741,6 +790,21 @@ async function main() {
     // Serialize proposal
     const serialized = builder.serializeProposal(proposal);
     const parsed = JSON.parse(serialized);
+
+    // Log detailed proposal structure for debugging
+    logger.debug('Serialized proposal structure (for Safe API submission)', {
+      to: parsed.to,
+      value: parsed.value,
+      data: parsed.data?.substring(0, 100) + '...',
+      operation: parsed.operation,
+      safeTxGas: parsed.safeTxGas,
+      baseGas: parsed.baseGas,
+      gasPrice: parsed.gasPrice,
+      gasToken: parsed.gasToken,
+      refundReceiver: parsed.refundReceiver,
+      nonce: parsed.nonce,
+      validationHash: parsed.validationHash,
+    });
 
     // Submit unsigned proposal to Safe Transaction Service
     const rpcUrl = process.env.RPC_URL;
