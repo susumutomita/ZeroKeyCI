@@ -79,16 +79,56 @@ async function notifyWithTimeout(
 }
 
 /**
+ * Get Safe wallet owners from on-chain data
+ * @param safeAddress - Safe wallet address
+ * @param rpcUrl - RPC URL for network connection
+ * @returns Array of owner addresses
+ */
+async function getSafeOwners(
+  safeAddress: string,
+  rpcUrl: string
+): Promise<string[]> {
+  try {
+    const { ethers } = await import('ethers');
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+    // Minimal Safe contract ABI for getOwners()
+    const safeAbi = [
+      'function getOwners() external view returns (address[] memory)',
+    ];
+
+    const safeContract = new ethers.Contract(safeAddress, safeAbi, provider);
+    const owners = await safeContract.getOwners();
+
+    logger.debug('Retrieved Safe owners', {
+      safeAddress,
+      ownerCount: owners.length,
+      owners,
+    });
+
+    return owners;
+  } catch (error) {
+    logger.error('Failed to fetch Safe owners', {
+      safeAddress,
+      error: (error as Error).message,
+    });
+    throw new Error(`Cannot retrieve Safe owners: ${(error as Error).message}`);
+  }
+}
+
+/**
  * Submit unsigned proposal to Safe Transaction Service
  * @param proposal - Safe transaction proposal
  * @param chainId - Network chain ID
  * @param safeAddress - Safe wallet address
+ * @param rpcUrl - RPC URL for network connection
  * @returns Safe transaction hash if successful, null otherwise
  */
 async function submitUnsignedProposalToSafe(
   proposal: any,
   chainId: number,
-  safeAddress: string
+  safeAddress: string,
+  rpcUrl: string
 ): Promise<string | null> {
   try {
     logger.info(
@@ -115,6 +155,18 @@ async function submitUnsignedProposalToSafe(
       return null;
     }
 
+    // Fetch Safe owners to use first owner as sender
+    const owners = await getSafeOwners(safeAddress, rpcUrl);
+    if (owners.length === 0) {
+      throw new Error('Safe has no owners');
+    }
+
+    const senderAddress = owners[0]; // Use first owner as sender
+    logger.info('Using Safe owner as sender for proposal submission', {
+      senderAddress,
+      totalOwners: owners.length,
+    });
+
     const safeService = new SafeApiKit({
       chainId: BigInt(chainId),
       apiKey: safeApiKey,
@@ -138,7 +190,7 @@ async function submitUnsignedProposalToSafe(
         nonce: proposal.nonce || 0,
       },
       safeTxHash: proposal.validationHash,
-      senderAddress: safeAddress, // Use Safe address itself for unsigned proposals
+      senderAddress, // Use first Safe owner as sender
       senderSignature: '0x', // Empty signature for unsigned proposals
     });
 
@@ -691,10 +743,19 @@ async function main() {
     const parsed = JSON.parse(serialized);
 
     // Submit unsigned proposal to Safe Transaction Service
+    const rpcUrl = process.env.RPC_URL;
+    if (!rpcUrl) {
+      throw new ConfigurationError('RPC_URL environment variable is required', {
+        configKey: 'rpcUrl',
+        expectedFormat: 'https://...',
+      });
+    }
+
     const safeTxHashFromApi = await submitUnsignedProposalToSafe(
       parsed,
       chainId,
-      safeAddress
+      safeAddress,
+      rpcUrl
     );
 
     // Add additional metadata for CI
