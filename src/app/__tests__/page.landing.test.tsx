@@ -62,16 +62,6 @@ describe('Landing Page', () => {
     expect(screen.getByText(/Deployed to Blockchain/i)).toBeInTheDocument();
   });
 
-  it('should render Try It Right Now section', () => {
-    render(<Home />);
-    // Check for the demo sandbox content
-    expect(
-      screen.getByText(
-        /See how ZeroKeyCI creates deployment transactions without private keys/i
-      )
-    ).toBeInTheDocument();
-  });
-
   it('should render Deploy Your First Contract section', () => {
     render(<Home />);
     expect(

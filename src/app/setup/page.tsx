@@ -1,545 +1,308 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import {
-  Github,
-  CheckCircle2,
-  AlertCircle,
-  ExternalLink,
-  FileCode,
-  Settings,
-  Rocket,
-} from 'lucide-react';
-import Link from 'next/link';
 import { CodeSnippet } from '@/components/CodeSnippet';
-
-interface GitHubUser {
-  login: string;
-  id: number;
-  avatar_url: string;
-  name: string | null;
-}
-
-interface Repository {
-  id: number;
-  name: string;
-  full_name: string;
-  private: boolean;
-  html_url: string;
-  default_branch: string;
-  permissions?: {
-    admin: boolean;
-    push: boolean;
-    pull: boolean;
-  };
-}
+import Link from 'next/link';
+import {
+  Rocket,
+  ExternalLink,
+  BookOpen,
+  Shield,
+  HelpCircle,
+} from 'lucide-react';
 
 export default function SetupPage() {
-  const [user, setUser] = useState<GitHubUser | null>(null);
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-  const [selectedRepo, setSelectedRepo] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState(false);
-  const [prUrl, setPrUrl] = useState<string>('');
-  const [oauthConfigured, setOauthConfigured] = useState<boolean | null>(null);
-  const [callbackUrl, setCallbackUrl] = useState('');
-
-  // Check OAuth configuration on mount
-  useEffect(() => {
-    // Set callback URL for SSR compatibility
-    setCallbackUrl(`${window.location.origin}/api/auth/github/callback`);
-
-    fetch('/api/config/status')
-      .then((res) => res.json())
-      .then((data) => {
-        setOauthConfigured(data.features.githubOAuthEnabled);
-      })
-      .catch((err) => {
-        console.error('Failed to check config status:', err);
-        setOauthConfigured(false);
-      });
-  }, []);
-
-  // Check if user is authenticated on mount
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const authenticated = params.get('authenticated');
-    const errorParam = params.get('error');
-
-    if (errorParam) {
-      setError(
-        `Authentication failed: ${params.get('error_description') || errorParam}`
-      );
-    }
-
-    if (authenticated === 'true') {
-      loadUserAndRepositories();
-    }
-  }, []);
-
-  const loadUserAndRepositories = async () => {
-    try {
-      setLoading(true);
-
-      // Get user info from cookie (set by OAuth callback)
-      const userCookie = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('github_user='));
-
-      if (userCookie) {
-        const userData = JSON.parse(
-          decodeURIComponent(userCookie.split('=')[1])
-        );
-        setUser(userData);
-      }
-
-      // Fetch repositories
-      const response = await fetch('/api/github/repositories');
-      if (!response.ok) {
-        throw new Error('Failed to fetch repositories');
-      }
-
-      const repos = await response.json();
-      setRepositories(repos);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleConnectGitHub = () => {
-    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
-    if (!clientId) {
-      setError('GitHub OAuth is not configured');
-      return;
-    }
-
-    // Generate random state for CSRF protection
-    const state = Math.random().toString(36).substring(7);
-    sessionStorage.setItem('github_oauth_state', state);
-
-    // Redirect to GitHub OAuth
-    const redirectUri = `${window.location.origin}/api/auth/github/callback`;
-    const scopes = 'repo,read:user,user:email';
-
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&state=${state}`;
-  };
-
-  const handleSetupZeroKeyCI = async () => {
-    if (!selectedRepo) {
-      setError('Please select a repository');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-
-      const [owner, repo] = selectedRepo.split('/');
-
-      // Create PR with ZeroKeyCI setup
-      const response = await fetch('/api/github/setup-pr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ owner, repo }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create PR');
-      }
-
-      const data = await response.json();
-      setPrUrl(data.pr_url);
-      setSuccess(true);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
-        <div className="max-w-2xl w-full">
-          {/* Back to Home Link */}
-          <div className="mb-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-            >
-              <span className="text-2xl">←</span>
-              <span>Back to Home</span>
-            </Link>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
-            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-12 h-12 text-green-400" />
-            </div>
-
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Pull Request Created! 🎉
-            </h1>
-
-            <p className="text-xl text-gray-300 mb-8">
-              ZeroKeyCI has been set up in your repository. Review and merge the
-              PR to start deploying.
-            </p>
-
-            <div className="space-y-4">
-              <a
-                href={prUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform"
-              >
-                <ExternalLink className="w-5 h-5" />
-                View Pull Request
-              </a>
-            </div>
-
-            <div className="mt-12 p-6 bg-blue-500/10 border border-blue-500/20 rounded-xl text-left">
-              <h3 className="font-semibold text-white mb-2">Next Steps:</h3>
-              <ol className="text-gray-300 space-y-2 list-decimal list-inside">
-                <li>Review the PR to understand the changes</li>
-                <li>Configure GitHub Secrets (see PR description)</li>
-                <li>Merge the PR</li>
-                <li>Start deploying contracts with ZeroKeyCI! 🚀</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-20 px-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Back to Home Link */}
-        <div className="mb-8">
+    <div className="min-h-screen bg-gradient-radial from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+      {/* Header */}
+      <header className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
-            <span className="text-2xl">←</span>
-            <span>Back to Home</span>
+            ← Back to Home
           </Link>
         </div>
+      </header>
 
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-black text-white mb-4">
-            Setup ZeroKeyCI
-          </h1>
-          <p className="text-xl text-gray-300">
-            Connect your GitHub account and deploy contracts in 3 minutes
-          </p>
-        </div>
-
-        {/* Error Display */}
-        {error && (
-          <div className="mb-8 bg-red-500/10 border border-red-500/20 rounded-xl p-6 flex items-start gap-4">
-            <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-red-300 mb-1">Error</h3>
-              <p className="text-red-200">{error}</p>
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-16 lg:py-24">
+        <div className="max-w-5xl mx-auto">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 glass-strong border border-blue-300/30 dark:border-blue-500/30 rounded-full px-6 py-3 mb-8 animate-fade-in shadow-glass">
+              <Rocket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-blue-600 dark:text-blue-300 font-medium">
+                Quick Setup Guide
+              </span>
             </div>
+            <h1 className="text-5xl md:text-6xl font-semibold mb-6 text-gray-900 dark:text-white tracking-tight">
+              Start Deploying in 3 Minutes
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              No OAuth, no complex setup. Just copy, paste, and deploy with zero
+              private keys in CI/CD.
+            </p>
           </div>
-        )}
 
-        {/* Step 1: Connect GitHub */}
-        {!user && (
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white text-xl">
+          {/* Step 1: Create Workflow */}
+          <div className="glass-card p-8 border border-white/10 dark:border-white/5 mb-6 animate-fade-in">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
                 1
               </div>
-              <h2 className="text-2xl font-bold text-white">
-                Connect to GitHub
-              </h2>
-            </div>
-
-            {oauthConfigured === false ? (
-              // Show quick manual setup when OAuth is not configured
-              <div className="space-y-8">
-                {/* Hero Message */}
-                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-2xl p-6">
-                  <h3 className="text-2xl font-bold text-white mb-3 flex items-center gap-3">
-                    <Rocket className="w-7 h-7 text-blue-400" />
-                    Deploy in 3 Steps
-                  </h3>
-                  <p className="text-gray-200 text-lg">
-                    Add ZeroKeyCI to your repository manually. No OAuth required
-                    - just copy, paste, and deploy!
-                  </p>
-                </div>
-
-                {/* Step 1: Create Workflow File */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white flex-shrink-0">
-                      1
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                        <FileCode className="w-5 h-5" />
-                        Create GitHub Workflow
-                      </h3>
-                      <p className="text-gray-300 mb-4">
-                        Add this file to your repository at{' '}
-                        <code className="bg-white/10 px-2 py-1 rounded text-sm">
-                          .github/workflows/deploy.yml
-                        </code>
-                      </p>
-                      <CodeSnippet
-                        language="yaml"
-                        code={`name: Deploy Smart Contracts
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Create GitHub Workflow
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Add this file to{' '}
+                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+                    .github/workflows/deploy.yml
+                  </code>{' '}
+                  in your repository:
+                </p>
+                <CodeSnippet
+                  language="yaml"
+                  title=".github/workflows/deploy.yml"
+                  code={`name: Deploy with ZeroKeyCI
 
 on:
   pull_request:
     types: [closed]
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  pull-requests: write
+  contents: read
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true
-    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
-    with:
-      safe-address: \${{ vars.SAFE_ADDRESS }}
-      network: sepolia
-      contract-name: MyContract
-    secrets:
-      rpc-url: \${{ secrets.SEPOLIA_RPC_URL }}`}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 2: Configure Secrets */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white flex-shrink-0">
-                      2
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                        <Settings className="w-5 h-5" />
-                        Configure GitHub Secrets
-                      </h3>
-                      <p className="text-gray-300 mb-4">
-                        Add these secrets in your repository settings → Settings
-                        → Secrets and variables → Actions
-                      </p>
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-sm text-gray-400 mb-2">
-                            Set{' '}
-                            <code className="bg-white/10 px-2 py-1 rounded">
-                              SAFE_ADDRESS
-                            </code>{' '}
-                            (Variable):
-                          </p>
-                          <CodeSnippet
-                            code={
-                              'gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"'
-                            }
-                          />
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-400 mb-2">
-                            Set{' '}
-                            <code className="bg-white/10 px-2 py-1 rounded">
-                              SEPOLIA_RPC_URL
-                            </code>{' '}
-                            (Secret):
-                          </p>
-                          <CodeSnippet
-                            code={
-                              'gh secret set SEPOLIA_RPC_URL --body "https://sepolia.infura.io/v3/YOUR_KEY"'
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 3: Deploy */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white flex-shrink-0">
-                      3
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5" />
-                        Merge & Deploy
-                      </h3>
-                      <p className="text-gray-300 mb-4">
-                        Merge any PR to trigger deployment. ZeroKeyCI will
-                        create a Safe proposal automatically.
-                      </p>
-                      <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 rounded-xl p-4">
-                        <p className="text-green-300 font-semibold">
-                          ✨ That&apos;s it! No private keys in CI/CD.
-                        </p>
-                        <p className="text-gray-300 text-sm mt-2">
-                          Safe owners review and sign the deployment proposal
-                          through the Safe web interface.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Resources */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-                  <h3 className="font-semibold text-white mb-3">
-                    📚 Need More Help?
-                  </h3>
-                  <div className="space-y-2">
-                    <a
-                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/INTEGRATION_GUIDE.md"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-blue-400 hover:text-blue-300 underline"
-                    >
-                      → Full Integration Guide
-                    </a>
-                    <a
-                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/DEPLOYMENT_GUIDE.md"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-blue-400 hover:text-blue-300 underline"
-                    >
-                      → Deployment Guide
-                    </a>
-                    <a
-                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/UPGRADEABLE_CONTRACTS.md"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-blue-400 hover:text-blue-300 underline"
-                    >
-                      → Upgradeable Contracts Guide
-                    </a>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-4">
-                    <strong>For administrators:</strong> To enable one-click
-                    OAuth setup,{' '}
-                    <a
-                      href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/GITHUB_INTEGRATION.md"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 underline"
-                    >
-                      configure GitHub OAuth
-                    </a>
-                    .
-                  </p>
-                </div>
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: susumutomita/ZeroKeyCI@main
+        with:
+          safe-address: \${{ vars.SAFE_ADDRESS }}
+          network: base-sepolia
+          contract-name: MyContract
+          verify-blockscout: true
+          rpc-url: \${{ secrets.RPC_URL }}`}
+                />
               </div>
-            ) : oauthConfigured === true ? (
-              // Show connect button when OAuth is configured
-              <>
-                <p className="text-gray-300 mb-6">
-                  Authorize ZeroKeyCI to access your repositories. We need
-                  permission to create a pull request with the deployment
-                  workflow.
-                </p>
-
-                <button
-                  onClick={handleConnectGitHub}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
-                >
-                  <Github className="w-5 h-5" />
-                  Connect with GitHub
-                </button>
-              </>
-            ) : (
-              // Loading state
-              <div className="text-center py-8">
-                <div className="inline-block w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-gray-400 mt-4">Checking configuration...</p>
-              </div>
-            )}
+            </div>
           </div>
-        )}
 
-        {/* Step 2: Select Repository */}
-        {user && !success && (
-          <>
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 mb-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-400" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">Connected</h2>
-                  <p className="text-gray-400">Logged in as @{user.login}</p>
+          {/* Step 2: Configure Secrets */}
+          <div className="glass-card p-8 border border-white/10 dark:border-white/5 mb-6 animate-fade-in">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                2
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Configure GitHub Secrets
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Run these commands in your repository to set up required
+                  secrets:
+                </p>
+                <CodeSnippet
+                  language="bash"
+                  title="Terminal"
+                  code={`gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
+gh secret set RPC_URL --body "https://base-sepolia.g.alchemy.com/v2/YOUR_KEY"`}
+                />
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-1">
+                        Where to get these values:
+                      </p>
+                      <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+                        <li>
+                          <strong>SAFE_ADDRESS</strong>: Your Safe multisig
+                          wallet address (
+                          <a
+                            href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/SAFE_SETUP.md"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-blue-600 dark:hover:text-blue-200"
+                          >
+                            create one here
+                          </a>
+                          )
+                        </li>
+                        <li>
+                          <strong>RPC_URL</strong>: Your blockchain RPC endpoint
+                          (get from{' '}
+                          <a
+                            href="https://www.alchemy.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-blue-600 dark:hover:text-blue-200"
+                          >
+                            Alchemy
+                          </a>
+                          ,{' '}
+                          <a
+                            href="https://www.infura.io/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-blue-600 dark:hover:text-blue-200"
+                          >
+                            Infura
+                          </a>
+                          , or{' '}
+                          <a
+                            href="https://chainlist.org/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-blue-600 dark:hover:text-blue-200"
+                          >
+                            public RPC
+                          </a>
+                          )
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-white text-xl">
-                  2
-                </div>
-                <h2 className="text-2xl font-bold text-white">
-                  Select Repository
-                </h2>
+          {/* Step 3: Merge & Deploy */}
+          <div className="glass-card p-8 border border-white/10 dark:border-white/5 mb-6 animate-fade-in">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                3
               </div>
-
-              <p className="text-gray-300 mb-6">
-                Choose the repository where you want to deploy smart contracts.
-              </p>
-
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-gray-400 mt-4">Loading repositories...</p>
-                </div>
-              ) : repositories.length > 0 ? (
-                <>
-                  <select
-                    value={selectedRepo}
-                    onChange={(e) => setSelectedRepo(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white mb-6 focus:outline-none focus:border-purple-500"
-                  >
-                    <option value="">Select a repository...</option>
-                    {repositories.map((repo) => (
-                      <option key={repo.id} value={repo.full_name}>
-                        {repo.full_name}
-                        {repo.private ? ' (Private)' : ' (Public)'}
-                      </option>
-                    ))}
-                  </select>
-
-                  <button
-                    onClick={handleSetupZeroKeyCI}
-                    disabled={!selectedRepo || loading}
-                    className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Setup ZeroKeyCI
-                  </button>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">
-                    No repositories found. Create a repository on GitHub first.
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Merge PR & Deploy
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  When you merge a PR to main, ZeroKeyCI automatically creates a
+                  Safe proposal. No private keys in CI!
+                </p>
+                <div className="p-4 bg-green-50/50 dark:bg-green-900/10 border border-green-300/30 dark:border-green-500/30 rounded-lg">
+                  <p className="text-green-700 dark:text-green-300 font-medium">
+                    ✨ That&apos;s it! No private keys needed in CI/CD. Your
+                    Safe owners sign proposals in the Safe UI.
                   </p>
                 </div>
-              )}
+              </div>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+
+          {/* Need More Help? */}
+          <div className="mt-12 glass-card border border-blue-300/30 dark:border-blue-500/30 rounded-xl p-8">
+            <div className="flex items-start gap-4 mb-6">
+              <HelpCircle className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <div>
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Need More Help?
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Check out our comprehensive documentation and guides.
+                </p>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/INTEGRATION_GUIDE.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 glass-card border border-white/10 hover:border-blue-300/30 dark:hover:border-blue-500/30 rounded-lg transition-all group"
+              >
+                <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Integration Guide
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Complete setup walkthrough
+                  </p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              </a>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/SAFE_SETUP.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 glass-card border border-white/10 hover:border-blue-300/30 dark:hover:border-blue-500/30 rounded-lg transition-all group"
+              >
+                <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Safe Setup Guide
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Create your Safe multisig
+                  </p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              </a>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/DEMO_MODE.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 glass-card border border-white/10 hover:border-blue-300/30 dark:hover:border-blue-500/30 rounded-lg transition-all group"
+              >
+                <Rocket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Demo Mode
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Try without creating Safe
+                  </p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              </a>
+              <a
+                href="https://github.com/susumutomita/ZeroKeyCI/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 glass-card border border-white/10 hover:border-blue-300/30 dark:hover:border-blue-500/30 rounded-lg transition-all group"
+              >
+                <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    Ask Questions
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    GitHub Issues
+                  </p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm mt-16">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Built for ETHOnline 2025
+            </p>
+            <Link
+              href="/"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
