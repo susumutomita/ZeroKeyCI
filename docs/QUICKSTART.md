@@ -9,7 +9,35 @@
 
 ---
 
+## 🚀 Two Ways to Get Started
+
+### Option 1: Quick Try (Demo Mode) - 3 minutes ⚡
+
+**Perfect for:** Learning the workflow, testing, hackathons
+
+Use our demo Safe address to try ZeroKeyCI immediately:
+- ✅ No Safe wallet creation needed
+- ✅ Skip testnet ETH and RPC setup
+- ✅ Understand the flow before production
+
+**[→ Start with Demo Mode](./DEMO_MODE.md)** (Recommended for first-time users)
+
+### Option 2: Full Setup (Production Ready) - 12 minutes 🔒
+
+**Perfect for:** Production deployments, mainnet, real projects
+
+Create your own Safe wallet for full security:
+- ✅ Your own multisig wallet
+- ✅ Production-ready security model
+- ✅ Deploy to any network
+
+**Continue below** for full setup instructions.
+
+---
+
 ## 🎯 Prerequisites (2 minutes)
+
+> **Note:** Using demo mode? Skip to [Demo Mode Guide](./DEMO_MODE.md) instead.
 
 ### Step 1: Create a Gnosis Safe Wallet
 
