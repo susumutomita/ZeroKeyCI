@@ -33,16 +33,85 @@ export default function SetupPage() {
             <div className="inline-flex items-center gap-2 glass-strong border border-blue-300/30 dark:border-blue-500/30 rounded-full px-6 py-3 mb-8 animate-fade-in shadow-glass">
               <Rocket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span className="text-blue-600 dark:text-blue-300 font-medium">
-                Quick Setup Guide
+                Setup Guide
               </span>
             </div>
             <h1 className="text-5xl md:text-6xl font-semibold mb-6 text-gray-900 dark:text-white tracking-tight">
-              Start Deploying in 3 Minutes
+              Setup Your CI/CD Deployment
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              No OAuth, no complex setup. Just copy, paste, and deploy with zero
-              private keys in CI/CD.
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+              Deploy smart contracts from GitHub Actions with zero private keys.
             </p>
+
+            {/* Prerequisites Warning */}
+            <div className="max-w-2xl mx-auto p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Shield className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-2">
+                    ⚠️ Before You Start
+                  </p>
+                  <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-3">
+                    You need these prerequisites (15-20 minutes first-time
+                    setup):
+                  </p>
+                  <ul className="text-sm text-yellow-800 dark:text-yellow-300 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="font-mono">1.</span>
+                      <span>
+                        <strong>Safe Wallet</strong> - Create at{' '}
+                        <a
+                          href="https://app.safe.global"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-yellow-600 dark:hover:text-yellow-200"
+                        >
+                          app.safe.global
+                        </a>{' '}
+                        (5-10 minutes)
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-mono">2.</span>
+                      <span>
+                        <strong>RPC URL</strong> - Get from{' '}
+                        <a
+                          href="https://www.alchemy.com/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-yellow-600 dark:hover:text-yellow-200"
+                        >
+                          Alchemy
+                        </a>
+                        ,{' '}
+                        <a
+                          href="https://www.infura.io/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-yellow-600 dark:hover:text-yellow-200"
+                        >
+                          Infura
+                        </a>
+                        , or use{' '}
+                        <a
+                          href="https://chainlist.org/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-yellow-600 dark:hover:text-yellow-200"
+                        >
+                          public RPC
+                        </a>{' '}
+                        (5-10 minutes)
+                      </span>
+                    </li>
+                  </ul>
+                  <p className="text-sm text-yellow-800 dark:text-yellow-300 mt-3">
+                    💡 <strong>Already have these?</strong> Setup takes 3
+                    minutes.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Step 1: Create Workflow */}
@@ -176,7 +245,7 @@ gh secret set RPC_URL --body "https://base-sepolia.g.alchemy.com/v2/YOUR_KEY"`}
             </div>
           </div>
 
-          {/* Step 3: Merge & Deploy */}
+          {/* Step 3: Trigger Deployment */}
           <div className="glass-card p-8 border border-white/10 dark:border-white/5 mb-6 animate-fade-in">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center font-bold text-lg flex-shrink-0">
@@ -184,16 +253,57 @@ gh secret set RPC_URL --body "https://base-sepolia.g.alchemy.com/v2/YOUR_KEY"`}
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Merge PR & Deploy
+                  Trigger Deployment
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  When you merge a PR to main, ZeroKeyCI automatically creates a
-                  Safe proposal. No private keys in CI!
+                  Unlike Hardhat&apos;s{' '}
+                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+                    npx hardhat deploy
+                  </code>
+                  , ZeroKeyCI triggers automatically when you merge a PR:
                 </p>
-                <div className="p-4 bg-green-50/50 dark:bg-green-900/10 border border-green-300/30 dark:border-green-500/30 rounded-lg">
+                <CodeSnippet
+                  language="bash"
+                  title="How to Deploy Your Contract"
+                  code={`# 1. Create a branch with your contract changes
+git checkout -b feat/deploy-my-contract
+
+# 2. Add your smart contract
+git add contracts/MyContract.sol
+git commit -m "feat: add MyContract for deployment"
+
+# 3. Push and create PR
+git push origin feat/deploy-my-contract
+gh pr create --title "Deploy MyContract to Base Sepolia"
+
+# 4. Merge PR - THIS TRIGGERS THE DEPLOYMENT
+gh pr merge
+
+# GitHub Actions will automatically:
+# - Compile your contract
+# - Create Safe transaction proposal
+# - Post PR comment with Safe UI link`}
+                />
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-1">
+                        What Happens After Merge:
+                      </p>
+                      <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+                        <li>✅ GitHub Actions compiles your contract</li>
+                        <li>✅ Creates Safe transaction proposal</li>
+                        <li>✅ Posts PR comment with Safe UI link</li>
+                        <li>✅ You sign in Safe UI → Contract deploys</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 p-4 bg-green-50/50 dark:bg-green-900/10 border border-green-300/30 dark:border-green-500/30 rounded-lg">
                   <p className="text-green-700 dark:text-green-300 font-medium">
-                    ✨ That&apos;s it! No private keys needed in CI/CD. Your
-                    Safe owners sign proposals in the Safe UI.
+                    ✨ No manual deploy command needed! PR merge is the trigger.
+                    Your Safe owners sign proposals in the Safe UI.
                   </p>
                 </div>
               </div>
