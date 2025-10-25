@@ -164,6 +164,32 @@ gh secret set BASE_SEPOLIA_RPC_URL --body "https://base-sepolia.g.alchemy.com/v2
 6. Value: `https://base-sepolia.g.alchemy.com/v2/YOUR_API_KEY` (your RPC URL from Step 3)
 7. Click **Add secret**
 
+#### Set SAFE_API_KEY (Secret - REQUIRED for Auto Queue Submission)
+
+**Why?** Safe Transaction Service requires an API key to automatically submit unsigned proposals to the Safe UI Queue.
+
+**Get your API key:**
+1. Visit [developer.safe.global](https://developer.safe.global)
+2. Sign up or log in
+3. Create new API key
+4. Copy the key
+
+```bash
+# Using GitHub CLI (recommended)
+gh secret set SAFE_API_KEY --body "YOUR_SAFE_API_KEY"
+```
+
+**Or via GitHub UI:**
+1. Go to your repository on GitHub
+2. Settings → Secrets and variables → Actions
+3. Click **Secrets** tab
+4. Click **New repository secret**
+5. Name: `SAFE_API_KEY`
+6. Value: `YOUR_SAFE_API_KEY` (from developer.safe.global)
+7. Click **Add secret**
+
+**Without SAFE_API_KEY:** Proposals will be created successfully, but you'll need to manually import the JSON file into Safe UI instead of seeing it directly in the Queue.
+
 ### Step 6: Verify Configuration
 
 **Check variables and secrets are set:**

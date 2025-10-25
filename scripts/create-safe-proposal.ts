@@ -100,8 +100,24 @@ async function submitUnsignedProposalToSafe(
       }
     );
 
+    // Initialize SafeApiKit with optional API key
+    // API key is required for Safe Transaction Service submission
+    // Get your API key at https://developer.safe.global
+    const safeApiKey = process.env.SAFE_API_KEY;
+
+    if (!safeApiKey) {
+      logger.warn(
+        '⚠️  SAFE_API_KEY not configured - Safe Transaction Service submission will fail',
+        {
+          hint: 'Get your API key at https://developer.safe.global',
+        }
+      );
+      return null;
+    }
+
     const safeService = new SafeApiKit({
       chainId: BigInt(chainId),
+      apiKey: safeApiKey,
     });
 
     const result = await safeService.proposeTransaction({
