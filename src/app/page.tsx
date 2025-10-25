@@ -278,6 +278,234 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Automation Options Section - Liquid Glass */}
+      <section className="relative py-32 bg-gradient-to-b from-transparent via-purple-50/30 to-transparent dark:via-purple-900/10">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 glass-strong border border-purple-300/30 dark:border-purple-500/30 rounded-full px-6 py-3 mb-8 animate-fade-in shadow-glass">
+                <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <span className="text-purple-600 dark:text-purple-300 font-medium">
+                  {t.automationOptions.badge}
+                </span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-semibold mb-6 text-gray-900 dark:text-white tracking-tight animate-fade-in">
+                {t.automationOptions.title}
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-fade-in">
+                {t.automationOptions.subtitle}
+              </p>
+            </div>
+
+            {/* Comparison Cards */}
+            <div className="grid md:grid-cols-2 gap-8 mb-16">
+              {/* Manual Signing Card */}
+              <div className="glass-card p-8 border border-white/10 dark:border-white/5 glow-on-hover animate-scale-in">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    {t.automationOptions.manual.title}
+                  </h3>
+                  <span className="glass-medium text-xs font-medium px-3 py-1.5 rounded-full text-blue-700 dark:text-blue-300 border border-blue-300/30 dark:border-blue-500/30">
+                    {t.automationOptions.manual.badge}
+                  </span>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  {t.automationOptions.manual.desc}
+                </p>
+
+                <div className="space-y-4 mb-6">
+                  <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <ArrowRight className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    {t.automationOptions.manual.howItWorks}
+                  </h4>
+                  {t.automationOptions.manual.steps.map((step, idx) => (
+                    <div key={idx} className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                        {step.num}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white text-sm">
+                          {step.title}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          {step.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-2 mb-6">
+                  <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                    ✅ {language === 'en' ? 'Pros' : 'メリット'}
+                  </p>
+                  {t.automationOptions.manual.pros.map((pro, idx) => (
+                    <p
+                      key={idx}
+                      className="text-sm text-gray-600 dark:text-gray-400 pl-4"
+                    >
+                      • {pro}
+                    </p>
+                  ))}
+                </div>
+
+                <div className="space-y-2 mb-8">
+                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                    ⚠️ {language === 'en' ? 'Cons' : 'デメリット'}
+                  </p>
+                  {t.automationOptions.manual.cons.map((con, idx) => (
+                    <p
+                      key={idx}
+                      className="text-sm text-gray-600 dark:text-gray-400 pl-4"
+                    >
+                      • {con}
+                    </p>
+                  ))}
+                </div>
+
+                <a
+                  href={t.automationOptions.manual.ctaLink}
+                  className="btn-secondary-modern w-full flex items-center justify-center gap-2"
+                >
+                  {t.automationOptions.manual.cta}
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+
+              {/* PKP Automation Card */}
+              <div
+                className="glass-card p-8 border border-purple-300/30 dark:border-purple-500/30 glow-on-hover animate-scale-in ring-2 ring-purple-500/20 dark:ring-purple-500/30"
+                style={{ animationDelay: '100ms' }}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    {t.automationOptions.pkp.title}
+                  </h3>
+                  <span className="glass-medium text-xs font-medium px-3 py-1.5 rounded-full text-purple-700 dark:text-purple-300 border border-purple-300/30 dark:border-purple-500/30">
+                    {t.automationOptions.pkp.badge}
+                  </span>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  {t.automationOptions.pkp.desc}
+                </p>
+
+                <div className="space-y-4 mb-6">
+                  <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    {t.automationOptions.pkp.howItWorks}
+                  </h4>
+                  {t.automationOptions.pkp.steps.map((step, idx) => (
+                    <div key={idx} className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                        {step.num}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white text-sm">
+                          {step.title}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          {step.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-2 mb-6">
+                  <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                    ✅ {language === 'en' ? 'Pros' : 'メリット'}
+                  </p>
+                  {t.automationOptions.pkp.pros.map((pro, idx) => (
+                    <p
+                      key={idx}
+                      className="text-sm text-gray-600 dark:text-gray-400 pl-4"
+                    >
+                      • {pro}
+                    </p>
+                  ))}
+                </div>
+
+                <div className="space-y-2 mb-8">
+                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                    ⚠️ {language === 'en' ? 'Cons' : 'デメリット'}
+                  </p>
+                  {t.automationOptions.pkp.cons.map((con, idx) => (
+                    <p
+                      key={idx}
+                      className="text-sm text-gray-600 dark:text-gray-400 pl-4"
+                    >
+                      • {con}
+                    </p>
+                  ))}
+                </div>
+
+                <a
+                  href={t.automationOptions.pkp.ctaLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary-modern w-full flex items-center justify-center gap-2"
+                >
+                  {t.automationOptions.pkp.cta}
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Comparison Guide */}
+            <div className="glass-card p-8 border border-white/10 dark:border-white/5 animate-fade-in-up">
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-8 text-center">
+                {t.automationOptions.comparison.title}
+              </h3>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    {t.automationOptions.comparison.useManual.title}
+                  </h4>
+                  <ul className="space-y-2">
+                    {t.automationOptions.comparison.useManual.points.map(
+                      (point, idx) => (
+                        <li
+                          key={idx}
+                          className="text-gray-600 dark:text-gray-300 flex items-start gap-2"
+                        >
+                          <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                          {point}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    {t.automationOptions.comparison.usePKP.title}
+                  </h4>
+                  <ul className="space-y-2">
+                    {t.automationOptions.comparison.usePKP.points.map(
+                      (point, idx) => (
+                        <li
+                          key={idx}
+                          className="text-gray-600 dark:text-gray-300 flex items-start gap-2"
+                        >
+                          <CheckCircle2 className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                          {point}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-8 p-4 glass-medium rounded-lg border border-blue-300/30 dark:border-blue-500/30">
+                <p className="text-center text-gray-700 dark:text-gray-300">
+                  💡 {t.automationOptions.comparison.note}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Why It's Safe Section - Liquid Glass */}
       <section className="relative py-32 bg-gradient-to-b from-transparent via-gray-50/50 to-transparent dark:via-gray-800/30">
         <div className="container mx-auto px-6 lg:px-12">

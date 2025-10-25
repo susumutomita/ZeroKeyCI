@@ -6,6 +6,7 @@
 [![ci](https://github.com/susumutomita/ZeroKeyCI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/susumutomita/ZeroKeyCI/actions/workflows/ci.yml)
 
 # 🛠 ZeroKey CI
+
 **Key-less CI/CD for smart contracts — secure, auditable, and open.**
 
 > ETHOnline 2025 submission
@@ -15,8 +16,7 @@
 
 **⚡ NEW: [Demo Mode](docs/DEMO_MODE.md) - Try ZeroKeyCI in 3 minutes (no Safe setup required!)**
 
-[DeepWiki](https://deepwiki.com/susumutomita/ZeroKeyCI/1-overview)
----
+## [DeepWiki](https://deepwiki.com/susumutomita/ZeroKeyCI/1-overview)
 
 ## 🏆 ETHOnline 2025 - What Makes This Different
 
@@ -27,12 +27,14 @@
 ### 💡 Real-World Impact
 
 **Before ZeroKeyCI:**
+
 - 🔴 Private keys in GitHub Secrets → stolen in SolarWinds-style breach
 - 🔴 Manual deployments → 30+ minutes per release, human error
 - 🔴 No cost visibility → surprise $200 gas fees on mainnet
 - 🔴 Upgrade risks → proxy deployment mistakes break contracts
 
 **After ZeroKeyCI:**
+
 - ✅ Zero keys in CI → impossible to steal what doesn't exist
 - ✅ Automated deployments → 3 minutes from PR merge to Safe proposal
 - ✅ Gas optimization → automatic recommendations save $50-200 per deployment
@@ -41,30 +43,35 @@
 ### 🚀 What We Built for ETHOnline 2025
 
 **1. Automatic Gas Optimization** → Save money on every deployment
+
 - Real-time gas prices across 10 networks
 - Multi-network cost comparison: "Deploy on Polygon saves $45"
 - 6 types of optimization recommendations (timing, network selection, bytecode)
 - Integrated into every CI/CD run - no manual work
 
 **2. True Multi-Chain Support** → Deploy everywhere with one config
+
 - 10 networks: Ethereum, Polygon, Arbitrum, Optimism, Base (+ all testnets)
 - Single YAML file deploys to all networks
 - Deterministic addresses across chains (same contract = same address)
 - Network-specific gas analysis per deployment
 
 **3. Team Notifications** → Know deployment status instantly
+
 - Slack/Discord webhooks for deployment events
 - Real-time status updates in team channels
 - GitHub PR comments with gas analysis
 - Non-blocking (notifications never stop deployments)
 
 **4. Upgradeable Contract Support** → Safe proxy deployments
+
 - UUPS proxy deployment with batch proposals
 - Transparent proxy deployment with admin management
 - UUPS proxy upgrades (upgradeToAndCall)
 - Validation prevents storage layout mistakes
 
 **5. Zero Private Keys** → Impossible to compromise
+
 - NO keys in CI/CD environments
 - Gnosis Safe multisig approval required
 - Optional: Lit Protocol PKP for automated conditional signing
@@ -122,18 +129,20 @@ Use our demo Safe address to try the full workflow in 3 minutes:
 ```yaml
 # Use the demo Safe for testing
 with:
-  safe-address: 0xfbD23fcc0D45a3BD6CdBff38b8C03C2A8E9ec663  # Demo Safe on Base Sepolia
+  safe-address: 0xfbD23fcc0D45a3BD6CdBff38b8C03C2A8E9ec663 # Demo Safe on Base Sepolia
   network: base-sepolia
   contract-name: MyContract
 ```
 
 **What you get:**
+
 - ✅ Full CI/CD workflow experience
 - ✅ Real testnet deployment
 - ✅ Understand Safe proposal flow
 - ✅ No Safe wallet setup needed
 
 **Security:**
+
 - ⚠️ Demo mode is for **learning only** (Base Sepolia testnet)
 - ⚠️ You still sign proposals manually (no auto-signing)
 - ⚠️ For production, create your own Safe
@@ -171,6 +180,7 @@ with:
 6. **Contract deployed** → Full audit trail: PR → CI → Safe → On-chain
 
 **Security guarantees:**
+
 - 🔐 NO private keys anywhere in CI/CD
 - ✅ Multisig approval required (one compromised account ≠ breach)
 - 📝 Complete audit trail (PR → blockchain)
@@ -226,16 +236,19 @@ ZeroKeyCI automatically creates a pull request containing:
 ### Gas Cost Savings (Real Examples)
 
 **Scenario 1: Multi-Network Deployment**
+
 - Contract: ERC-721 NFT (24KB bytecode)
 - Without ZeroKeyCI: Deploy to Ethereum mainnet → $180 gas fee (200 gwei)
 - **With ZeroKeyCI**: Automatic recommendation "Deploy to Polygon" → **$2.50 gas fee** (saves $177.50)
 
 **Scenario 2: Timing Optimization**
+
 - Contract: UUPS Proxy + Implementation (combined 32KB)
 - Without ZeroKeyCI: Deploy during peak hours → $95 gas fee (150 gwei)
 - **With ZeroKeyCI**: Wait recommendation "Gas price will drop 40％ in 2 hours" → **$57 gas fee** (saves $38)
 
 **Scenario 3: Network Comparison**
+
 - Contract: ERC-20 Token (18KB bytecode)
 - ZeroKeyCI compares ALL 10 networks automatically:
   - Ethereum: $120 | Polygon: $1.20 | Arbitrum: $0.80 | **Optimism: $0.60** ← Recommended
@@ -244,12 +257,14 @@ ZeroKeyCI automatically creates a pull request containing:
 ### Time Savings
 
 **Traditional Manual Deployment:**
+
 - Research gas prices across networks: 15 mins
 - Choose optimal network: 10 mins
 - Manual deployment: 5 mins
 - **Total: 30 minutes per deployment**
 
 **ZeroKeyCI Automated Deployment:**
+
 - Merge PR: 30 seconds
 - CI generates proposal with gas analysis: 90 seconds
 - Review & approve in Safe UI: 60 seconds
@@ -258,11 +273,13 @@ ZeroKeyCI automatically creates a pull request containing:
 ### Security Impact
 
 **Before (Private Keys in GitHub Secrets):**
+
 - Breach risk: Single compromised account = full treasury access
 - Audit trail: Limited to GitHub audit logs
 - Rollback: Impossible once transaction broadcast
 
 **After (ZeroKeyCI Multisig):**
+
 - Breach risk: Need 2+ of 3 accounts (significantly harder)
 - Audit trail: Complete (PR → CI logs → Safe → On-chain)
 - Rollback: Proposals can be rejected before execution
@@ -276,12 +293,14 @@ ZeroKeyCI automatically creates a pull request containing:
 ### Attack Surface Comparison
 
 **Traditional CI/CD** (Private keys in GitHub Secrets):
+
 ```
 Attacker needs: 1 compromised GitHub account with repo access
 Result: Full access to deployment private key → drain entire treasury
 ```
 
 **ZeroKeyCI** (Multisig approval):
+
 ```
 Attacker needs: 2+ of 3 Safe owners' hardware wallets
 Result: Even with GitHub breach, attacker cannot deploy or access funds
@@ -290,6 +309,7 @@ Result: Even with GitHub breach, attacker cannot deploy or access funds
 ### ETHOnline 2025 Stack
 
 Built with hackathon sponsor technologies:
+
 - **Hardhat 3** → Compile, test, and simulate contracts
 - **Gnosis Safe SDK** → Create deployment proposals
 - **Lit Protocol PKP** → Optional automated conditional signing
@@ -297,18 +317,68 @@ Built with hackathon sponsor technologies:
 - **Envio HyperIndex** → Real-time deployment monitoring
 - **Open Policy Agent** → Policy enforcement before signing
 
-### 🤖 Optional: Lit Protocol PKP for Full Automation
+### 🤖 Two Ways to Deploy: Manual vs PKP Automation
 
-**For high-frequency deployments**: Add Lit Protocol PKP as Safe signer for automated conditional signing.
+ZeroKeyCI supports **two deployment workflows**. Choose based on your team's needs:
+
+#### Option 1: Manual Signing (Default - Ready in 3 Minutes)
 
 **How it works**:
+
 ```
-PR Merged → Tests Pass → OPA Validates → PKP Signs → Safe Executes
+PR Merged → CI Creates Proposal → Proposal in Safe UI → Team Signs Manually → Execute
 ```
 
-**Key benefit**: 3-minute end-to-end deployment while maintaining security (distributed key, conditional logic, human override).
+**When to use**:
 
-**→ [Complete PKP Setup Guide](docs/PKP_SETUP.md)**
+- ✅ Getting started with ZeroKeyCI
+- ✅ Deploy infrequently (weekly or less)
+- ✅ Want maximum human control
+- ✅ Need no additional setup
+
+**Setup**: Just add `SAFE_ADDRESS` and `RPC_URL` to GitHub Secrets. That's it!
+
+---
+
+#### Option 2: PKP Automation (Optional - Fully Automated)
+
+**For high-frequency deployments**: Add Lit Protocol PKP for fully automated signing.
+
+**What is PKP?**
+PKP (Programmable Key Pair) is a distributed cryptographic key from Lit Protocol. The private key is split across Lit Protocol's decentralized network using threshold cryptography - no single party can access it.
+
+**How it works**:
+
+```
+PR Merged → Tests Pass → OPA Validates → PKP Auto-Signs → Safe Executes
+```
+
+**When to use**:
+
+- ✅ Deploy frequently (daily/weekly)
+- ✅ Want zero manual steps
+- ✅ Need 24/7 deployment capability
+- ✅ Have automated CI/CD workflows
+
+**Key benefits**:
+
+- 🚀 3-minute end-to-end deployment (vs 30+ minutes manual)
+- 🔐 Cryptographically enforced conditions (tests + policies must pass)
+- 🛡️ Distributed key security (never exists in full anywhere)
+- 👥 Human override maintained (multisig threshold ≥2)
+
+**Required GitHub Secrets** (in addition to `SAFE_ADDRESS` and `RPC_URL`):
+| Secret Name | What It Is | How to Get It |
+|---|---|---|
+| `PKP_PUBLIC_KEY` | Your PKP's Ethereum address | Obtained when minting PKP NFT (see setup guide) |
+| `LIT_ACTION_IPFS_CID` | IPFS hash of conditional signing logic | Deployed once during PKP setup |
+| `LIT_NETWORK` | Lit Protocol network (`datil-dev`, `datil-test`, `datil`) | Choose based on environment (dev/staging/prod) |
+
+**Setup time**: 15-20 minutes (one-time)
+
+**→ [Complete PKP Setup Guide](docs/PKP_SETUP.md)** - Step-by-step instructions
+
+**Note**: You can start with Manual Signing and upgrade to PKP later. Both are equally secure.
 
 ---
 
@@ -380,5 +450,6 @@ gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
 ---
 
 ## 💡 Team
+
 Built by **Susumu Tomita (たみぃ)** and collaborators
 for **ETHOnline 2025**
