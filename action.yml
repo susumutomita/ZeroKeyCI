@@ -220,6 +220,7 @@ runs:
         NETWORK: ${{ inputs.network }}
         CONTRACT: ${{ inputs.contract-name }}
         RPC_URL: ${{ inputs.rpc-url }}
+        CALLING_REPO_ROOT: ${{ github.workspace }}
       run: |
         echo "🔐 Creating Safe transaction proposal..."
 
@@ -235,9 +236,14 @@ runs:
           const safeAddress = process.env.SAFE_ADDRESS;
           const network = process.env.NETWORK;
           const contractName = process.env.CONTRACT;
+          const callingRepoRoot = process.env.CALLING_REPO_ROOT;
 
           if (!safeAddress) {
             throw new Error('SAFE_ADDRESS not configured');
+          }
+
+          if (!callingRepoRoot) {
+            throw new Error('CALLING_REPO_ROOT not set');
           }
 
           const chainIds: Record<string, number> = {
@@ -258,9 +264,9 @@ runs:
             throw new Error(`Unknown network: ${network}`);
           }
 
-          // Read compiled contract
+          // Read compiled contract from calling repository
           const artifactPath = resolve(
-            process.cwd(),
+            callingRepoRoot,
             'artifacts',
             'contracts',
             `${contractName}.sol`,
@@ -293,8 +299,8 @@ runs:
           // Serialize proposal
           const serialized = builder.serializeProposal(proposal);
 
-          // Write to file
-          const outputPath = resolve(process.cwd(), 'safe-proposal.json');
+          // Write to file in calling repository
+          const outputPath = resolve(callingRepoRoot, 'safe-proposal.json');
           require('fs').writeFileSync(outputPath, serialized);
 
           console.log('✅ Safe proposal created successfully');
@@ -313,8 +319,8 @@ runs:
         # Run proposal creation
         bun run create-proposal.ts
 
-        # Set outputs
-        PROPOSAL_HASH=$(cat safe-proposal.json | jq -r '.validationHash')
+        # Set outputs (read from calling repository)
+        PROPOSAL_HASH=$(cat ${{ github.workspace }}/safe-proposal.json | jq -r '.validationHash')
         echo "proposal_hash=$PROPOSAL_HASH" >> $GITHUB_OUTPUT
         echo "safe_address=${{ inputs.safe-address }}" >> $GITHUB_OUTPUT
 
@@ -337,17 +343,17 @@ runs:
       run: |
         echo "🔍 Validating Safe proposal structure..."
 
-        if [ ! -f "safe-proposal.json" ]; then
+        if [ ! -f "${{ github.workspace }}/safe-proposal.json" ]; then
           echo "::error::Safe proposal not found"
           exit 1
         fi
 
-        jq empty safe-proposal.json || {
+        jq empty ${{ github.workspace }}/safe-proposal.json || {
           echo "::error::Invalid JSON in safe-proposal.json"
           exit 1
         }
 
-        jq -e '.safe' safe-proposal.json > /dev/null || {
+        jq -e '.safe' ${{ github.workspace }}/safe-proposal.json > /dev/null || {
           echo "::error::Missing 'safe' field in proposal"
           exit 1
         }
@@ -358,7 +364,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: safe-proposal-${{ github.run_id }}
-        path: safe-proposal.json
+        path: ${{ github.workspace }}/safe-proposal.json
         retention-days: 30
 
     - name: Verify contract on Blockscout
