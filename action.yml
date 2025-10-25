@@ -24,6 +24,10 @@ inputs:
     description: 'RPC URL for the target network'
     required: true
 
+  safe-api-key:
+    description: 'Safe API key for submitting unsigned proposals to Safe Transaction Service (get at https://developer.safe.global)'
+    required: false
+
   deploy-config-path:
     description: 'Path to deployment configuration YAML file'
     required: false
@@ -217,6 +221,7 @@ runs:
       shell: bash
       env:
         SAFE_ADDRESS: ${{ inputs.safe-address }}
+        SAFE_API_KEY: ${{ inputs.safe-api-key }}
         NETWORK: ${{ inputs.network }}
         CONTRACT_NAME: ${{ inputs.contract-name }}
         ZERO_KEY_PROJECT_ROOT: ${{ github.workspace }}
