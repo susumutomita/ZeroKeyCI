@@ -86,6 +86,118 @@ export const translations = {
       ],
     },
 
+    // Automation options
+    automationOptions: {
+      badge: 'Choose Your Setup',
+      title: 'Two Ways to Deploy',
+      subtitle:
+        'Start with manual signing (ready in 3 minutes) or enable PKP automation (fully automated workflow)',
+      manual: {
+        title: 'Manual Signing',
+        badge: 'Default • Ready Now',
+        desc: 'Sign transactions in Safe UI. Secure, simple, works immediately.',
+        howItWorks: 'How It Works',
+        steps: [
+          {
+            num: '1',
+            title: 'Configure Safe Address',
+            desc: 'Add your Safe multisig address and RPC URL to GitHub Secrets. No other setup needed.',
+          },
+          {
+            num: '2',
+            title: 'CI Creates Proposal',
+            desc: 'When PR is merged, GitHub Actions compiles contract and generates unsigned Safe proposal.',
+          },
+          {
+            num: '3',
+            title: 'Proposal Appears in Safe UI',
+            desc: 'Proposal automatically appears in Safe Transaction Service. No manual file import needed.',
+          },
+          {
+            num: '4',
+            title: 'Sign in Safe UI',
+            desc: 'Safe owners review bytecode, parameters, and sign. Once threshold is met, execute deployment.',
+          },
+        ],
+        pros: [
+          'Works immediately (3-minute setup)',
+          'No additional dependencies',
+          'Maximum human control',
+          'Perfect for learning',
+        ],
+        cons: [
+          'Requires manual signing step',
+          'Team needs to be online to sign',
+        ],
+        cta: 'Use Manual Signing',
+        ctaLink: '#setup',
+      },
+      pkp: {
+        title: 'PKP Automation',
+        badge: 'Optional • Fully Automated',
+        desc: 'Automated signing with Lit Protocol PKP. Zero manual steps after setup.',
+        howItWorks: 'How It Works',
+        steps: [
+          {
+            num: '1',
+            title: 'Set Up PKP',
+            desc: 'Mint PKP NFT, grant permissions to Lit Action, add PKP as Safe owner. One-time setup (15-20 minutes).',
+          },
+          {
+            num: '2',
+            title: 'Configure GitHub Secrets',
+            desc: 'Add PKP_PUBLIC_KEY, LIT_ACTION_IPFS_CID, LIT_NETWORK to GitHub repository secrets.',
+          },
+          {
+            num: '3',
+            title: 'Merge PR → Auto-Deploy',
+            desc: 'PKP automatically signs if all conditions pass (tests, policies, PR merged). No manual intervention.',
+          },
+          {
+            num: '4',
+            title: 'Multisig as Safety Net',
+            desc: 'PKP counts as 1-of-N signatures. Other Safe owners can still review and approve before execution.',
+          },
+        ],
+        pros: [
+          'Fully automated (zero manual steps)',
+          'Conditional signing (enforced by cryptography)',
+          'Fast deployment (minutes, not hours)',
+          'Perfect for production',
+        ],
+        cons: [
+          'Requires 15-20 minute initial setup',
+          'Needs PKP NFT minting (small gas fee)',
+          'More complex architecture',
+        ],
+        cta: 'Set Up PKP Automation',
+        ctaLink:
+          'https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PKP_SETUP.md',
+      },
+      comparison: {
+        title: 'Which Should You Choose?',
+        useManual: {
+          title: 'Use Manual Signing If:',
+          points: [
+            'You want to start immediately',
+            'You are learning ZeroKeyCI for the first time',
+            'You deploy infrequently (once a week or less)',
+            'You prefer maximum human control',
+          ],
+        },
+        usePKP: {
+          title: 'Use PKP Automation If:',
+          points: [
+            'You deploy frequently (daily or weekly)',
+            'You want zero manual steps in deployment',
+            'You have automated CI/CD workflows',
+            'You need 24/7 deployment capability',
+          ],
+        },
+        note: 'You can start with Manual Signing and upgrade to PKP later. Both are secure.',
+      },
+    },
+
     // Why it's safe
     whyItsSafe: {
       badge: 'Security Model',
@@ -358,6 +470,115 @@ export const translations = {
           desc: '閾値に達すると、コントラクトがデプロイされます。コードからチェーンまで完全な監査証跡。',
         },
       ],
+    },
+
+    // 自動化オプション
+    automationOptions: {
+      badge: 'セットアップを選択',
+      title: '2つのデプロイ方法',
+      subtitle:
+        '手動署名から始める（3分で準備完了）か、PKP自動化を有効化（完全自動ワークフロー）',
+      manual: {
+        title: '手動署名',
+        badge: 'デフォルト • すぐ使える',
+        desc: 'Safe UIでトランザクションに署名。安全、シンプル、すぐに動作。',
+        howItWorks: '仕組み',
+        steps: [
+          {
+            num: '1',
+            title: 'Safeアドレスを設定',
+            desc: 'SafeマルチシグアドレスとRPC URLをGitHub Secretsに追加。他に設定不要。',
+          },
+          {
+            num: '2',
+            title: 'CIがプロポーザルを作成',
+            desc: 'PRマージ時、GitHub Actionsがコントラクトをコンパイルし、未署名のSafeプロポーザルを生成。',
+          },
+          {
+            num: '3',
+            title: 'プロポーザルがSafe UIに表示',
+            desc: 'プロポーザルが自動的にSafe Transaction Serviceに表示。手動ファイルインポート不要。',
+          },
+          {
+            num: '4',
+            title: 'Safe UIで署名',
+            desc: 'Safeオーナーがバイトコード、パラメータをレビューして署名。閾値到達で実行。',
+          },
+        ],
+        pros: [
+          'すぐに使える（3分セットアップ）',
+          '追加の依存関係なし',
+          '最大限の人間による制御',
+          '学習に最適',
+        ],
+        cons: ['手動署名ステップが必要', 'チームがオンラインで署名する必要'],
+        cta: '手動署名を使用',
+        ctaLink: '#setup',
+      },
+      pkp: {
+        title: 'PKP自動化',
+        badge: 'オプション • 完全自動',
+        desc: 'Lit Protocol PKPによる自動署名。セットアップ後は手動ステップゼロ。',
+        howItWorks: '仕組み',
+        steps: [
+          {
+            num: '1',
+            title: 'PKPをセットアップ',
+            desc: 'PKP NFTをミント、Lit Actionに権限付与、PKPをSafeオーナーに追加。一度だけのセットアップ（15-20分）。',
+          },
+          {
+            num: '2',
+            title: 'GitHub Secretsを設定',
+            desc: 'PKP_PUBLIC_KEY、LIT_ACTION_IPFS_CID、LIT_NETWORKをGitHubリポジトリのSecretsに追加。',
+          },
+          {
+            num: '3',
+            title: 'PRマージ → 自動デプロイ',
+            desc: 'すべての条件（テスト、ポリシー、PRマージ）が満たされた場合、PKPが自動署名。手動介入なし。',
+          },
+          {
+            num: '4',
+            title: 'マルチシグがセーフティネット',
+            desc: 'PKPは1-of-N署名としてカウント。他のSafeオーナーは実行前にレビュー・承認可能。',
+          },
+        ],
+        pros: [
+          '完全自動化（手動ステップゼロ）',
+          '条件付き署名（暗号学的に強制）',
+          '高速デプロイ（数分、数時間ではなく）',
+          '本番環境に最適',
+        ],
+        cons: [
+          '初回セットアップに15-20分必要',
+          'PKP NFTミントが必要（小額のガス代）',
+          'より複雑なアーキテクチャ',
+        ],
+        cta: 'PKP自動化をセットアップ',
+        ctaLink:
+          'https://github.com/susumutomita/ZeroKeyCI/blob/main/docs/PKP_SETUP.md',
+      },
+      comparison: {
+        title: 'どちらを選ぶべきか？',
+        useManual: {
+          title: '手動署名を使用する場合：',
+          points: [
+            'すぐに始めたい',
+            'ZeroKeyCIを初めて学ぶ',
+            'デプロイ頻度が低い（週1回以下）',
+            '最大限の人間による制御を好む',
+          ],
+        },
+        usePKP: {
+          title: 'PKP自動化を使用する場合：',
+          points: [
+            'デプロイ頻度が高い（毎日または毎週）',
+            'デプロイで手動ステップをゼロにしたい',
+            '自動化されたCI/CDワークフローがある',
+            '24時間365日のデプロイ能力が必要',
+          ],
+        },
+        note: '手動署名から始めて、後でPKPにアップグレードできます。両方とも安全です。',
+      },
     },
 
     // なぜ安全か
