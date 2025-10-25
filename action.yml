@@ -125,11 +125,53 @@ runs:
         bun run test
         bun run test:coverage
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+
+    - name: Install calling repository dependencies
+      shell: bash
+      run: |
+        echo "📦 Installing calling repository dependencies..."
+        
+        # Check which package manager to use
+        if [ -f "bun.lockb" ]; then
+          echo "Using Bun..."
+          bun install --frozen-lockfile
+        elif [ -f "pnpm-lock.yaml" ]; then
+          echo "Using pnpm..."
+          npm install -g pnpm
+          pnpm install --frozen-lockfile
+        elif [ -f "yarn.lock" ]; then
+          echo "Using Yarn..."
+          yarn install --frozen-lockfile
+        elif [ -f "package-lock.json" ]; then
+          echo "Using npm..."
+          npm ci
+        elif [ -f "package.json" ]; then
+          echo "Using npm (no lockfile)..."
+          npm install
+        else
+          echo "::error::No package.json found in calling repository"
+          exit 1
+        fi
+        
+        echo "✅ Dependencies installed successfully"
+
     - name: Compile contracts
       shell: bash
       run: |
         echo "🔨 Compiling contracts..."
-        npx hardhat compile
+        
+        # Use locally installed hardhat
+        if [ -f "node_modules/.bin/hardhat" ]; then
+          ./node_modules/.bin/hardhat compile
+        else
+          npx hardhat compile
+        fi
 
     - name: Extract deployment configuration
       id: deploy-config
