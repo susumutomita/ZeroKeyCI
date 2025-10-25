@@ -74,10 +74,11 @@ describe('Landing Page', () => {
 
   it('should render Deploy Your First Contract section', () => {
     render(<Home />);
-    expect(screen.getByText('3-Minute Setup')).toBeInTheDocument();
-    expect(screen.getByText(/Deploy Your First Contract/i)).toBeInTheDocument();
-    const in3MinutesElements = screen.getAllByText(/In 3 Minutes/i);
-    expect(in3MinutesElements.length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(/Start Deploying in 3 Minutes/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/No OAuth, no complex setup/i)).toBeInTheDocument();
+    expect(screen.getByText('Create GitHub Workflow')).toBeInTheDocument();
   });
 
   it('should render Why This Matters section with tabs', () => {
