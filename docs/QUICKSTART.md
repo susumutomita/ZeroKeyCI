@@ -273,6 +273,57 @@ gh pr create --title "Deploy MyContract" --body "Deploy first contract using Zer
 
 ## 🎓 Next Steps
 
+### Advanced Configuration (Optional)
+
+#### Option: Use `.zerokey/deploy.yaml` Configuration File
+
+**What is it?** An optional configuration file for centralizing deployment settings.
+
+**When to use it:**
+- ✅ You have multiple contracts to deploy
+- ✅ You want to share configuration across workflows
+- ✅ You prefer file-based configuration over workflow YAML
+
+**When NOT to use it:**
+- ⛔ Simple projects with one contract (use workflow parameters instead - easier)
+- ⛔ Quick start guide examples (workflow parameters are clearer)
+
+**How to use:**
+
+1. Create `.zerokey/deploy.yaml` in your repository root:
+
+```yaml
+network: base-sepolia
+contract: MyContract
+```
+
+2. The workflow will use these values automatically if **not** specified in workflow inputs.
+
+**Priority:** Workflow inputs **always override** file configuration.
+
+```yaml
+# .github/workflows/deploy.yml
+with:
+  safe-address: ${{ vars.SAFE_ADDRESS }}
+  # network and contract-name can be omitted if .zerokey/deploy.yaml exists
+  verify-blockscout: true
+secrets:
+  rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+```
+
+**Example use case:** Multi-contract repository
+
+```yaml
+# .zerokey/deploy.yaml
+network: base-sepolia
+contract: TokenContract  # Default contract
+
+# Override in workflow for different contracts:
+# .github/workflows/deploy-nft.yml
+with:
+  contract-name: NFTContract  # Overrides file setting
+```
+
 ### Deploy to More Networks
 
 Update `.github/workflows/deploy.yml`:
