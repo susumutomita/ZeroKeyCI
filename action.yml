@@ -122,7 +122,7 @@ runs:
       shell: bash
       run: |
         echo "📦 Installing calling repository dependencies..."
-        
+
         # Check which package manager to use
         if [ -f "bun.lockb" ]; then
           echo "Using Bun..."
@@ -144,14 +144,14 @@ runs:
           echo "::error::No package.json found in calling repository"
           exit 1
         fi
-        
+
         echo "✅ Dependencies installed successfully"
 
     - name: Compile contracts
       shell: bash
       run: |
         echo "🔨 Compiling contracts..."
-        
+
         # Use locally installed hardhat
         if [ -f "node_modules/.bin/hardhat" ]; then
           ./node_modules/.bin/hardhat compile
@@ -217,126 +217,42 @@ runs:
       shell: bash
       env:
         SAFE_ADDRESS: ${{ inputs.safe-address }}
-        NETWORK: ${{ inputs.network }}
-        CONTRACT: ${{ inputs.contract-name }}
-        RPC_URL: ${{ inputs.rpc-url }}
+        ZERO_KEY_PROJECT_ROOT: ${{ github.workspace }}
         CALLING_REPO_ROOT: ${{ github.workspace }}
+        GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_PR_AUTHOR: ${{ github.event.pull_request.user.login || github.actor }}
+        GITHUB_WORKFLOW: ${{ github.workflow }}
+        GITHUB_RUN_ID: ${{ github.run_id }}
+        GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
         echo "🔐 Creating Safe transaction proposal..."
 
         cd ${{ github.action_path }}
+        bun run scripts/create-safe-proposal.ts
 
-        # Create proposal script
-        cat << 'EOF' > create-proposal.ts
-        import { SafeProposalBuilder } from './src/services/SafeProposalBuilder';
-        import { readFileSync } from 'fs';
-        import { resolve } from 'path';
+        PROPOSAL_PATH="${{ github.workspace }}/safe-proposal.json"
+        if [ ! -f "$PROPOSAL_PATH" ]; then
+          echo "::error::Safe proposal not found at $PROPOSAL_PATH"
+          exit 1
+        fi
 
-        async function createDeploymentProposal() {
-          const safeAddress = process.env.SAFE_ADDRESS;
-          const network = process.env.NETWORK;
-          const contractName = process.env.CONTRACT;
-          const callingRepoRoot = process.env.CALLING_REPO_ROOT;
-
-          if (!safeAddress) {
-            throw new Error('SAFE_ADDRESS not configured');
-          }
-
-          if (!callingRepoRoot) {
-            throw new Error('CALLING_REPO_ROOT not set');
-          }
-
-          const chainIds: Record<string, number> = {
-            'mainnet': 1,
-            'sepolia': 11155111,
-            'polygon': 137,
-            'polygon-amoy': 80002,
-            'arbitrum': 42161,
-            'arbitrum-sepolia': 421614,
-            'optimism': 10,
-            'optimism-sepolia': 11155420,
-            'base': 8453,
-            'base-sepolia': 84532,
-          };
-
-          const chainId = chainIds[network || 'base-sepolia'];
-          if (!chainId) {
-            throw new Error(`Unknown network: ${network}`);
-          }
-
-          // Read compiled contract from calling repository
-          const artifactPath = resolve(
-            callingRepoRoot,
-            'artifacts',
-            'contracts',
-            `${contractName}.sol`,
-            `${contractName}.json`
-          );
-
-          const artifact = JSON.parse(readFileSync(artifactPath, 'utf-8'));
-          const bytecode = artifact.bytecode;
-
-          // Initialize builder
-          const builder = new SafeProposalBuilder({
-            safeAddress,
-            chainId,
-          });
-
-          // Create deployment proposal
-          const proposal = await builder.createDeploymentProposal({
-            contractName,
-            bytecode,
-            constructorArgs: [],
-            value: '0',
-            metadata: {
-              pr: process.env.GITHUB_PR_NUMBER || 'N/A',
-              commit: process.env.GITHUB_SHA || 'N/A',
-              deployer: 'ZeroKeyCI GitHub Action',
-              author: process.env.GITHUB_ACTOR || 'unknown',
-            },
-          });
-
-          // Serialize proposal
-          const serialized = builder.serializeProposal(proposal);
-
-          // Write to file in calling repository
-          const outputPath = resolve(callingRepoRoot, 'safe-proposal.json');
-          require('fs').writeFileSync(outputPath, serialized);
-
-          console.log('✅ Safe proposal created successfully');
-          console.log(`📝 Proposal saved to: ${outputPath}`);
-
-          // Output for GitHub Actions
-          const parsed = JSON.parse(serialized);
-          console.log(`::set-output name=proposal-hash::${parsed.validationHash}`);
-          console.log(`::set-output name=safe-address::${safeAddress}`);
-          console.log(`::set-output name=chain-id::${chainId}`);
-        }
-
-        createDeploymentProposal().catch(console.error);
-        EOF
-
-        # Run proposal creation
-        bun run create-proposal.ts
-
-        # Set outputs (read from calling repository)
-        PROPOSAL_HASH=$(cat ${{ github.workspace }}/safe-proposal.json | jq -r '.validationHash')
+        PROPOSAL_HASH=$(jq -r '.validationHash' "$PROPOSAL_PATH")
+        if [ -z "$PROPOSAL_HASH" ] || [ "$PROPOSAL_HASH" = "null" ]; then
+          echo "::error::validationHash missing in safe-proposal.json"
+          exit 1
+        fi
         echo "proposal_hash=$PROPOSAL_HASH" >> $GITHUB_OUTPUT
         echo "safe_address=${{ inputs.safe-address }}" >> $GITHUB_OUTPUT
 
-        # Determine chain ID
-        case "${{ inputs.network }}" in
-          mainnet) echo "chain_id=1" >> $GITHUB_OUTPUT ;;
-          sepolia) echo "chain_id=11155111" >> $GITHUB_OUTPUT ;;
-          polygon) echo "chain_id=137" >> $GITHUB_OUTPUT ;;
-          polygon-amoy) echo "chain_id=80002" >> $GITHUB_OUTPUT ;;
-          arbitrum) echo "chain_id=42161" >> $GITHUB_OUTPUT ;;
-          arbitrum-sepolia) echo "chain_id=421614" >> $GITHUB_OUTPUT ;;
-          optimism) echo "chain_id=10" >> $GITHUB_OUTPUT ;;
-          optimism-sepolia) echo "chain_id=11155420" >> $GITHUB_OUTPUT ;;
-          base) echo "chain_id=8453" >> $GITHUB_OUTPUT ;;
-          base-sepolia) echo "chain_id=84532" >> $GITHUB_OUTPUT ;;
-        esac
+        CHAIN_ID=$(jq -r '.chainId' "$PROPOSAL_PATH")
+        if [ -z "$CHAIN_ID" ] || [ "$CHAIN_ID" = "null" ]; then
+          echo "::error::chainId missing in safe-proposal.json"
+          exit 1
+        fi
+        echo "chain_id=$CHAIN_ID" >> $GITHUB_OUTPUT
 
     - name: Validate proposal structure
       shell: bash

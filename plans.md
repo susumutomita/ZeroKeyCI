@@ -5581,11 +5581,15 @@ Enable Manual Signing mode to submit unsigned proposals to Safe Transaction Serv
   - [x] Analyze trigger-pkp-signing.ts for Safe API submission pattern
   - [x] Identify what senderSignature value to use for unsigned proposals
   - [x] Create exec plan in plans.md
-- [ ] Phase 2: Implementation
-  - [ ] Add Safe Transaction Service submission to create-safe-proposal.ts
-  - [ ] Handle unsigned proposal (empty signature or safe address as sender)
-  - [ ] Add graceful error handling if Safe API submission fails
-  - [ ] Add logging for Safe API submission
+- [x] Phase 2: Implementation (core script)
+  - [x] Add Safe Transaction Service submission to create-safe-proposal.ts
+  - [x] Handle unsigned proposal (empty signature or safe address as sender)
+  - [x] Add graceful error handling if Safe API submission fails
+  - [x] Add logging for Safe API submission
+- [x] Phase 2b: GitHub Action integration
+  - [x] Allow scripts/create-safe-proposal.ts to target the calling repo root via env var
+  - [x] Replace inline workflow script with bun run scripts/create-safe-proposal.ts
+  - [x] Ensure workflow outputs (proposal hash, chain id, safe address) still work
 - [ ] Phase 3: Testing
   - [ ] Update create-safe-proposal.test.ts to mock Safe API submission
   - [ ] Test with actual Safe address on Base Sepolia
@@ -5825,3 +5829,46 @@ if (safeTxHashFromApi) {
 - Zero changes to PKP workflow (backward compatible)
 - Maintains "no private keys in CI" security model
 
+### Iteration 4 (2025-10-25 13:45)
+**What was done:**
+- Investigated user report referencing Actions run 18804803137 and traced the workflow path.
+- Found `.github/workflows/deploy.yml` still embeds the legacy inline TypeScript script, so the new Safe submission logic in `scripts/create-safe-proposal.ts` never executes inside GitHub Actions.
+- Confirmed documentation (`docs/DEPLOY_WORKFLOW_REFACTOR.md`) already calls out this refactor but it was never implemented.
+- Discovered Bun CLI in this sandbox currently aborts with `Signal(6)` (even `bun -v`), so local test commands cannot run until sandbox allows Bun.
+
+**Test status:**
+- Not run yet → Bun binary crashes immediately in current sandbox (needs follow-up once available).
+
+**Decisions made:**
+- Introduce `ZERO_KEY_PROJECT_ROOT` env override so scripts can target the calling repo while still running inside the action package directory.
+- Replace inline script block in `action.yml` with `bun run scripts/create-safe-proposal.ts` to guarantee Safe submissions happen in CI.
+- Refresh PR comment copy to describe the new "already queued" behavior so users stop re-entering calldata manually.
+
+**Next steps:**
+- Update `scripts/create-safe-proposal.ts` to respect `ZERO_KEY_PROJECT_ROOT` for configs/artifacts/output and persist the Safe Tx hash in `safe-proposal.json`.
+- Simplify the workflow step to call the shared script and continue exporting outputs via `jq`.
+- Revise `scripts/post-safe-link-to-pr.ts` messaging so the Safe link tells users to review/sign the queued transaction rather than recreating it manually.
+
+#### Retrospective (2025-10-25)
+**Problem**: Manual mode workflow linked to Safe UI but never queued transactions, confusing users and blocking signatures.
+
+**Root Cause**: `.github/workflows/deploy.yml` still embedded the legacy inline proposal script, so the updated `scripts/create-safe-proposal.ts` (which actually submits to the Safe Transaction Service) never executed inside CI.
+
+**Prevention**: Always route proposal generation through the shared script and keep workflow logic minimal; added `ZERO_KEY_PROJECT_ROOT` override plus Safe Tx hash persistence so regression tests (future TODO) can assert that workflow + script stay in sync.
+
+### Iteration 5 (2025-10-25 15:25)
+**What was done:**
+- Added `projectRoot` detection + env override in `scripts/create-safe-proposal.ts`, ensured config/artifact/output paths respect the calling repo, and persisted `safeTxHash` / submission status into `safe-proposal.json`.
+- Replaced the inline TS blob in `action.yml` with a direct `bun run scripts/create-safe-proposal.ts` call, piping `ZERO_KEY_PROJECT_ROOT` and re-reading outputs from the generated JSON to keep everything in sync.
+- Updated `scripts/post-safe-link-to-pr.ts` so PR comments (and workflow summary) now explain that the transaction is already queued when `safeTxHash` exists, while still guiding manual fallback if submission fails.
+
+**Test status:**
+- Not run → Bun CLI still crashes immediately with `Signal(6)` in this sandbox, so `bun run lint|test` cannot execute locally. Need to rerun once environment allows Bun to spawn.
+
+**Decisions made:**
+- Treat Safe submission as source of truth; embed metadata so future automation (or tests) can assert queue status.
+- Read chain ID from `safe-proposal.json` instead of trusting workflow inputs to avoid drift between `.zerokey/deploy.yaml` and GitHub inputs.
+
+**Next steps:**
+- Once Bun works, rerun `bun run test` + `bun run lint` to reconfirm green status.
+- Update docs / i18n copy (Phase 4) after verifying the new UX in a live Safe.
