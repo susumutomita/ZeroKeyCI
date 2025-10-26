@@ -131,8 +131,7 @@ graph TD
 
 ### Optional Enhancements
 1. **Monitoring**
-   - Add Blockscout integration
-   - Setup Envio indexer
+   - Add Blockscout integration (experimental)
    - Discord/Slack notifications
 
 2. **Advanced Features**
