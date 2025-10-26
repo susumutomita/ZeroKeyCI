@@ -107,6 +107,26 @@ export function validatePrivateKey(privateKey: string): {
   }
 }
 
+export function normalizePKPPublicKey(rawKey: string): string {
+  if (!rawKey || rawKey.trim() === '') {
+    throw new Error('Invalid PKP public key (missing value)');
+  }
+
+  // Lit SDK currently returns pkp.publicKey values without the 0x prefix.
+  const trimmed = rawKey.trim();
+  const hex = trimmed.startsWith('0x') ? trimmed.slice(2) : trimmed;
+
+  if (!hex.startsWith('04')) {
+    throw new Error('Invalid PKP public key (expected uncompressed 0x04...)');
+  }
+
+  if (!/^04[0-9a-fA-F]{128}$/.test(hex)) {
+    throw new Error('Invalid PKP public key (malformed hex)');
+  }
+
+  return `0x${hex}`;
+}
+
 async function getLitNetworkStr(): Promise<LitNetworkStr> {
   const env = process.env.LIT_NETWORK;
   const valid: LitNetworkStr[] = ['datil-dev', 'datil-test', 'datil'];
