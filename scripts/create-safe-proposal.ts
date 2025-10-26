@@ -807,18 +807,29 @@ async function main() {
       validationHash: parsed.validationHash,
     });
 
-    // Safe API submission is skipped for Manual workflow
-    // Manual workflow: Users create proposals in Safe UI using the artifact file
-    // PKP workflow: Will be implemented separately with PKP signing
-    logger.info('📋 Manual workflow - Safe API submission skipped', {
-      reason:
-        'Unsigned proposals require manual creation in Safe UI (app.safe.global)',
-      artifactFile: 'safe-proposal.json',
-      nextSteps:
-        'Safe owners will review and sign the proposal in Safe UI Queue',
-    });
+    // Try to submit to Safe Transaction Service if SAFE_API_KEY is configured
+    let safeTxHashFromApi: string | null = null;
 
-    const safeTxHashFromApi = null; // No API submission in Manual workflow
+    const rpcUrl = process.env.RPC_URL;
+    if (process.env.SAFE_API_KEY && rpcUrl) {
+      logger.info(
+        'Attempting to submit proposal to Safe Transaction Service...'
+      );
+      safeTxHashFromApi = await submitUnsignedProposalToSafe(
+        parsed.proposal,
+        parsed.validationHash,
+        chainId,
+        safeAddress,
+        rpcUrl
+      );
+    } else {
+      logger.info('📋 Manual workflow - Safe API submission skipped', {
+        reason: 'SAFE_API_KEY or RPC_URL not configured',
+        artifactFile: 'safe-proposal.json',
+        nextSteps:
+          'Safe owners will review and sign the proposal in Safe UI Queue',
+      });
+    }
 
     // Add additional metadata for CI
     const enrichedProposal = {
