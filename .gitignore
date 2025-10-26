@@ -150,3 +150,6 @@ safe-proposal.json
 
 # ZeroKeyCI storage
 .zerokey/storage/
+
+# Lit Protocol SDK cache
+.lit-localstorage/
