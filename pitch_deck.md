@@ -8,296 +8,137 @@ class:
 
 # 🛠 ZeroKey CI
 
-**Key-less CI/CD for Smart Contracts**
+**Smart Contract CI/CD**
+**Without Private Keys**
 
-> ETHOnline 2025 Submission
+ETHOnline 2025
 
 ---
 
 ## The Problem
 
-**Every Web3 team faces the same dilemma:**
+Private keys in GitHub Actions = **Security Risk**
 
-Deploy fast with keys in CI (insecure)
-vs.
-Deploy manually (slow, error-prone)
-
----
-
-## The Problem (cont'd)
-
-**Traditional CI/CD Security Risks:**
-
-- 🔴 Private keys in GitHub Secrets
-- 🔴 Single compromised account = full treasury access
-- 🔴 SolarWinds-style breach → stolen keys
-- 🔴 No audit trail, no rollback
-
-**One leaked key = game over**
+One leaked key = Game over
 
 ---
 
 ## Our Solution
 
-**ZeroKeyCI**: Deploy smart contracts through GitHub Actions **without storing private keys anywhere**.
+**No private keys in CI/CD**
 
-Gnosis Safe multisig owners approve deployments.
-
-**No keys in code, no keys in secrets, no keys in CI.**
+✅ CI creates proposal
+✅ Safe owners sign
+✅ Contract deploys
 
 ---
 
 ## How It Works
 
 ```
-❌ Traditional:  CI → Private Key → Sign → Broadcast → Deploy
-✅ ZeroKeyCI:    CI → Create Proposal → Owners Sign → Execute
+❌ Old: CI → Private Key → Deploy
+✅ New: CI → Proposal → Safe → Deploy
 ```
 
-**Separation of build and execution**
+---
+
+## Real Impact
+
+💰 Save **$177** per deployment
+⚡ **10x faster** (30 min → 3 min)
+🔐 **2-of-3 multisig** vs single key
 
 ---
 
-## Workflow in 6 Steps
+## Technology
 
-1. Developer merges PR
-2. GitHub Actions runs (compile, test, validate)
-3. Creates Safe proposal (unsigned transaction)
-4. Posts as PR comment (review bytecode, gas costs)
-5. Owners sign & execute (multisig approval)
-6. Contract deployed (full audit trail)
+🔥 Hardhat 3
+🔐 Gnosis Safe SDK
+⚡ Lit Protocol PKP
+🔍 Blockscout
 
 ---
 
-## Key Innovation
+## Prize Tracks
 
-**CI/CD does NOT deploy.**
-**It only creates proposals.**
-
-- 🔐 NO private keys in CI/CD
-- ✅ Multisig approval required (2-of-3)
-- 📝 Complete audit trail (PR → blockchain)
-- 🔍 OPA policy validation
-- 🛡️ Optional Lit Protocol PKP automation
+🏆 Lit Protocol - **$5,000**
+🏆 Hardhat - **$5,000**
+🏆 Blockscout - **$10,000**
 
 ---
 
-## Real-World Impact
-
-**Gas Cost Savings:**
-- Multi-network analysis saves **$177 per deployment**
-- Timing optimization saves **$38 per deployment**
-- Automatic network comparison across 10 chains
-
-**Time Savings:**
-- 30 minutes manual → **3 minutes automated**
-- **10x faster** deployment cycle
-
----
-
-## Real-World Impact (cont'd)
-
-**Security Improvement:**
-
-**Before (Private Keys):**
-- Single compromised account = full treasury access
-- Limited audit trail
-- No rollback once broadcast
-
-**After (ZeroKeyCI Multisig):**
-- Need 2+ of 3 accounts (significantly harder)
-- Complete audit trail (PR → CI → Safe → On-chain)
-- Proposals can be rejected before execution
-
----
-
-## Technology Stack
-
-**Built with ETHOnline 2025 Sponsor Tech:**
-
-- 🔥 Hardhat 3 → Compile, test, simulate
-- 🔐 Gnosis Safe SDK → Deployment proposals
-- ⚡ Lit Protocol PKP → Automated conditional signing
-- 🔍 Blockscout Autoscout → Instant verification
-- 📊 Envio HyperIndex → Real-time monitoring
-- 🛡️ Open Policy Agent → Policy enforcement
-
----
-
-## Prize Track Integration
-
-**🏆 Lit Protocol ($5,000)**
-- PKP-based automated signing
-- Distributed key security
-- No private keys ever exposed
-
-**🏆 Hardhat ($5,000)**
-- All contracts developed with Hardhat
-- 605 tests running with Hardhat
-- Complete compilation & testing workflow
-
----
-
-## Prize Track Integration (cont'd)
-
-**🏆 Blockscout ($10,000)**
-- Automated contract verification
-- MCP server integration
-- Explorer verification in CI/CD
-
-**📊 Envio**
-- Real-time deployment monitoring
-- Transaction indexing
-- Event tracking dashboard
-
----
-
-## 3-Minute Integration
+## Integration
 
 ```yaml
-# .github/workflows/deploy.yml
 - uses: susumutomita/ZeroKeyCI@main
   with:
     safe-address: ${{ vars.SAFE_ADDRESS }}
     network: base-sepolia
-    contract-name: MyContract
-    verify-blockscout: true
-    rpc-url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
 ```
 
-**That's it. No private keys in CI. Ever.**
+**3 minutes to setup**
 
 ---
 
 ## Demo
 
-**Live Demo:**
-https://zero-key-ci.vercel.app
+🌐 **zero-key-ci.vercel.app**
 
-**Demo Mode:**
-- Try full workflow in 3 minutes
-- No Safe setup required
-- Real testnet deployment
-- Base Sepolia testnet
+Try it in 3 minutes
+No Safe setup needed
 
 ---
 
-## What We Built for ETHOnline
+## What We Built
 
-**1. Automatic Gas Optimization**
-- Real-time gas prices across 10 networks
-- Multi-network cost comparison
-- 6 types of optimization recommendations
-
-**2. True Multi-Chain Support**
-- 10 networks (Ethereum, Polygon, Arbitrum, etc.)
-- Single YAML → deploy everywhere
-- Deterministic addresses across chains
+✅ Gas optimization (10 networks)
+✅ Multi-chain support
+✅ Team notifications
+✅ Proxy deployments
 
 ---
 
-## What We Built (cont'd)
+## Market
 
-**3. Team Notifications**
-- Slack/Discord webhooks
-- Real-time status updates
-- GitHub PR comments with gas analysis
-
-**4. Upgradeable Contract Support**
-- UUPS proxy deployment
-- Transparent proxy with admin
-- Safe upgrade validation
-
----
-
-## What We Built (cont'd)
-
-**5. Zero Private Keys**
-- NO keys in CI/CD environments
-- Gnosis Safe multisig approval
-- Lit Protocol PKP automation
-- Full audit trail
-
-**6. One-Click GitHub Integration**
-- Auto-generate workflow PR
-- Zero manual configuration
-- Ready in 3 minutes
-
----
-
-## Market Opportunity
-
-**Target Users:**
-
-- Web3 protocols deploying frequently
-- DeFi teams with security requirements
-- DAOs with multisig governance
-- Any team tired of manual deployments
-
-**Total Addressable Market:**
-- 50,000+ smart contract repositories on GitHub
-- Growing demand for secure CI/CD
-- Increasing complexity of Web3 deployments
+**50,000+** smart contract repos
+Growing security demand
+Every Web3 team needs this
 
 ---
 
 ## Traction
 
-**Current Status:**
-
-- ✅ Production-ready GitHub Action
-- ✅ 683 tests passing
-- ✅ Multi-chain support (10 networks)
-- ✅ Complete documentation
-- ✅ Demo mode for easy onboarding
-
-**Next Steps:**
-
-- Expand to more networks
-- Enhanced PKP automation
-- Team management UI
-- Enterprise features
+✅ Production ready
+✅ 683 tests passing
+✅ Complete documentation
+✅ Demo mode live
 
 ---
 
 ## Why We'll Win
 
-**Technical Excellence:**
-- Deep integration with 4+ sponsor technologies
-- Novel security model (zero private keys)
-- Real cost savings ($177 per deployment)
-- 10x faster than manual deployment
-
-**Hackathon Fit:**
-- Addresses real Web3 security problem
-- Production-ready solution
-- Clear demonstration of sponsor tech value
-- Scalable to entire ecosystem
+Novel security model
+Real cost savings ($177)
+Deep sponsor integration
+Production ready now
 
 ---
 
 ## Team
 
-**Built by Susumu Tomita (たみぃ)**
+**Susumu Tomita (たみぃ)**
 
-**ETHOnline 2025 Submission**
+ETHOnline 2025
 
-**GitHub:** GitHub.com/susumutomita/ZeroKeyCI
-**Demo:** zero-key-ci.vercel.app
-**Docs:** Complete integration guides
+GitHub.com/susumutomita/ZeroKeyCI
 
 ---
 
 ## Thank You!
 
-**Try ZeroKeyCI today:**
-
-🚀 Quick Start: docs/QUICKSTART.md
-⚡ Demo Mode: Try in 3 minutes
-🔐 Security: No private keys, ever
+🚀 Try it: zero-key-ci.vercel.app
+🔐 No private keys, ever
 
 **Questions?**
-
-**Let's make Web3 CI/CD secure together.**
 
 ---
