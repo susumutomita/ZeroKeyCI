@@ -127,6 +127,54 @@ Resolve the textlint failure in CLAUDE.md and document the prevention rule for a
 
 **Follow-up Tasks:** _TBD_
 
+### Exec Plan: Fix bun install frozen lockfile failure
+Created: 2025-10-26 11:35
+Status: 🚧 In Progress
+
+## Objective
+Restore CI by updating the Bun lockfiles so `bun install --frozen-lockfile` succeeds locally and in GitHub Actions.
+
+## Guardrails (Non-negotiable constraints)
+- Keep `packageManager` at `bun@1.1.38`; avoid `npm`/`yarn` usage entirely.
+- Update `bun.lock` and `bun.lockb` together via `bun install`; never hand-edit generated files.
+- Document every iteration + validation in this exec plan before moving on.
+- Do not modify unrelated dependencies or scripts while resolving the lock drift.
+
+## TODO
+- [ ] Reproduce the frozen lockfile failure with Bun 1.1.38.
+- [ ] Regenerate the lockfiles with plain `bun install` and capture resulting diffs.
+- [ ] Re-run `bun install --frozen-lockfile` to confirm the error is gone.
+- [ ] Execute sanity checks (`bun run lint`, `bun run test`) once Bun CLI is operational.
+- [ ] Update the exec plan with validation evidence + add retrospective if needed.
+
+## Validation Steps
+- [ ] bun install --frozen-lockfile
+- [ ] bun run lint
+- [ ] bun run test
+- [ ] make before_commit (when Bun works outside Docker)
+
+## Progress Log
+
+### Iteration 1 (11:35)
+**What was done:** Logged the GitHub Actions failure (lockfile drift) and created this exec plan prior to running any install commands.
+
+**Test status:** Pending reproduction; host Bun binary currently aborts with `Signal(6)` so Docker-based Bun 1.1.38 may be required.
+
+**Decisions made:** Use the official `oven/bun:1.1.38` image as a workaround until the host shim is fixed to avoid violating the packageManager constraint.
+
+## Open Questions
+- Will we need a follow-up task to repair the host Bun shim, or is Docker-based Bun sufficient for now?
+
+## References
+- GitHub Actions failure: https://github.com/susumutomita/ZeroKeyCI-sample/actions/runs/18813299997/job/53678046851
+
+## Handoff Notes
+**Final Summary:** _TBD_
+
+**Outstanding Risks:** _TBD_
+
+**Follow-up Tasks:** _TBD_
+
 ## Active Exec Plans
 
 ### Exec Plan: Lit Protocol PKP Integration for Automated Signing

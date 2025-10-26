@@ -88,12 +88,18 @@ export async function getLitActionCID(): Promise<string> {
 
   console.log('\n📦 Enter Lit Action IPFS CID:');
   console.log('   This is the IPFS hash of your deployed Lit Action code.');
-  console.log('   Example: QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG');
+  console.log(
+    '   Example CIDv0: QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG'
+  );
+  console.log(
+    '   Example CIDv1: bafybeigfkfpdz5br6efhbkqwujfqkfndgcfgfebhmnpdiofvfi7ypxl25y'
+  );
 
   const cid = await prompt('\nIPFS CID: ');
 
-  if (!cid || !cid.startsWith('Qm')) {
-    throw new Error('Invalid IPFS CID format');
+  // Accept both CIDv0 (Qm...) and CIDv1 (bafy...)
+  if (!cid || !(cid.startsWith('Qm') || cid.startsWith('bafy'))) {
+    throw new Error('Invalid IPFS CID format (must start with Qm or bafy)');
   }
 
   return cid;

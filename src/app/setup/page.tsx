@@ -453,6 +453,134 @@ gh variable set LIT_NETWORK --body "datil-dev"`}
                   </table>
                 </div>
 
+                {/* PKP Setup Scripts */}
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+                  Step-by-Step: Run PKP Setup Scripts
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Run these 4 scripts in order to set up PKP automation (15-20
+                  minutes total):
+                </p>
+
+                <div className="space-y-4 mb-6">
+                  {/* Script 1: Mint PKP */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        1
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                          Mint PKP NFT
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Creates a distributed cryptographic key pair
+                          controlled by Lit Protocol. This generates your PKP
+                          address and token ID.
+                        </p>
+                        <CodeSnippet
+                          language="bash"
+                          code={`LIT_NETWORK=datil-test ETHEREUM_PRIVATE_KEY=0x... \\
+bun run scripts/setup/mint-pkp.ts
+
+# Outputs: .zerokey/pkp-config.json with PKP address`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Script 2: Upload Lit Action */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        2
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                          Upload Lit Action to IPFS
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Uploads your signing logic (conditionalSigner.js) to
+                          IPFS. Returns the IPFS CID needed for permission
+                          granting.
+                        </p>
+                        <CodeSnippet
+                          language="bash"
+                          code={`LIT_NETWORK=datil-test bun run scripts/setup/upload-lit-action.ts
+
+# Prompts for IPFS upload (Web3.Storage/Pinata)
+# Saves CID to pkp-config.json`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Script 3: Grant Permissions */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        3
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                          Grant Lit Action Permission
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Authorizes your Lit Action to sign transactions using
+                          the PKP. Required before the PKP can participate in
+                          automated signing.
+                        </p>
+                        <CodeSnippet
+                          language="bash"
+                          code={`ETHEREUM_PRIVATE_KEY=0x... \\
+bun run scripts/setup/grant-lit-action-permission.ts
+
+# Grants SignAnything permission to Lit Action`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Script 4: Add PKP to Safe */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        4
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                          Add PKP as Safe Owner
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Adds your PKP as an owner of your Safe multisig
+                          wallet. After this, PKP can participate in automated
+                          transaction signing.
+                        </p>
+                        <CodeSnippet
+                          language="bash"
+                          code={`BASE_SEPOLIA_RPC_URL=https://sepolia.base.org \\
+SAFE_ADDRESS=0xYourSafeAddress \\
+ETHEREUM_PRIVATE_KEY=0x... \\
+SAFE_THRESHOLD=1 \\
+bun run scripts/setup/add-pkp-to-safe.ts
+
+# Proposes "add owner" transaction
+# Safe owners approve → PKP becomes owner`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-4 bg-green-50/50 dark:bg-green-900/10 border border-green-300/30 dark:border-green-500/30 rounded-lg">
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    ✅ <strong>After completing these 4 scripts</strong>, your
+                    PKP is ready for automated signing! The final
+                    pkp-config.json contains all values you need for GitHub
+                    Secrets.
+                  </p>
+                </div>
+
                 {/* Update Workflow */}
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">
                   Update Your Workflow
