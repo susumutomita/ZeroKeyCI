@@ -173,6 +173,29 @@ async function submitUnsignedProposalToSafe(
       apiKey: safeApiKey,
     });
 
+    // Fetch Safe's current nonce from the blockchain
+    let safeNonce = 0;
+    try {
+      const { ethers } = await import('ethers');
+      const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+      // Minimal Safe contract ABI for nonce()
+      const safeAbi = ['function nonce() external view returns (uint256)'];
+      const safeContract = new ethers.Contract(safeAddress, safeAbi, provider);
+      safeNonce = await safeContract.nonce();
+
+      logger.info('Fetched Safe nonce from blockchain', {
+        safeAddress,
+        nonce: safeNonce.toString(),
+      });
+    } catch (error) {
+      logger.warn('Failed to fetch Safe nonce, using 0', {
+        error: (error as Error).message,
+      });
+      // Fallback to 0 if nonce fetch fails
+      safeNonce = 0;
+    }
+
     // Prepare transaction data with detailed logging
     const safeTransactionData = {
       to: proposal.to,
@@ -186,7 +209,7 @@ async function submitUnsignedProposalToSafe(
         proposal.gasToken || '0x0000000000000000000000000000000000000000',
       refundReceiver:
         proposal.refundReceiver || '0x0000000000000000000000000000000000000000',
-      nonce: proposal.nonce || 0,
+      nonce: safeNonce,
     };
 
     const proposePayload = {
