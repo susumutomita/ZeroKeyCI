@@ -5872,3 +5872,49 @@ if (safeTxHashFromApi) {
 **Next steps:**
 - Once Bun works, rerun `bun run test` + `bun run lint` to reconfirm green status.
 - Update docs / i18n copy (Phase 4) after verifying the new UX in a live Safe.
+
+### Exec Plan: Fix PKP mint invalid public key error
+Created: 2025-10-26 10:31
+Status: 🚧 In Progress
+
+## Objective
+Unblock real PKP minting by ensuring scripts/setup/mint-pkp.ts accepts the current Lit SDK publicKey format and persists a valid 0x04-prefixed key for downstream tooling.
+
+## Guardrails (Non-negotiable constraints)
+- Maintain 100% coverage expectations for existing Vitest suites touching the mint script.
+- Do not weaken PKP validation (must still guarantee uncompressed keys for LitPKPSigner).
+- No hardcoding of secrets or private keys; keep runtime prompts intact.
+
+## TODO
+- [ ] Confirm Lit SDK now returns publicKey without the 0x prefix and document evidence in code comments.
+- [ ] Add a normalization helper that enforces 0x04 + 128 hex while auto-prefixing when the SDK omits 0x.
+- [ ] Update mintPKP workflow to store normalized keys and adjust savePKPConfig / messaging accordingly.
+- [ ] Align console + docs references so PKP_PUBLIC_KEY always points to the 0x04 public key (no longer the PKP ETH address).
+- [ ] Extend scripts/setup/__tests__/mint-pkp.test.ts to cover normalization paths and regression cases.
+- [ ] Run focused tests once Bun works (`bun run test scripts/setup/mint-pkp.test.ts`).
+
+## Validation Steps
+- [ ] bun run test scripts/setup/mint-pkp.test.ts
+- [ ] bun run lint
+
+## Progress Log
+
+### Iteration 1 (10:31)
+**What was done:** Captured user repro log, recorded objective/guardrails/TODOs, and noted Bun currently crashes (Signal 6) so validation is pending until the binary works again.
+
+**Test status:** Not run — Bun CLI exits with Signal 6 at startup in this sandbox.
+
+**Decisions made:** Investigate SDK source before changing runtime behavior to avoid breaking invariants.
+
+## Open Questions
+- None right now; will add if new uncertainties appear during implementation.
+
+## References
+- Related Issue: User report (Oct 26 2025) “Invalid PKP public key” during scripts/setup/mint-pkp.ts execution.
+
+## Handoff Notes
+**Final Summary:** _TBD_
+
+**Outstanding Risks:** _TBD_
+
+**Follow-up Tasks:** _TBD_

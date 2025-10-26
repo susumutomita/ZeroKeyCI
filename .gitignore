@@ -150,3 +150,9 @@ safe-proposal.json
 
 # ZeroKeyCI storage
 .zerokey/storage/
+
+# Lit Protocol SDK cache
+.lit-localstorage/
+
+# PKP configuration (personal setup, not shared)
+.zerokey/pkp-config.json

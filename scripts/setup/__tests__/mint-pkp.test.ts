@@ -16,12 +16,21 @@ vi.mock('fs');
 vi.mock('@lit-protocol/lit-node-client', () => ({
   LitNodeClient: vi.fn(),
 }));
+vi.mock('@lit-protocol/contracts-sdk', () => ({
+  LitContracts: vi.fn(),
+}));
 vi.mock('@lit-protocol/constants', () => ({
-  LitNetwork: {
+  LIT_NETWORK: {
     DatilDev: 'datil-dev',
     DatilTest: 'datil-test',
     Datil: 'datil',
   },
+  LIT_RPC: {
+    CHRONICLE_YELLOWSTONE: 'https://yellowstone-rpc.litprotocol.com',
+  },
+}));
+vi.mock('node-localstorage', () => ({
+  LocalStorage: vi.fn(),
 }));
 vi.mock('readline', () => ({
   default: {
@@ -49,22 +58,32 @@ describe('mint-pkp', () => {
   });
 
   describe('validatePrivateKey', () => {
-    it('should return true for valid private key', () => {
+    it('should return valid=true for valid private key', () => {
       const validKey =
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-      expect(validatePrivateKey(validKey)).toBe(true);
+      expect(validatePrivateKey(validKey)).toEqual({ valid: true });
     });
 
-    it('should return false for invalid private key', () => {
-      expect(validatePrivateKey('invalid')).toBe(false);
-      expect(validatePrivateKey('0x123')).toBe(false);
-      expect(validatePrivateKey('')).toBe(false);
+    it('should return valid=false with error message for invalid private keys', () => {
+      const result1 = validatePrivateKey('invalid');
+      expect(result1.valid).toBe(false);
+      expect(result1.error).toBe('Private key must start with "0x"');
+
+      const result2 = validatePrivateKey('0x123');
+      expect(result2.valid).toBe(false);
+      expect(result2.error).toContain('must be 66 characters');
+
+      const result3 = validatePrivateKey('');
+      expect(result3.valid).toBe(false);
+      expect(result3.error).toBe('Private key must start with "0x"');
     });
 
-    it('should return true for private key without 0x prefix', () => {
-      const validKey =
+    it('should require 0x prefix', () => {
+      const keyWithout0x =
         'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-      expect(validatePrivateKey(validKey)).toBe(true);
+      const result = validatePrivateKey(keyWithout0x);
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Private key must start with "0x"');
     });
   });
 
@@ -159,7 +178,9 @@ describe('mint-pkp', () => {
       };
       vi.mocked(readline.createInterface).mockReturnValue(mockRl as any);
 
-      await expect(getPrivateKey()).rejects.toThrow('Invalid private key');
+      await expect(getPrivateKey()).rejects.toThrow(
+        'Private key must start with "0x"'
+      );
     });
   });
 
@@ -214,7 +235,7 @@ describe('mint-pkp', () => {
       );
 
       await expect(mintPKP(network, privateKey)).rejects.toThrow(
-        'Failed to mint PKP: Connection failed'
+        'Failed to connect to Lit nodes: Connection failed'
       );
     });
   });
@@ -318,16 +339,9 @@ describe('mint-pkp', () => {
       expect(config.network).toBe('datil-dev');
     });
 
-    it('should exit with error code on failure', async () => {
+    it('should propagate error on failure', async () => {
       delete process.env.LIT_NETWORK;
       delete process.env.ETHEREUM_PRIVATE_KEY;
-
-      const mockExit = vi
-        .spyOn(process, 'exit')
-        .mockImplementation((() => {}) as any);
-      const mockConsoleError = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
 
       // Mock prompt to throw error
       const readline = await import('readline');
@@ -339,13 +353,7 @@ describe('mint-pkp', () => {
       };
       vi.mocked(readline.createInterface).mockReturnValue(mockRl as any);
 
-      await main();
-
-      expect(mockExit).toHaveBeenCalledWith(1);
-      expect(mockConsoleError).toHaveBeenCalled();
-
-      mockExit.mockRestore();
-      mockConsoleError.mockRestore();
+      await expect(main()).rejects.toThrow('Test error');
     });
   });
 });
