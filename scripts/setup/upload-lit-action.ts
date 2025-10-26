@@ -140,25 +140,38 @@ export async function uploadLitActionToIPFS(
     );
 
     if (hasUploaded.toLowerCase() !== 'y') {
-      console.log('\n📋 Please upload the file using one of these methods:\n');
+      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('📁 FILE TO UPLOAD:');
+      console.log('   src/lit-actions/conditionalSigner.js');
+      console.log('   (Lit Action execution code - 6578 bytes)');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-      console.log('Option 1: IPFS CLI (if you have IPFS installed)');
+      console.log('📋 Choose one upload method:\n');
+
+      console.log('✅ Option 1: Web3.Storage (RECOMMENDED - easiest, free)');
+      console.log('   1. Visit: https://web3.storage');
+      console.log('   2. Sign up/Login (free account)');
+      console.log('   3. Click "Upload" button');
+      console.log('   4. Select file: src/lit-actions/conditionalSigner.js');
+      console.log('   5. Copy the CID (starts with "Qm...")');
+      console.log('   Example CID: QmX1234abcd...\n');
+
+      console.log('Option 2: IPFS CLI (if you have IPFS installed)');
       console.log('   ipfs add src/lit-actions/conditionalSigner.js');
       console.log('   # Output: added <CID> conditionalSigner.js\n');
 
-      console.log('Option 2: Pinata (requires API key)');
+      console.log('Option 3: Pinata (requires API key)');
       console.log('   pinata upload src/lit-actions/conditionalSigner.js \\');
       console.log('     --name "ZeroKeyCI Conditional Signer" \\');
       console.log('     --key YOUR_PINATA_API_KEY');
       console.log('   # Output: IpfsHash: <CID>\n');
 
-      console.log('Option 3: Web3.Storage (easiest - web UI, free)');
-      console.log('   1. Visit: https://web3.storage');
-      console.log('   2. Sign up/Login');
-      console.log('   3. Upload: src/lit-actions/conditionalSigner.js');
-      console.log('   4. Copy the CID from the upload confirmation\n');
-
-      console.log('📝 After uploading, run this script again.\n');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('📝 After uploading, run this script again:');
+      console.log(
+        '   LIT_NETWORK=datil-test bun run scripts/setup/upload-lit-action.ts'
+      );
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
       await litNodeClient.disconnect();
       throw new Error(
         'Please upload the file to IPFS first, then run this script again.'
