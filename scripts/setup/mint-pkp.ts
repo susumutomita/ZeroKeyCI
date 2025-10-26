@@ -17,7 +17,12 @@
 
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { LIT_NETWORK, LIT_RPC } from '@lit-protocol/constants';
+import {
+  LIT_NETWORK,
+  LIT_RPC,
+  AUTH_METHOD_TYPE,
+  AUTH_METHOD_SCOPE,
+} from '@lit-protocol/constants';
 import * as ethers from 'ethers';
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
@@ -203,39 +208,48 @@ export async function mintPKP(
   }
 
   try {
-    // Mint PKP NFT
-    const pkpNft = litContracts.pkpNftContract;
-    if (!pkpNft) {
-      throw new Error(
-        'PKP NFT contract not available (contracts sdk mismatch)'
-      );
-    }
-    const tx = await pkpNft.mintNext(signer.address);
-    console.log(`⏳ Mint tx: ${tx.hash}`);
-    const receipt = await tx.wait();
-    console.log(`✅ Confirmed in block ${receipt.blockNumber}`);
+    // Create authentication signature for PKP minting
+    console.log('🔐 Creating authentication signature...');
+    const authMessage = 'Lit Protocol PKP Mint Authorization';
+    const authSig = await signer.signMessage(authMessage);
 
-    // Get the latest tokenId owned by signer
-    const balance = await pkpNft.balanceOf(signer.address);
-    if (balance.isZero()) {
-      throw new Error('Mint succeeded but balance is zero');
-    }
-    const index = balance.sub(1);
-    const tokenIdBN = await pkpNft.tokenOfOwnerByIndex(signer.address, index);
-    const tokenId = tokenIdBN.toString();
+    // Create auth method for EthWallet
+    const authMethod = {
+      authMethodType: AUTH_METHOD_TYPE.EthWallet,
+      accessToken: JSON.stringify({
+        sig: authSig,
+        derivedVia: 'web3.eth.personal.sign',
+        signedMessage: authMessage,
+        address: signer.address,
+      }),
+    };
 
-    // Read public key
-    const publicKey: string = await pkpNft.readPublicKey(tokenIdBN);
+    // Mint PKP using the correct SDK method
+    console.log('⏳ Minting PKP NFT with authentication...');
+    const mintInfo = await litContracts.mintWithAuth({
+      authMethod: authMethod,
+      scopes: [AUTH_METHOD_SCOPE.SignAnything, AUTH_METHOD_SCOPE.PersonalSign],
+    });
+
+    console.log(`✅ Mint tx: ${mintInfo.tx.transactionHash}`);
+    console.log(`✅ Confirmed in block ${mintInfo.tx.blockNumber}`);
+
+    // Extract PKP details from mint result
+    const { tokenId, publicKey, ethAddress } = mintInfo.pkp;
+
+    // Validate public key format
     if (!publicKey || !publicKey.startsWith('0x04')) {
       throw new Error('Invalid PKP public key (expected uncompressed 0x04...)');
     }
 
-    // Derive ETH address
-    const ethAddress = ethers.utils.computeAddress(publicKey);
-
     await litNodeClient.disconnect();
 
-    return { tokenId, publicKey, ethAddress, mintTxHash: tx.hash };
+    return {
+      tokenId,
+      publicKey,
+      ethAddress,
+      mintTxHash: mintInfo.tx.transactionHash,
+    };
   } catch (error) {
     await litNodeClient.disconnect();
     throw new Error(
