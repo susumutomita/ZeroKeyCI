@@ -156,3 +156,5 @@ safe-proposal.json
 
 # PKP configuration (personal setup, not shared)
 .zerokey/pkp-config.json
+
+.DS_Store

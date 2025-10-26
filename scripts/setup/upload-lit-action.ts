@@ -12,14 +12,15 @@
  */
 
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { readFileSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
 import * as readline from 'readline';
 
 type LitNetworkStr = 'datil-dev' | 'datil-test' | 'datil';
 
 const LIT_ACTION_SOURCE_PATH = 'src/lit-actions/conditionalSigner.js';
-const PKP_CONFIG_PATH = '.zerokey/pkp-config.json';
+const PKP_CONFIG_PATH =
+  process.env.PKP_CONFIG_PATH || '.zerokey/pkp-config.json';
 
 interface PKPConfig {
   tokenId: string;
@@ -119,8 +120,8 @@ export async function uploadLitActionToIPFS(
     await litNodeClient.connect();
     console.log('✅ Connected to Lit nodes');
   } catch (error) {
-    throw new Error(
-      `Failed to connect to Lit nodes: ${error instanceof Error ? error.message : error}`
+    console.warn(
+      `⚠️ Could not connect to Lit nodes (${error instanceof Error ? error.message : error}). Continuing with manual IPFS flow...`
     );
   }
 
@@ -222,7 +223,7 @@ export async function uploadLitActionToIPFS(
       } else {
         await litNodeClient.disconnect();
         throw new Error(
-          'Failed to get valid IPFS CID after 3 attempts. CID must start with "Qm".'
+          'Failed to get valid IPFS CID after 3 attempts. CID must start with "Qm" (CIDv0) or "bafy" (CIDv1).'
         );
       }
     }
@@ -259,6 +260,7 @@ function savePKPConfig(config: PKPConfig, litActionCID: string): void {
     litActionUploadedAt: new Date().toISOString(),
   };
 
+  mkdirSync(dirname(PKP_CONFIG_PATH), { recursive: true });
   writeFileSync(PKP_CONFIG_PATH, JSON.stringify(updatedConfig, null, 2));
   console.log(`\n💾 Updated PKP config: ${PKP_CONFIG_PATH}`);
   console.log(`   Lit Action CID: ${litActionCID}`);
@@ -295,6 +297,9 @@ export async function main(): Promise<string> {
   console.log('   2) Add PKP to Safe:');
   console.log('      bun run scripts/setup/add-pkp-to-safe.ts');
   console.log('   3) Configure GitHub Secrets:');
+  console.log(
+    `      PKP_PUBLIC_KEY=${pkpConfig ? pkpConfig.ethAddress : '<from .zerokey/pkp-config.json>'}`
+  );
   console.log(`      LIT_ACTION_IPFS_CID=${ipfsCID}`);
   console.log(`      LIT_NETWORK=${networkStr}`);
 

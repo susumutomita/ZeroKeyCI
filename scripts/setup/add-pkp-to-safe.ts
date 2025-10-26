@@ -19,10 +19,12 @@
  * - PKP_CONFIG_PATH: Path to PKP config [default: .zerokey/pkp-config.json]
  * - SAFE_ADDRESS: Safe multisig address (required)
  * - ETHEREUM_PRIVATE_KEY: Private key of current Safe owner (required)
+ * - BASE_SEPOLIA_RPC_URL: Base Sepolia RPC URL [default: https://sepolia.base.org]
+ * - SAFE_THRESHOLD: New Safe threshold (1-N) [default: current threshold]
  */
 
 import { ethers } from 'ethers';
-import Safe, { EthersAdapter } from '@safe-global/protocol-kit';
+import Safe from '@safe-global/protocol-kit';
 import { readFileSync, writeFileSync } from 'fs';
 import * as readline from 'readline';
 import type { PKPConfig } from './mint-pkp';
@@ -131,6 +133,19 @@ export async function getThreshold(
   currentThreshold: number,
   ownersCount: number
 ): Promise<number> {
+  // Check for environment variable first
+  const envThreshold = process.env.SAFE_THRESHOLD;
+  if (envThreshold) {
+    const threshold = parseInt(envThreshold);
+    if (threshold >= 1 && threshold <= ownersCount + 1) {
+      console.log(`\n⚖️  Using threshold from SAFE_THRESHOLD: ${threshold}`);
+      return threshold;
+    }
+    console.warn(
+      `⚠️  Invalid SAFE_THRESHOLD value: ${envThreshold}. Must be between 1 and ${ownersCount + 1}`
+    );
+  }
+
   console.log('\n⚖️  Safe Threshold Configuration:');
   console.log(`   Current owners: ${ownersCount}`);
   console.log(`   Current threshold: ${currentThreshold}`);
@@ -172,24 +187,29 @@ export async function addPKPToSafe(
   console.log(`   New Threshold: ${threshold}`);
 
   try {
-    // Create ethers provider and wallet
-    const provider = new ethers.providers.JsonRpcProvider(
+    // Get RPC URL
+    const rpcUrl =
+      process.env.BASE_SEPOLIA_RPC_URL ||
       process.env.ETHEREUM_RPC_URL ||
-        'https://eth-sepolia.g.alchemy.com/v2/demo'
-    );
-    const wallet = new ethers.Wallet(ownerPrivateKey, provider);
+      'https://sepolia.base.org';
 
-    // Create Safe SDK adapter
-    const ethAdapter = new EthersAdapter({
-      ethers,
-      signerOrProvider: wallet,
-    });
+    console.log(`   RPC URL: ${rpcUrl.replace(/\/v2\/.*$/, '/v2/***')}`);
+    console.log('   Initializing Safe SDK...');
 
-    // Initialize Safe
-    const safe = await Safe.create({
-      ethAdapter,
-      safeAddress,
-    });
+    // Initialize Safe (Safe Protocol Kit v6 uses RPC URL string and private key string)
+    const safe = (await Promise.race([
+      Safe.init({
+        provider: rpcUrl,
+        signer: ownerPrivateKey,
+        safeAddress,
+      }),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Safe.init() timed out after 30 seconds')),
+          30000
+        )
+      ),
+    ])) as Awaited<ReturnType<typeof Safe.init>>;
 
     console.log('✅ Connected to Safe');
     console.log(`   Current owners: ${await safe.getOwners()}`);
@@ -295,19 +315,28 @@ export async function main(): Promise<AddOwnerResult> {
     const ownerPrivateKey = await getOwnerPrivateKey();
 
     // Initialize Safe to get current threshold
-    const provider = new ethers.providers.JsonRpcProvider(
+    const rpcUrl =
+      process.env.BASE_SEPOLIA_RPC_URL ||
       process.env.ETHEREUM_RPC_URL ||
-        'https://eth-sepolia.g.alchemy.com/v2/demo'
-    );
-    const wallet = new ethers.Wallet(ownerPrivateKey, provider);
-    const ethAdapter = new EthersAdapter({
-      ethers,
-      signerOrProvider: wallet,
-    });
-    const safe = await Safe.create({
-      ethAdapter,
-      safeAddress,
-    });
+      'https://sepolia.base.org';
+
+    console.log(`\n🔌 RPC URL: ${rpcUrl.replace(/\/v2\/.*$/, '/v2/***')}`);
+    console.log('🔄 Connecting to Safe...');
+
+    // Initialize Safe (Safe Protocol Kit v6 uses RPC URL string and private key string)
+    const safe = (await Promise.race([
+      Safe.init({
+        provider: rpcUrl,
+        signer: ownerPrivateKey,
+        safeAddress,
+      }),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Safe.init() timed out after 30 seconds')),
+          30000
+        )
+      ),
+    ])) as Awaited<ReturnType<typeof Safe.init>>;
 
     const currentThreshold = await safe.getThreshold();
     const owners = await safe.getOwners();
