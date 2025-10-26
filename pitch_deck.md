@@ -55,7 +55,7 @@ Add GitHub Actions.yaml.
 
 ## Demo
 
-Submot proposal from GitHub Actions.
+Submit proposal from GitHub Actions.
 
 ---
 
