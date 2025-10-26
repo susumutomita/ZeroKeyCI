@@ -215,17 +215,9 @@ async function submitUnsignedProposalToSafe(
     // Calculate proper Safe transaction hash using Safe Protocol Kit
     // Import Safe SDK to calculate EIP-712 compliant safeTxHash
     const Safe = (await import('@safe-global/protocol-kit')).default;
-    const { EthersAdapter } = await import('@safe-global/protocol-kit');
-    const { ethers } = await import('ethers');
 
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-    const ethAdapter = new EthersAdapter({
-      ethers,
-      signerOrProvider: provider,
-    });
-
-    const protocolKit = await Safe.create({
-      ethAdapter,
+    const protocolKit = await Safe.init({
+      provider: rpcUrl,
       safeAddress,
     });
 
