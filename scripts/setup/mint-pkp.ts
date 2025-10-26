@@ -60,12 +60,45 @@ export async function prompt(question: string): Promise<string> {
 /**
  * Validate Ethereum private key
  */
-export function validatePrivateKey(privateKey: string): boolean {
+export function validatePrivateKey(privateKey: string): {
+  valid: boolean;
+  error?: string;
+} {
+  // Check if starts with 0x
+  if (!privateKey.startsWith('0x')) {
+    return {
+      valid: false,
+      error: 'Private key must start with "0x"',
+    };
+  }
+
+  // Check length (0x + 64 hex characters = 66 total)
+  if (privateKey.length !== 66) {
+    return {
+      valid: false,
+      error: `Private key must be 66 characters (0x + 64 hex). Got ${privateKey.length} characters.`,
+    };
+  }
+
+  // Check if contains only hex characters
+  const hexPattern = /^0x[0-9a-fA-F]{64}$/;
+  if (!hexPattern.test(privateKey)) {
+    return {
+      valid: false,
+      error:
+        'Private key must contain only hexadecimal characters (0-9, a-f, A-F)',
+    };
+  }
+
+  // Final validation with ethers
   try {
     new ethers.Wallet(privateKey);
-    return true;
-  } catch {
-    return false;
+    return { valid: true };
+  } catch (error) {
+    return {
+      valid: false,
+      error: error instanceof Error ? error.message : 'Invalid private key',
+    };
   }
 }
 
@@ -120,14 +153,17 @@ export async function getPrivateKey(): Promise<string> {
   const envKey = process.env.ETHEREUM_PRIVATE_KEY;
 
   if (envKey) {
-    if (validatePrivateKey(envKey)) {
+    const validation = validatePrivateKey(envKey);
+    if (validation.valid) {
       console.log(
         '🔑 Using private key from ETHEREUM_PRIVATE_KEY environment variable'
       );
       return envKey;
     }
 
-    console.warn('⚠️  Invalid ETHEREUM_PRIVATE_KEY in environment');
+    console.warn(
+      `⚠️  Invalid ETHEREUM_PRIVATE_KEY in environment: ${validation.error}`
+    );
   }
 
   console.log(
@@ -135,11 +171,27 @@ export async function getPrivateKey(): Promise<string> {
   );
   console.log('   This key will be used ONLY to pay gas fees for minting.');
   console.log('   It is NOT the PKP itself and will not be stored.');
+  console.log(
+    '\n   Format: 0x followed by 64 hexadecimal characters (66 total)'
+  );
+  console.log(
+    '   Example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+  );
 
   const privateKey = await prompt('\nPrivate key (0x...): ');
 
-  if (!validatePrivateKey(privateKey)) {
-    throw new Error('Invalid private key format');
+  const validation = validatePrivateKey(privateKey);
+  if (!validation.valid) {
+    console.error(`\n❌ Invalid private key: ${validation.error}`);
+    console.error(
+      '\nPlease check that your private key is exactly 66 characters:'
+    );
+    console.error('  - Starts with "0x"');
+    console.error('  - Followed by 64 hexadecimal characters (0-9, a-f, A-F)');
+    console.error(
+      '  - Example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    );
+    throw new Error(validation.error);
   }
 
   return privateKey;

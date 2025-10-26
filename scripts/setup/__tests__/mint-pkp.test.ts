@@ -49,22 +49,32 @@ describe('mint-pkp', () => {
   });
 
   describe('validatePrivateKey', () => {
-    it('should return true for valid private key', () => {
+    it('should return valid=true for valid private key', () => {
       const validKey =
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-      expect(validatePrivateKey(validKey)).toBe(true);
+      expect(validatePrivateKey(validKey)).toEqual({ valid: true });
     });
 
-    it('should return false for invalid private key', () => {
-      expect(validatePrivateKey('invalid')).toBe(false);
-      expect(validatePrivateKey('0x123')).toBe(false);
-      expect(validatePrivateKey('')).toBe(false);
+    it('should return valid=false with error message for invalid private keys', () => {
+      const result1 = validatePrivateKey('invalid');
+      expect(result1.valid).toBe(false);
+      expect(result1.error).toBe('Private key must start with "0x"');
+
+      const result2 = validatePrivateKey('0x123');
+      expect(result2.valid).toBe(false);
+      expect(result2.error).toContain('must be 66 characters');
+
+      const result3 = validatePrivateKey('');
+      expect(result3.valid).toBe(false);
+      expect(result3.error).toBe('Private key must start with "0x"');
     });
 
-    it('should return true for private key without 0x prefix', () => {
-      const validKey =
+    it('should require 0x prefix', () => {
+      const keyWithout0x =
         'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-      expect(validatePrivateKey(validKey)).toBe(true);
+      const result = validatePrivateKey(keyWithout0x);
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Private key must start with "0x"');
     });
   });
 
@@ -159,7 +169,9 @@ describe('mint-pkp', () => {
       };
       vi.mocked(readline.createInterface).mockReturnValue(mockRl as any);
 
-      await expect(getPrivateKey()).rejects.toThrow('Invalid private key');
+      await expect(getPrivateKey()).rejects.toThrow(
+        'Private key must start with "0x"'
+      );
     });
   });
 
