@@ -153,3 +153,6 @@ safe-proposal.json
 
 # Lit Protocol SDK cache
 .lit-localstorage/
+
+# PKP configuration (personal setup, not shared)
+.zerokey/pkp-config.json
