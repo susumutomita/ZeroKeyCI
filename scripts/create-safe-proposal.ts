@@ -196,7 +196,7 @@ async function submitUnsignedProposalToSafe(
       safeNonce = 0;
     }
 
-    // Prepare transaction data with detailed logging
+    // Prepare transaction data
     const safeTransactionData = {
       to: proposal.to,
       value: proposal.value,
@@ -212,12 +212,50 @@ async function submitUnsignedProposalToSafe(
       nonce: safeNonce,
     };
 
+    // Calculate proper Safe transaction hash using Safe Protocol Kit
+    // Import Safe SDK to calculate EIP-712 compliant safeTxHash
+    const Safe = (await import('@safe-global/protocol-kit')).default;
+    const { EthersAdapter } = await import('@safe-global/protocol-kit');
+    const { ethers } = await import('ethers');
+
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    const ethAdapter = new EthersAdapter({
+      ethers,
+      signerOrProvider: provider,
+    });
+
+    const protocolKit = await Safe.create({
+      ethAdapter,
+      safeAddress,
+    });
+
+    // Create Safe transaction to get proper safeTxHash
+    const safeTransaction = await protocolKit.createTransaction({
+      transactions: [safeTransactionData],
+    });
+
+    const safeTxHash = await protocolKit.getTransactionHash(safeTransaction);
+
+    logger.info('Calculated EIP-712 compliant Safe transaction hash', {
+      safeTxHash,
+      previousValidationHash: validationHash,
+    });
+
+    // Generate pre-approved signature (contract signature format)
+    // For unsigned transactions, use a special signature format that indicates
+    // the transaction should be approved by the Safe owner
+    const preApprovedSignature =
+      '0x000000000000000000000000' +
+      senderAddress.slice(2).toLowerCase() +
+      '0000000000000000000000000000000000000000000000000000000000000000' +
+      '01'; // signature type 1 = approved
+
     const proposePayload = {
       safeAddress: safeAddress,
       safeTransactionData,
-      safeTxHash: validationHash,
+      safeTxHash,
       senderAddress,
-      senderSignature: '0x',
+      senderSignature: preApprovedSignature,
     };
 
     // Log full request payload for debugging (truncate data for readability)
