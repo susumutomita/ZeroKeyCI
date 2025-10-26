@@ -129,10 +129,21 @@ export async function uploadLitActionToIPFS(
     // For now, we'll provide a manual IPFS upload guide
     // Users can use: ipfs add, Pinata, or Web3.Storage
 
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📢 IMPORTANT: Why Manual IPFS Upload?');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     console.log(
-      '\n⚠️ Automated IPFS upload via Lit SDK is not available in v7+'
+      '⚠️  Lit Protocol SDK v7+ removed automatic IPFS upload functionality.'
     );
-    console.log('   You need to manually upload the Lit Action to IPFS.\n');
+    console.log(
+      '   This change gives YOU control over which IPFS provider to use'
+    );
+    console.log('   (Web3.Storage, Pinata, your own IPFS node, etc.).\n');
+    console.log('✅ This is a ONE-TIME setup step per Lit Action.');
+    console.log(
+      '   Once uploaded, the IPFS CID will be saved in your config.\n'
+    );
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     // Check if user has already uploaded
     const hasUploaded = await prompt(
@@ -153,8 +164,11 @@ export async function uploadLitActionToIPFS(
       console.log('   2. Sign up/Login (free account)');
       console.log('   3. Click "Upload" button');
       console.log('   4. Select file: src/lit-actions/conditionalSigner.js');
-      console.log('   5. Copy the CID (starts with "Qm...")');
-      console.log('   Example CID: QmX1234abcd...\n');
+      console.log('   5. Copy the CID (starts with "bafy..." or "Qm...")');
+      console.log(
+        '   Example CIDv1: bafybeigfkfpdz5br6efhbkqwujfqkfndgcfgfebhmnpdiofvfi7ypxl25y'
+      );
+      console.log('   Example CIDv0: QmX1234abcd...\n');
 
       console.log('Option 2: IPFS CLI (if you have IPFS installed)');
       console.log('   ipfs add src/lit-actions/conditionalSigner.js');
@@ -185,19 +199,20 @@ export async function uploadLitActionToIPFS(
 
     while (attempts < maxAttempts) {
       manualCID = await prompt(
-        '\nEnter IPFS CID from upload (starts with Qm...): '
+        '\nEnter IPFS CID from upload (Qm... or bafy...): '
       );
 
-      if (manualCID && manualCID.trim().startsWith('Qm')) {
-        // Valid CID format
-        console.log(`✅ CID format valid: ${manualCID.trim()}`);
+      const trimmed = manualCID.trim();
+      // Accept both CIDv0 (Qm...) and CIDv1 (bafy...)
+      if (trimmed && (trimmed.startsWith('Qm') || trimmed.startsWith('bafy'))) {
+        console.log(`✅ CID format valid: ${trimmed}`);
         await litNodeClient.disconnect();
-        return manualCID.trim();
+        return trimmed;
       }
 
       attempts++;
       console.log(
-        `\n❌ Invalid CID format. CID must start with "Qm" (got: "${manualCID}")`
+        `\n❌ Invalid CID format. CID must start with "Qm" (CIDv0) or "bafy" (CIDv1) (got: "${trimmed}")`
       );
 
       if (attempts < maxAttempts) {
