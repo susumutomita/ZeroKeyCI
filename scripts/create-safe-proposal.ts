@@ -815,8 +815,14 @@ async function main() {
       });
     }
 
+    // Add validationHash to proposal for Safe API submission
+    const proposalWithValidationHash = {
+      ...parsed.proposal,
+      validationHash: parsed.validationHash,
+    };
+
     const safeTxHashFromApi = await submitUnsignedProposalToSafe(
-      parsed.proposal,
+      proposalWithValidationHash,
       chainId,
       safeAddress,
       rpcUrl
