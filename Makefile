@@ -32,6 +32,9 @@ test_coverage:
 crawl:
 	curl http://localhost:3000/api/crawl
 
+export_pdf:        # Export pitch deck to PDF using Marp
+	npx marp pitch_deck.md --pdf --allow-local-files --html
+
 help:
 	@echo "Usage: make [target]"
 	@echo ""
