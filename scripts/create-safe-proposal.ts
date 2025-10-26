@@ -807,23 +807,18 @@ async function main() {
       validationHash: parsed.validationHash,
     });
 
-    // Submit unsigned proposal to Safe Transaction Service
-    const rpcUrl = process.env.RPC_URL;
-    if (!rpcUrl) {
-      throw new ConfigurationError('RPC_URL environment variable is required', {
-        configKey: 'rpcUrl',
-        expectedFormat: 'https://...',
-      });
-    }
+    // Safe API submission is skipped for Manual workflow
+    // Manual workflow: Users create proposals in Safe UI using the artifact file
+    // PKP workflow: Will be implemented separately with PKP signing
+    logger.info('📋 Manual workflow - Safe API submission skipped', {
+      reason:
+        'Unsigned proposals require manual creation in Safe UI (app.safe.global)',
+      artifactFile: 'safe-proposal.json',
+      nextSteps:
+        'Safe owners will review and sign the proposal in Safe UI Queue',
+    });
 
-    // Submit proposal with validationHash as separate argument
-    const safeTxHashFromApi = await submitUnsignedProposalToSafe(
-      parsed.proposal,
-      parsed.validationHash,
-      chainId,
-      safeAddress,
-      rpcUrl
-    );
+    const safeTxHashFromApi = null; // No API submission in Manual workflow
 
     // Add additional metadata for CI
     const enrichedProposal = {
