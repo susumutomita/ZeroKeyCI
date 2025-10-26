@@ -125,8 +125,7 @@ jobs:
 | `deploy-config-path` | Path to deployment config | `.zerokey/deploy.yaml` |
 | `policy-path` | OPA policy file | `.zerokey/policy.rego` |
 | `run-tests` | Run tests before proposal | `true` |
-| `verify-blockscout` | Verify on Blockscout | `true` |
-| `enable-envio` | Enable event indexing | `false` |
+| `verify-blockscout` | Verify on Blockscout (experimental) | `true` |
 
 ### Outputs
 
@@ -152,8 +151,7 @@ your-project/
 ├── .zerokey/                   # Optional configs
 │   ├── deploy.yaml             # Deployment config
 │   ├── policy.rego             # OPA policy
-│   ├── explorer.json           # Blockscout config
-│   └── envio-config.yaml       # Envio indexing
+│   └── explorer.json           # Blockscout config (optional)
 ├── hardhat.config.js
 └── package.json
 ```
@@ -298,7 +296,6 @@ jobs:
       contract-name: MyUUPSContract
       run-tests: true
       verify-blockscout: true
-      enable-envio: true  # Track upgrade events
     secrets:
       rpc-url: ${{ secrets.POLYGON_RPC_URL }}
 ```
@@ -436,42 +433,6 @@ jobs:
 - Cost comparison across networks
 - Individual proposals per network for Safe signing
 
-### Example 4: With Envio Event Indexing
-
-```yaml
-name: Deploy with Event Indexing
-
-on:
-  pull_request:
-    types: [closed]
-
-jobs:
-  deploy:
-    if: github.event.pull_request.merged == true
-    uses: susumutomita/ZeroKeyCI/.github/workflows/reusable-deploy.yml@main
-    with:
-      safe-address: ${{ vars.SAFE_ADDRESS }}
-      network: sepolia
-      contract-name: MyDeFiProtocol
-      enable-envio: true
-      envio-config-path: .zerokey/envio-config.yaml
-    secrets:
-      rpc-url: ${{ secrets.SEPOLIA_RPC_URL }}
-
-  # Setup Envio indexer after deployment
-  setup-indexing:
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy Envio HyperIndex
-        run: |
-          npx envio-cli deploy \
-            --config .zerokey/envio-config.yaml \
-            --contract-address ${{ needs.deploy.outputs.proposal-hash }}
-```
-
 ## Advanced Configuration
 
 ### Blockscout Verification
@@ -496,30 +457,6 @@ Create `.zerokey/explorer.json`:
     "features": ["contract_metadata", "transaction_tracking"]
   }
 }
-```
-
-### Envio Event Indexing
-
-Create `.zerokey/envio-config.yaml`:
-
-```yaml
-name: my-contract-indexer
-description: Index my contract events
-
-networks:
-  - id: 11155111
-    name: sepolia
-    start_block: 5000000
-    rpc_config:
-      url: ${SEPOLIA_RPC_URL}
-
-contracts:
-  - name: MyContract
-    abi_file_path: ./artifacts/contracts/MyContract.sol/MyContract.json
-    handler: src/EventHandlers.ts
-    events:
-      - event: "Transfer(address,address,uint256)"
-      - event: "Approval(address,address,uint256)"
 ```
 
 ## Workflow Triggers

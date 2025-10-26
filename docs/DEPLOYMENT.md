@@ -399,9 +399,8 @@ open coverage/index.html
 ### On-Chain Monitoring
 
 Optional integrations:
-- **Blockscout:** For explorer visibility
-- **Envio HyperIndex:** Real-time Safe event monitoring
-- **The Graph:** Custom deployment indexing
+- **Blockscout:** Contract verification (implementation exists, not yet tested in production)
+- **The Graph:** Custom deployment indexing (future integration)
 
 ## Advanced Topics
 

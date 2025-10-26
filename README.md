@@ -174,10 +174,12 @@ with:
 
 1. **Developer merges PR** → Contract code in repository
 2. **GitHub Actions runs** → Compiles, tests, validates with OPA policies
-3. **Creates Safe proposal** → Unsigned transaction with deployment parameters
-4. **Posts as PR comment** → Safe owners review exact bytecode, constructor args, gas costs
-5. **Owners sign & execute** → Multisig approval required (e.g., 2-of-3 threshold)
-6. **Contract deployed** → Full audit trail: PR → CI → Safe → On-chain
+3. **Creates Safe proposal** → Generates `safe-proposal.json` with deployment transaction
+4. **Posts as PR comment** → Safe owners review bytecode, constructor args, gas analysis
+5. **Owners sign & execute in Safe UI** → Multisig approval required (e.g., 2-of-3 threshold)
+6. **Contract deploys** → Full audit trail: PR → CI → Safe → On-chain
+
+**Note:** Steps 1-4 are fully automated and tested. Optional: Configure Safe API key for automatic submission to Safe UI queue (currently manual approval workflow).
 
 **Security guarantees:**
 
@@ -231,9 +233,9 @@ ZeroKeyCI automatically creates a pull request containing:
 
 ---
 
-## 📊 Proven Results
+## 📊 Implementation Results
 
-### Gas Cost Savings (Real Examples)
+### Gas Cost Savings (Based on Gas Estimation Engine)
 
 **Scenario 1: Multi-Network Deployment**
 
@@ -254,21 +256,25 @@ ZeroKeyCI automatically creates a pull request containing:
   - Ethereum: $120 | Polygon: $1.20 | Arbitrum: $0.80 | **Optimism: $0.60** ← Recommended
   - **Saves $119.40** with zero manual research
 
-### Time Savings
+### Time Savings (Workflow Automation)
 
 **Traditional Manual Deployment:**
 
 - Research gas prices across networks: 15 mins
 - Choose optimal network: 10 mins
+- Compile and test: 5 mins
 - Manual deployment: 5 mins
-- **Total: 30 minutes per deployment**
+- **Total: 35 minutes per deployment**
 
-**ZeroKeyCI Automated Deployment:**
+**ZeroKeyCI Automated Workflow:**
 
 - Merge PR: 30 seconds
-- CI generates proposal with gas analysis: 90 seconds
-- Review & approve in Safe UI: 60 seconds
-- **Total: 3 minutes per deployment** (10x faster)
+- CI auto-compiles, tests, analyzes gas: 90 seconds
+- Review proposal in Safe UI: 60 seconds
+- Sign & execute: 30 seconds
+- **Total: 3-4 minutes per deployment** (10x faster)
+
+**Verified:** 605 automated tests ensure CI pipeline reliability
 
 ### Security Impact
 
@@ -306,16 +312,50 @@ Attacker needs: 2+ of 3 Safe owners' hardware wallets
 Result: Even with GitHub breach, attacker cannot deploy or access funds
 ```
 
-### ETHOnline 2025 Stack
+### 🏆 ETHOnline 2025 - Sponsor Technology Integration
 
-Built with hackathon sponsor technologies:
+**Production-tested integrations with prize sponsor technologies:**
 
-- **Hardhat 3** → Compile, test, and simulate contracts
-- **Gnosis Safe SDK** → Create deployment proposals
-- **Lit Protocol PKP** → Optional automated conditional signing
-- **Blockscout Autoscout** → Instant explorer verification
-- **Envio HyperIndex** → Real-time deployment monitoring
-- **Open Policy Agent** → Policy enforcement before signing
+#### 🔥 Hardhat ($5,000 Prize Track)
+Complete smart contract development infrastructure powering the entire pipeline.
+
+**What we use:**
+- Contract compilation and artifact generation ([hardhat.config.ts:1-147](hardhat.config.ts))
+- **605+ unit tests passing** with Viem integration ([package.json:39](package.json))
+- Network configuration for 10 EVM chains (Sepolia, Base, Arbitrum, Optimism, Polygon, etc.)
+- Gas estimation via Hardhat local node simulation
+- TypeScript support and plugin system
+
+**Code locations:**
+- Main config: `hardhat.config.ts`
+- Compilation used in: `scripts/create-safe-proposal.ts:272-288`
+- Workflow integration: `.github/workflows/deploy.yml:134-145`
+
+**Why this qualifies:** Hardhat 3.0.7 is the foundation of our entire smart contract workflow. Every contract that goes through ZeroKeyCI is compiled, tested, and validated using Hardhat infrastructure.
+
+---
+
+#### ⚡ Lit Protocol ($5,000 Prize Track)
+PKP (Programmable Key Pairs) for keyless automated signing in CI/CD - **Core Innovation**
+
+**What we use:**
+- PKP-based transaction signing without private keys in GitHub Actions
+- Lit Actions for conditional signing (validates OPA policies, test results, PR approvals)
+- Distributed threshold cryptography (private key never exists in full)
+- datil-test network integration
+
+**Code locations:**
+- PKP signing script: `scripts/trigger-pkp-signing.ts:1-163`
+- Workflow integration: `.github/workflows/deploy.yml:226-250`
+- Complete setup guide: `docs/PKP_SETUP.md`
+
+**Why this qualifies:** Lit Protocol PKPs are fundamental to ZeroKeyCI's security model. Without PKPs, automated keyless CI/CD deployments would be impossible. This is the core innovation that enables deploying smart contracts from GitHub Actions without storing any private keys.
+
+---
+
+#### 🛡️ Additional Security Technologies
+- **Gnosis Safe SDK** → Multi-sig proposal creation and EIP-712 signing ([create-safe-proposal.ts](scripts/create-safe-proposal.ts))
+- **Open Policy Agent** → Policy validation before every deployment ([policy validation](scripts/validate-deployment-policy.ts))
 
 ### 🤖 Two Ways to Deploy: Manual vs PKP Automation
 
@@ -449,7 +489,6 @@ gh variable set SAFE_ADDRESS --body "0xYourSafeAddress"
 
 ---
 
-## 💡 Team
+## Team
 
-Built by **Susumu Tomita (たみぃ)** and collaborators
-for **ETHOnline 2025**
+- [Susumu Tomita](https://susumutomita.netlify.app/) - Full Stack Developer

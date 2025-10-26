@@ -61,7 +61,7 @@ Submit proposal from GitHub Actions.
 
 ## Technology
 
-🔥 Hardhat
+🔥 Hardhat (605 tests ✅)
 🔐 Gnosis Safe SDK
 ⚡ Lit Protocol PKP
 

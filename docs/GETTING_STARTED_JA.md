@@ -477,9 +477,9 @@ npx hardhat coverage
 
 ### 高度な機能
 
-- **Envio統合**: リアルタイムイベント監視
-- **Lit Protocol**: ポリシーベースの自動署名
-- **マルチネットワークデプロイ**: Polygon、Arbitrum、Optimism 対応
+- **Lit Protocol PKP**: ポリシーベースの自動署名（秘密鍵なし）
+- **マルチネットワークデプロイ**: Polygon、Arbitrum、Optimism、Base 対応
+- **Gas最適化**: 自動Gas分析とコスト比較
 
 詳細は公式ドキュメントを参照:
 - [統合ガイド](./INTEGRATION_GUIDE.md)
