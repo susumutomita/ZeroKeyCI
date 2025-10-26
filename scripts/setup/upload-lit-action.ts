@@ -132,28 +132,71 @@ export async function uploadLitActionToIPFS(
     console.log(
       '\n⚠️ Automated IPFS upload via Lit SDK is not available in v7+'
     );
-    console.log('\n📋 Manual IPFS Upload Options:\n');
+    console.log('   You need to manually upload the Lit Action to IPFS.\n');
 
-    console.log('Option 1: IPFS CLI');
-    console.log('   ipfs add src/lit-actions/conditionalSigner.js');
-    console.log('   # Output: added <CID> conditionalSigner.js\n');
-
-    console.log('Option 2: Pinata (Pinning Service)');
-    console.log('   pinata upload src/lit-actions/conditionalSigner.js \\');
-    console.log('     --name "ZeroKeyCI Conditional Signer" \\');
-    console.log('     --key YOUR_PINATA_API_KEY');
-    console.log('   # Output: IpfsHash: <CID>\n');
-
-    console.log('Option 3: Web3.Storage');
-    console.log('   Visit: https://web3.storage/docs/how-to/upload/');
-    console.log('   Upload: src/lit-actions/conditionalSigner.js\n');
-
-    const manualCID = await prompt(
-      'Enter IPFS CID after manual upload (QmXXX...): '
+    // Check if user has already uploaded
+    const hasUploaded = await prompt(
+      'Have you already uploaded the file to IPFS? (y/N): '
     );
 
-    if (!manualCID || !manualCID.startsWith('Qm')) {
-      throw new Error('Invalid IPFS CID format (must start with Qm)');
+    if (hasUploaded.toLowerCase() !== 'y') {
+      console.log('\n📋 Please upload the file using one of these methods:\n');
+
+      console.log('Option 1: IPFS CLI (if you have IPFS installed)');
+      console.log('   ipfs add src/lit-actions/conditionalSigner.js');
+      console.log('   # Output: added <CID> conditionalSigner.js\n');
+
+      console.log('Option 2: Pinata (requires API key)');
+      console.log('   pinata upload src/lit-actions/conditionalSigner.js \\');
+      console.log('     --name "ZeroKeyCI Conditional Signer" \\');
+      console.log('     --key YOUR_PINATA_API_KEY');
+      console.log('   # Output: IpfsHash: <CID>\n');
+
+      console.log('Option 3: Web3.Storage (easiest - web UI, free)');
+      console.log('   1. Visit: https://web3.storage');
+      console.log('   2. Sign up/Login');
+      console.log('   3. Upload: src/lit-actions/conditionalSigner.js');
+      console.log('   4. Copy the CID from the upload confirmation\n');
+
+      console.log('📝 After uploading, run this script again.\n');
+      await litNodeClient.disconnect();
+      throw new Error(
+        'Please upload the file to IPFS first, then run this script again.'
+      );
+    }
+
+    // User claims they've uploaded, ask for CID with retry logic
+    let manualCID = '';
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      manualCID = await prompt(
+        '\nEnter IPFS CID from upload (starts with Qm...): '
+      );
+
+      if (manualCID && manualCID.trim().startsWith('Qm')) {
+        // Valid CID format
+        console.log(`✅ CID format valid: ${manualCID.trim()}`);
+        await litNodeClient.disconnect();
+        return manualCID.trim();
+      }
+
+      attempts++;
+      console.log(
+        `\n❌ Invalid CID format. CID must start with "Qm" (got: "${manualCID}")`
+      );
+
+      if (attempts < maxAttempts) {
+        console.log(
+          `   Please try again (${attempts}/${maxAttempts} attempts)\n`
+        );
+      } else {
+        await litNodeClient.disconnect();
+        throw new Error(
+          'Failed to get valid IPFS CID after 3 attempts. CID must start with "Qm".'
+        );
+      }
     }
 
     await litNodeClient.disconnect();
