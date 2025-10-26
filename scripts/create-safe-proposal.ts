@@ -126,6 +126,7 @@ async function getSafeOwners(
  */
 async function submitUnsignedProposalToSafe(
   proposal: any,
+  validationHash: string,
   chainId: number,
   safeAddress: string,
   rpcUrl: string
@@ -191,7 +192,7 @@ async function submitUnsignedProposalToSafe(
     const proposePayload = {
       safeAddress: safeAddress,
       safeTransactionData,
-      safeTxHash: proposal.validationHash,
+      safeTxHash: validationHash,
       senderAddress,
       senderSignature: '0x',
     };
@@ -219,7 +220,7 @@ async function submitUnsignedProposalToSafe(
 
     const result = await safeService.proposeTransaction(proposePayload);
 
-    const safeTxHash = result.safeTxHash || proposal.validationHash;
+    const safeTxHash = result.safeTxHash || validationHash;
     logger.info('✅ Unsigned proposal submitted to Safe UI queue', {
       safeTxHash,
       chainId,
@@ -815,14 +816,10 @@ async function main() {
       });
     }
 
-    // Add validationHash to proposal for Safe API submission
-    const proposalWithValidationHash = {
-      ...parsed.proposal,
-      validationHash: parsed.validationHash,
-    };
-
+    // Submit proposal with validationHash as separate argument
     const safeTxHashFromApi = await submitUnsignedProposalToSafe(
-      proposalWithValidationHash,
+      parsed.proposal,
+      parsed.validationHash,
       chainId,
       safeAddress,
       rpcUrl
