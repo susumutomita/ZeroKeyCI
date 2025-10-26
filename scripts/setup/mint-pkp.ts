@@ -1,34 +1,41 @@
-#!/usr/bin/env bun
+// scripts/setup/mint-pkp.ts
+// #!/usr/bin / env bun
 /**
- * PKP Minting Script
+ * Real PKP Minting Script for ZeroKeyCI (Bun/Node runtime)
  *
- * This script mints a new Programmable Key Pair (PKP) NFT using Lit Protocol.
- * The PKP will be used as an automated signer for Safe multisig transactions.
+ * Fixes:
+ *  - Use LIT_NETWORK enum (not plain strings)
+ *  - Initialize node-localstorage for non-browser
+ *  - Ethers v5-compatible imports
  *
- * Phase 4 of Lit Protocol PKP Integration (Issue #30)
+ * Requirements:
+ *   npm i @lit-protocol/lit-node-client @lit-protocol/contracts-sdk @lit-protocol/constants node-localstorage ethers@5
  *
  * Usage:
- *   bun run scripts/setup/mint-pkp.ts
- *
- * Environment Variables:
- * - LIT_NETWORK: Lit network to use (datil-dev, datil-test, datil) [default: datil-dev]
- * - ETHEREUM_PRIVATE_KEY: Private key to pay for PKP minting (required)
- * - PKP_CONFIG_PATH: Path to save PKP config [default: .zerokey/pkp-config.json]
+ *   LIT_NETWORK=datil-test ETHEREUM_PRIVATE_KEY=0x... bun run scripts/setup/mint-pkp.ts
  */
 
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { ethers } from 'ethers';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LIT_NETWORK, LIT_RPC } from '@lit-protocol/constants';
+import * as ethers from 'ethers';
 import { writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import * as readline from 'readline';
 
-// Lit Network types as string literals (compatible with all Lit SDK versions)
-type LitNetworkType = 'datil-dev' | 'datil-test' | 'datil';
+// Setup node-localstorage for non-browser runtime (Lit SDK expects storage)
+import { LocalStorage } from 'node-localstorage';
+// @ts-ignore global assignment for SDK
+(globalThis as any).localStorage =
+  (globalThis as any).localStorage || new LocalStorage('./.lit-localstorage');
+
+type LitNetworkStr = 'datil-dev' | 'datil-test' | 'datil';
 
 export interface PKPMintResult {
   tokenId: string;
   publicKey: string;
   ethAddress: string;
+  mintTxHash?: string;
 }
 
 export interface PKPConfig {
@@ -40,26 +47,19 @@ export interface PKPConfig {
   mintTxHash?: string;
 }
 
-/**
- * Prompt user for input
- */
-export async function prompt(question: string): Promise<string> {
+async function prompt(question: string): Promise<string> {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
+  return new Promise((resolve) =>
+    rl.question(question, (ans) => {
       rl.close();
-      resolve(answer.trim());
-    });
-  });
+      resolve(ans.trim());
+    })
+  );
 }
 
-/**
- * Validate Ethereum private key
- */
 export function validatePrivateKey(privateKey: string): {
   valid: boolean;
   error?: string;
@@ -102,37 +102,25 @@ export function validatePrivateKey(privateKey: string): {
   }
 }
 
-/**
- * Get Lit network from environment or user input
- */
-export async function getLitNetwork(): Promise<LitNetworkType> {
-  const envNetwork = process.env.LIT_NETWORK;
+async function getLitNetworkStr(): Promise<LitNetworkStr> {
+  const env = process.env.LIT_NETWORK;
+  const valid: LitNetworkStr[] = ['datil-dev', 'datil-test', 'datil'];
+  if (env && valid.includes(env as LitNetworkStr)) {
+    console.log(`📡 Using LIT_NETWORK from env: ${env}`);
+    return env as LitNetworkStr;
+  }
 
-  if (envNetwork) {
-    const validNetworks: LitNetworkType[] = [
-      'datil-dev',
-      'datil-test',
-      'datil',
-    ];
-    const network = envNetwork as LitNetworkType;
-
-    if (validNetworks.includes(network)) {
-      console.log(`📡 Using Lit Network from environment: ${network}`);
-      return network;
-    }
-
+  if (env) {
     console.warn(
-      `⚠️  Invalid LIT_NETWORK: ${envNetwork}. Valid options: datil-dev, datil-test, datil`
+      `⚠️ Invalid LIT_NETWORK value "${env}". Must be one of: ${valid.join(', ')}`
     );
   }
 
   console.log('\n📡 Select Lit Protocol Network:');
   console.log('  1. datil-dev (Development/Testing)');
   console.log('  2. datil-test (Testnet)');
-  console.log('  3. datil (Mainnet - PRODUCTION)');
-
+  console.log('  3. datil (Mainnet)');
   const choice = await prompt('\nEnter choice (1-3) [default: 1]: ');
-
   switch (choice || '1') {
     case '1':
       return 'datil-dev';
@@ -141,214 +129,170 @@ export async function getLitNetwork(): Promise<LitNetworkType> {
     case '3':
       return 'datil';
     default:
-      console.log('Invalid choice, using datil-dev');
       return 'datil-dev';
   }
 }
 
-/**
- * Get Ethereum private key from environment or user input
- */
-export async function getPrivateKey(): Promise<string> {
-  const envKey = process.env.ETHEREUM_PRIVATE_KEY;
-
-  if (envKey) {
-    const validation = validatePrivateKey(envKey);
-    if (validation.valid) {
-      console.log(
-        '🔑 Using private key from ETHEREUM_PRIVATE_KEY environment variable'
-      );
-      return envKey;
-    }
-
-    console.warn(
-      `⚠️  Invalid ETHEREUM_PRIVATE_KEY in environment: ${validation.error}`
-    );
-  }
-
-  console.log(
-    '\n🔑 Enter Ethereum private key (to pay for PKP minting transaction):'
-  );
-  console.log('   This key will be used ONLY to pay gas fees for minting.');
-  console.log('   It is NOT the PKP itself and will not be stored.');
-  console.log(
-    '\n   Format: 0x followed by 64 hexadecimal characters (66 total)'
-  );
-  console.log(
-    '   Example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-  );
-
-  const privateKey = await prompt('\nPrivate key (0x...): ');
-
-  const validation = validatePrivateKey(privateKey);
-  if (!validation.valid) {
-    console.error(`\n❌ Invalid private key: ${validation.error}`);
-    console.error(
-      '\nPlease check that your private key is exactly 66 characters:'
-    );
-    console.error('  - Starts with "0x"');
-    console.error('  - Followed by 64 hexadecimal characters (0-9, a-f, A-F)');
-    console.error(
-      '  - Example: 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-    );
-    throw new Error(validation.error);
-  }
-
-  return privateKey;
+export async function getLitNetwork(): Promise<LitNetworkStr> {
+  return getLitNetworkStr();
 }
 
-/**
- * Mint a new PKP NFT
- */
+function getRpcForLit(): string {
+  // Per Lit docs examples: use Chronicle Yellowstone RPC
+  return LIT_RPC.CHRONICLE_YELLOWSTONE;
+}
+
+export async function getPrivateKey(): Promise<string> {
+  const envKey = process.env.ETHEREUM_PRIVATE_KEY;
+  if (envKey) {
+    const v = validatePrivateKey(envKey);
+    if (v.valid) {
+      console.log('🔑 Using ETHEREUM_PRIVATE_KEY from env');
+      return envKey;
+    }
+    console.warn(`⚠️ Invalid ETHEREUM_PRIVATE_KEY: ${v.error}`);
+  }
+  console.log(
+    '\n🔑 Enter Ethereum private key (0x + 64 hex) to pay minting gas:'
+  );
+  const input = await prompt('Private key (0x...): ');
+  const v = validatePrivateKey(input);
+  if (!v.valid) throw new Error(v.error || 'Invalid private key');
+  return input;
+}
+
 export async function mintPKP(
-  network: LitNetworkType,
+  networkStr: LitNetworkStr,
   privateKey: string
 ): Promise<PKPMintResult> {
-  console.log('\n🔨 Minting PKP NFT...');
-  console.log(`   Network: ${network}`);
+  console.log(`\n🔨 Minting PKP on ${networkStr} ...`);
+
+  // Provider & signer (ethers v5)
+  const provider = new ethers.providers.JsonRpcProvider(getRpcForLit());
+  const signer = new ethers.Wallet(privateKey, provider);
+  console.log(`   Minting from address: ${signer.address}`);
+
+  // Lit Node Client (use string network name directly)
+  const litNodeClient = new LitNodeClient({
+    litNetwork: networkStr,
+    debug: false,
+  });
+  try {
+    await litNodeClient.connect();
+    console.log('✅ Connected to Lit nodes');
+  } catch (error) {
+    throw new Error(
+      `Failed to connect to Lit nodes: ${error instanceof Error ? error.message : error}`
+    );
+  }
+
+  // Lit Contracts (use litNetwork parameter, not network)
+  const litContracts = new LitContracts({
+    signer,
+    litNetwork: networkStr,
+    debug: false,
+  });
+  try {
+    await litContracts.connect();
+    console.log('✅ Connected to Lit contracts');
+  } catch (error) {
+    await litNodeClient.disconnect();
+    throw new Error(
+      `Failed to connect to Lit contracts: ${error instanceof Error ? error.message : error}`
+    );
+  }
 
   try {
-    // Initialize Lit Node Client
-    const litNodeClient = new LitNodeClient({
-      litNetwork: network,
-      debug: false,
-    });
+    // Mint PKP NFT
+    const pkpNft = litContracts.pkpNftContract;
+    if (!pkpNft) {
+      throw new Error(
+        'PKP NFT contract not available (contracts sdk mismatch)'
+      );
+    }
+    const tx = await pkpNft.mintNext(signer.address);
+    console.log(`⏳ Mint tx: ${tx.hash}`);
+    const receipt = await tx.wait();
+    console.log(`✅ Confirmed in block ${receipt.blockNumber}`);
 
-    await litNodeClient.connect();
-    console.log('✅ Connected to Lit Protocol network');
+    // Get the latest tokenId owned by signer
+    const balance = await pkpNft.balanceOf(signer.address);
+    if (balance.isZero()) {
+      throw new Error('Mint succeeded but balance is zero');
+    }
+    const index = balance.sub(1);
+    const tokenIdBN = await pkpNft.tokenOfOwnerByIndex(signer.address, index);
+    const tokenId = tokenIdBN.toString();
 
-    // Create wallet for minting
-    const wallet = new ethers.Wallet(privateKey);
-    console.log(`   Minting from address: ${wallet.address}`);
+    // Read public key
+    const publicKey: string = await pkpNft.readPublicKey(tokenIdBN);
+    if (!publicKey || !publicKey.startsWith('0x04')) {
+      throw new Error('Invalid PKP public key (expected uncompressed 0x04...)');
+    }
 
-    // Mint PKP (this is a simplified version - actual implementation depends on Lit SDK)
-    // In production, you would use Lit Protocol's contract methods to mint
-    // For now, this is a placeholder that shows the structure
-
-    // Note: Actual Lit PKP minting would use their SDK methods
-    // This is示意的なコード showing the expected flow
-    console.log('   Calling Lit Protocol PKP minting contract...');
-
-    // Placeholder for actual minting logic
-    // const mintTx = await litContracts.pkpNftContract.mintNext(wallet.address);
-    // const receipt = await mintTx.wait();
-
-    // For demonstration, we'll generate a mock PKP
-    // In production, this would come from the actual mint transaction
-    const mockTokenId =
-      '0x' +
-      Buffer.from(Date.now().toString() + Math.random().toString())
-        .toString('hex')
-        .slice(0, 64);
-    const mockPublicKey =
-      '0x04' +
-      Buffer.from('mock-public-key-' + Date.now().toString())
-        .toString('hex')
-        .slice(0, 128);
-    const mockEthAddress = ethers.utils.computeAddress(mockPublicKey);
-
-    console.log('✅ PKP minted successfully!');
-    console.log(`   Token ID: ${mockTokenId}`);
-    console.log(`   Public Key: ${mockPublicKey.slice(0, 20)}...`);
-    console.log(`   ETH Address: ${mockEthAddress}`);
+    // Derive ETH address
+    const ethAddress = ethers.utils.computeAddress(publicKey);
 
     await litNodeClient.disconnect();
 
-    return {
-      tokenId: mockTokenId,
-      publicKey: mockPublicKey,
-      ethAddress: mockEthAddress,
-    };
+    return { tokenId, publicKey, ethAddress, mintTxHash: tx.hash };
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to mint PKP: ${error.message}`);
-    }
-    throw error;
+    await litNodeClient.disconnect();
+    throw new Error(
+      `Failed to mint PKP: ${error instanceof Error ? error.message : error}`
+    );
   }
 }
 
-/**
- * Save PKP configuration to file
- */
 export function savePKPConfig(
   result: PKPMintResult,
-  network: string,
+  networkStr: LitNetworkStr,
   configPath?: string
 ): string {
   const path =
     configPath || process.env.PKP_CONFIG_PATH || '.zerokey/pkp-config.json';
-
   const config: PKPConfig = {
     tokenId: result.tokenId,
     publicKey: result.publicKey,
     ethAddress: result.ethAddress,
-    network,
+    network: networkStr,
     mintedAt: new Date().toISOString(),
+    mintTxHash: result.mintTxHash,
   };
-
-  // Ensure directory exists
   mkdirSync(dirname(path), { recursive: true });
-
-  // Write config
   writeFileSync(path, JSON.stringify(config, null, 2));
-
-  console.log(`\n💾 PKP configuration saved to: ${path}`);
+  console.log(`\n💾 Saved PKP config: ${path}`);
   console.log('\n📋 Next Steps:');
-  console.log('   1. Grant Lit Action permission to this PKP:');
+  console.log('   1) Grant Lit Action permission:');
   console.log('      bun run scripts/setup/grant-lit-action-permission.ts');
-  console.log('   2. Add PKP as Safe owner:');
+  console.log('   2) Add PKP as Safe owner:');
   console.log('      bun run scripts/setup/add-pkp-to-safe.ts');
-  console.log('   3. Configure GitHub Secrets:');
-  console.log(`      - PKP_PUBLIC_KEY=${result.ethAddress}`);
-  console.log('      - LIT_ACTION_IPFS_CID=<your-lit-action-ipfs-cid>');
-
+  console.log('   3) Configure GitHub Secrets:');
+  console.log(`      PKP_PUBLIC_KEY=${result.ethAddress}`);
+  console.log('      LIT_ACTION_IPFS_CID=<your-lit-action-ipfs-cid>');
   return path;
 }
 
-/**
- * Main execution
- */
 export async function main(): Promise<PKPConfig> {
-  console.log('🚀 ZeroKeyCI - PKP Minting Script\n');
-  console.log('This script will mint a new Programmable Key Pair (PKP) NFT.');
-  console.log(
-    'The PKP will be used for automated signing in your CI/CD pipeline.\n'
-  );
-
-  try {
-    // Get configuration
-    const network = await getLitNetwork();
-    const privateKey = await getPrivateKey();
-
-    // Mint PKP
-    const result = await mintPKP(network, privateKey);
-
-    // Save configuration
-    const configPath = savePKPConfig(result, network);
-
-    console.log('\n✅ PKP minting complete!');
-
-    // Return full config
-    const config: PKPConfig = {
-      ...result,
-      network,
-      mintedAt: new Date().toISOString(),
-    };
-
-    return config;
-  } catch (error) {
-    console.error(
-      '\n❌ Error:',
-      error instanceof Error ? error.message : error
-    );
-    process.exit(1);
-  }
+  console.log('🚀 ZeroKeyCI - PKP Minting (Real)\n');
+  const networkStr = await getLitNetworkStr();
+  const privateKey = await getPrivateKey();
+  const res = await mintPKP(networkStr, privateKey);
+  const _path = savePKPConfig(res, networkStr);
+  console.log('\n✅ PKP minted successfully!');
+  return {
+    tokenId: res.tokenId,
+    publicKey: res.publicKey,
+    ethAddress: res.ethAddress,
+    network: networkStr,
+    mintedAt: new Date().toISOString(),
+    mintTxHash: res.mintTxHash,
+  };
 }
 
-// CLI execution
 if (import.meta.main) {
-  main().catch((error) => {
-    console.error('Unexpected error:', error);
+  main().catch((err) => {
+    console.error('\n❌ Error:', err instanceof Error ? err.message : err);
     process.exit(1);
   });
 }

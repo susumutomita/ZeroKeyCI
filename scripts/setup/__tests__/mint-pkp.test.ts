@@ -16,12 +16,21 @@ vi.mock('fs');
 vi.mock('@lit-protocol/lit-node-client', () => ({
   LitNodeClient: vi.fn(),
 }));
+vi.mock('@lit-protocol/contracts-sdk', () => ({
+  LitContracts: vi.fn(),
+}));
 vi.mock('@lit-protocol/constants', () => ({
-  LitNetwork: {
+  LIT_NETWORK: {
     DatilDev: 'datil-dev',
     DatilTest: 'datil-test',
     Datil: 'datil',
   },
+  LIT_RPC: {
+    CHRONICLE_YELLOWSTONE: 'https://yellowstone-rpc.litprotocol.com',
+  },
+}));
+vi.mock('node-localstorage', () => ({
+  LocalStorage: vi.fn(),
 }));
 vi.mock('readline', () => ({
   default: {
@@ -226,7 +235,7 @@ describe('mint-pkp', () => {
       );
 
       await expect(mintPKP(network, privateKey)).rejects.toThrow(
-        'Failed to mint PKP: Connection failed'
+        'Failed to connect to Lit nodes: Connection failed'
       );
     });
   });
@@ -330,16 +339,9 @@ describe('mint-pkp', () => {
       expect(config.network).toBe('datil-dev');
     });
 
-    it('should exit with error code on failure', async () => {
+    it('should propagate error on failure', async () => {
       delete process.env.LIT_NETWORK;
       delete process.env.ETHEREUM_PRIVATE_KEY;
-
-      const mockExit = vi
-        .spyOn(process, 'exit')
-        .mockImplementation((() => {}) as any);
-      const mockConsoleError = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
 
       // Mock prompt to throw error
       const readline = await import('readline');
@@ -351,13 +353,7 @@ describe('mint-pkp', () => {
       };
       vi.mocked(readline.createInterface).mockReturnValue(mockRl as any);
 
-      await main();
-
-      expect(mockExit).toHaveBeenCalledWith(1);
-      expect(mockConsoleError).toHaveBeenCalled();
-
-      mockExit.mockRestore();
-      mockConsoleError.mockRestore();
+      await expect(main()).rejects.toThrow('Test error');
     });
   });
 });
