@@ -281,7 +281,6 @@ async function submitUnsignedProposalToSafe(
 
     const result = await safeService.proposeTransaction(proposePayload);
 
-    const safeTxHash = result.safeTxHash || validationHash;
     logger.info('✅ Unsigned proposal submitted to Safe UI queue', {
       safeTxHash,
       chainId,
